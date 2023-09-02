@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th ="http://www.thymeleaf.org" >
 <head>
+    <link th:replace="~{fragment/global_fragment :: image-favicon}"></link>
+    <link th:replace="~{fragment/global_fragment :: bootstrap-link}"></link>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-
+<script th:replace="~{fragment/global_fragment :: bootstrap-script}"></script>
+<div th:insert="~{fragment/global_fragment :: header}"></div>
 <h1 th:text="#{index.name}"></h1>
 <h2 th:text="#{index.welcome}"></h2>
 <!--<button th:text="#{button.regions}" onclick="/messages"></button>-->
-<select onchange="location.href = location.pathname + '?lang=' + this.value;">
-    <option th:text="#{region.select}" value="ko"></option>
-    <th:block th:each="regionTypeList :${regionTypeList}">
-        <option th:text="${regionTypeList}" th:value="${regionTypeList}"></option>
-    </th:block>
-</select>
+
 </body>
 </html>
