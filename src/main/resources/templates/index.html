@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th ="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h1 th:text="#{index.name}"></h1>
+<h2 th:text="#{index.welcome}"></h2>
+<!--<button th:text="#{button.regions}" onclick="/messages"></button>-->
+<select onchange="location.href = location.pathname + '?lang=' + this.value;">
+    <option th:text="#{region.select}" value="ko"></option>
+    <th:block th:each="regionTypeList :${regionTypeList}">
+        <option th:text="${regionTypeList}" th:value="${regionTypeList}"></option>
+    </th:block>
+</select>
+</body>
+</html>

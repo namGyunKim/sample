@@ -1,15 +1,13 @@
-package namGyun.sample.api.user.controller;
+package namGyun.sample.domain.user.contoller;
 
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @Controller(value = "User Controller")
-@RequestMapping(value = "/user", headers = "X_API_VERSION=1")
+//@RequestMapping(value = "/user",headers = "X_API_VERSION=1")
+@RequestMapping(value = "/user")
 //@SecurityRequirement(name = "Bearer Authentication")
 public class UserController {
 
