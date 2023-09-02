@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import namGyun.sample.domain.account.entity.BaseTimeEntity;
 import namGyun.sample.domain.member.payload.request.SaveMemberRequest;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
 
@@ -33,7 +34,11 @@ public class Member extends BaseTimeEntity {
     public Member(SaveMemberRequest request) {
         this.loginId = request.loginId();
         this.name = request.name();
-        this.password = request.password();
+        this.password = passwordEncoding(request.password());
         active = true;
+    }
+
+    private String passwordEncoding(String password){
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 }
