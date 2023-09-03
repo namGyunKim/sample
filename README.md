@@ -8,8 +8,7 @@ RestApi 프로젝트
 올바르지 않은 RequestData를 보내면 400에러를 반환하도록 구현
 BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdvice를 통해 에러를 처리하도록 구현
 
-<img width="584" alt="image" src="https://github.com/namGyunKim/sample/assets/30253535/4794011f-df91-4c4d-8d64-61a3c80f09f2">
-
+<img width="671" alt="image" src="https://github.com/namGyunKim/sample/assets/30253535/9ba3e831-c550-4d59-9ee6-4ec2f2633450">
 
 예외처리는 @RestControllerAdvice 및 @ExceptionHandler를 사용하여 구현
 
