@@ -87,7 +87,7 @@ public enum ErrorCode {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("code", code);
-            jsonObject.put("message", errorMessage);
+            jsonObject.put("errorMessage", errorMessage);
         } catch (JSONException ignore) {
         }
         return jsonObject;

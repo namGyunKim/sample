@@ -2,10 +2,10 @@ package namGyun.sample.global.exception.payload.response;
 
 public record ErrorResult(
         String code,
-        String message) {
+        String errorMessage) {
 
-    public ErrorResult(String code, String message) {
+    public ErrorResult(String code, String errorMessage) {
         this.code = code;
-        this.message = message;
+        this.errorMessage = errorMessage;
     }
 }
