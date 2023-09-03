@@ -2,6 +2,7 @@ package namGyun.sample.global.config.web;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import namGyun.sample.global.resolver.CurrentAccountResolver;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,7 +50,7 @@ public class WebConfig implements WebMvcConfigurer {
 //        AuthenticationPrincipalArgumentResolver authenticationPrincipalArgumentResolver = new AuthenticationPrincipalArgumentResolver();
         argumentResolvers.add(pageResolver);
 //        argumentResolvers.add(authenticationPrincipalArgumentResolver);
-//        argumentResolvers.add(new CurrentAccountResolver(jwtUtil));
+        argumentResolvers.add(new CurrentAccountResolver());
     }
 
     //    //    인터셉터
