@@ -13,7 +13,7 @@ BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdv
 
 예외처리는 @RestControllerAdvice 및 @ExceptionHandler를 사용하여 구현
 
-<img width="384" alt="image" src="https://github.com/namGyunKim/sample/assets/30253535/2e1ec6a8-b35e-4c64-894f-5f70a6cea67a">
+<img width="422" alt="image" src="https://github.com/namGyunKim/sample/assets/30253535/35b585cc-fd55-4997-b66c-a3921ae3052d">
 
 예외처리시 @EventListener를 사용하여 로그를 남기도록 구현
 
