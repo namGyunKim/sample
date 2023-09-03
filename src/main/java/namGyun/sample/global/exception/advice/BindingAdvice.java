@@ -1,6 +1,7 @@
 package namGyun.sample.global.exception.advice;
 
 import lombok.extern.slf4j.Slf4j;
+import namGyun.sample.global.exception.enums.ErrorCode;
 import namGyun.sample.global.exception.payload.response.BindingResultResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -26,6 +27,8 @@ public class BindingAdvice {
     public Object validationHandler(ProceedingJoinPoint joinPoint) throws Throwable {
         String type = joinPoint.getSignature().getDeclaringTypeName();
         String method = joinPoint.getSignature().getName();
+        String errorCode = ErrorCode.REQUEST_BINDING_RESULT.getCode();
+        String errorMessage = ErrorCode.REQUEST_BINDING_RESULT.getErrorMessage();
         Map<String, String> errorMap = new HashMap<>();
         Object[] args = joinPoint.getArgs(); // join point parameter
         for (Object arg : args) {
@@ -33,7 +36,7 @@ public class BindingAdvice {
             if (arg instanceof BindingResult bindingResult) {
                 if (bindingResult.hasErrors()) {
                     populateErrorMap(bindingResult, errorMap);
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BindingResultResponse(type,method,errorMap));
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BindingResultResponse(false,type,method,errorCode,errorMessage,errorMap));
                 }
             }
         }

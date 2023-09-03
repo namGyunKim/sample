@@ -1,4 +1,4 @@
 package namGyun.sample.global.exception.payload.response;
 
-public record BindingResultResponse(String path,String method,Object content) {
+public record BindingResultResponse(boolean success,String path,String method,String errorCode,String errorMessage,Object content) {
 }

@@ -1,5 +1,6 @@
 package namGyun.sample.global.exception.enums;
 
+import lombok.Getter;
 import namGyun.sample.global.exception.payload.response.ErrorResult;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -55,11 +56,6 @@ public enum ErrorCode {
     public String getCode() {
         return code;
     }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getErrorMessage() {
         return errorMessage;
     }
