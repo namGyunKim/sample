@@ -1,8 +1,8 @@
 package gyun.sample.global.exception.advice;
 
-import lombok.extern.slf4j.Slf4j;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

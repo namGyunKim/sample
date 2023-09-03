@@ -1,13 +1,14 @@
 package gyun.sample.domain.member.entity;
 
 
+import gyun.sample.domain.account.entity.BaseTimeEntity;
+import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.payload.request.SaveMemberForCustomerRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import gyun.sample.domain.account.entity.BaseTimeEntity;
-import gyun.sample.domain.member.payload.request.SaveMemberRequest;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
@@ -27,14 +28,17 @@ public class Member extends BaseTimeEntity {
     private String password;                               //  유저 비밀번호
     @NotNull
     private boolean active;                                 //  활성
+    @Enumerated(EnumType.STRING)
+    private AccountRole role;                               //  유저 권한
 
     private LocalDateTime deletedAt;                        //  탈퇴일
 
 
-    public Member(SaveMemberRequest request) {
+    public Member(SaveMemberForCustomerRequest request) {
         this.loginId = request.loginId();
         this.name = request.name();
         this.password = passwordEncoding(request.password());
+        this.role = AccountRole.CUSTOMER;
         active = true;
     }
 

@@ -1,8 +1,8 @@
 package gyun.sample.domain.index.controller;
 
+import gyun.sample.global.region.enums.RegionsType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import gyun.sample.global.region.enums.RegionsType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;

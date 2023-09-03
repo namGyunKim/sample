@@ -1,7 +1,7 @@
 package gyun.sample.global.error.utils;
 
-import lombok.RequiredArgsConstructor;
 import gyun.sample.global.exception.enums.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 

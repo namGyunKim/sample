@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public record SaveMemberRequest(
+public record SaveMemberForCustomerRequest(
         @NotBlank(message = "로그인 아이디를 입력해주세요.")
         @Schema(description = "로그인 아이디", example = "skarbs01")
         String loginId,
