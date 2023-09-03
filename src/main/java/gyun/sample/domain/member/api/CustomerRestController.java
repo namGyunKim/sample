@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO: 2023/09/02 예외처리 및 로그이벤트 기능 추가 실질적인 예외처리 프로세스 작업 필요
-@Tag(name = "CustomerRestController", description = "고객 api 컨트롤러")
-@RestController(value = "CustomerRestController")
-//@RequestMapping(value = "/api/user", headers = "X_API_VERSION=1")
+@Tag(name = "CustomerRestController", description = "고객 api")
+@RestController
 @RequestMapping(value = "/api/member/customer")
 //@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor

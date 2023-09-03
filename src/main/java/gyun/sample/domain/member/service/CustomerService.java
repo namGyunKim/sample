@@ -23,7 +23,9 @@ public class CustomerService extends MemberService{
     public SaveMemberResponse saveCustomer(SaveMemberForCustomerRequest request){
         customerValidator.validateSaveCustomer(request);
         Member member = new Member(request);
-        memberRepository.save(member);
+        saveMemberByRole(member);
         return new SaveMemberResponse(member);
     }
+
+
 }

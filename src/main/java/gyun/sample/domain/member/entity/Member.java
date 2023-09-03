@@ -4,6 +4,7 @@ package gyun.sample.domain.member.entity;
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.payload.request.SaveMemberForCustomerRequest;
+import gyun.sample.domain.member.payload.request.SaveMemberForSuperAdminRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -45,4 +46,12 @@ public class Member extends BaseTimeEntity {
     private String passwordEncoding(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
+    public Member (SaveMemberForSuperAdminRequest request) {
+        this.loginId = request.loginId();
+        this.name = request.name();
+        this.password = passwordEncoding(request.password());
+        this.role = AccountRole.SUPER_ADMIN;
+        active = true;
+    }
+
 }

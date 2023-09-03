@@ -13,6 +13,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     private final MemberRepositoryCustomUtil memberRepositoryCustomUtil;
 
     QMember member = QMember.member;
+
     @Override
     public boolean existByLoginId(String loginId) {
         BooleanBuilder builder = memberRepositoryCustomUtil.existByLoginIdBuilder(loginId);
@@ -21,4 +22,14 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .where(builder)
                 .fetch().isEmpty();
     }
+
+    @Override
+    public boolean existByRoleSuperAdmin() {
+        BooleanBuilder builder = memberRepositoryCustomUtil.existByRoleSuperAdminBuilder();
+        return !jpaQueryFactory
+                .selectFrom(member)
+                .where(builder)
+                .fetch().isEmpty();
+    }
+
 }
