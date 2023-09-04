@@ -16,4 +16,4 @@ BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdv
 
 예외처리시 @EventListener를 사용하여 로그를 남기도록 구현
 
-<img width="385" alt="image" src="https://github.com/namGyunKim/sample/assets/30253535/16ff7c4b-f9dc-42dd-9e30-0583740f1dbc">
+![image](https://github.com/namGyunKim/sample/assets/30253535/600da971-420f-4c83-8b62-caeb35407056)
