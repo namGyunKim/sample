@@ -17,3 +17,7 @@ BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdv
 예외처리시 @EventListener를 사용하여 로그를 남기도록 구현
 
 ![image](https://github.com/namGyunKim/sample/assets/30253535/600da971-420f-4c83-8b62-caeb35407056)
+
+
+
+로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장
