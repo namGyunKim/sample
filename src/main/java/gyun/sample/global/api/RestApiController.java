@@ -6,9 +6,10 @@ import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.payload.response.RestApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RestApiController {
 
     private final ObjectMapper objectMapper;
@@ -39,6 +40,9 @@ public class RestApiController {
         } catch (JsonProcessingException exception) {
             throw new GlobalException(ErrorCode.JSON_PROCESS_FAIL, exception);
         }
-        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(responseBody);
+
+//        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(responseBody);
+
+        return ResponseEntity.status(status).body(responseBody);
     }
 }
