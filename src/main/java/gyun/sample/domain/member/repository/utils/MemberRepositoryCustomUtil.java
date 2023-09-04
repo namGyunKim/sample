@@ -11,13 +11,27 @@ public class MemberRepositoryCustomUtil {
 
     QMember member = QMember.member;
 
-    public BooleanBuilder existByLoginIdBuilder(String loginId) {
+    public BooleanBuilder existByLoginIdAndActiveAllBuilder(String loginId) {
         BooleanExpression loginIdExpression = member.loginId.eq(loginId);
         return new BooleanBuilder().and(loginIdExpression);
     }
 
     public BooleanBuilder existByRoleSuperAdminBuilder() {
         BooleanExpression superAdminExpression = member.role.eq(AccountRole.SUPER_ADMIN);
-        return new BooleanBuilder().and(superAdminExpression);
+        BooleanExpression activeExpression = member.active.eq(true);
+        return new BooleanBuilder().and(superAdminExpression.and(activeExpression));
+    }
+
+    public BooleanBuilder findByLoginIdAndRoleBuilder(String loginId, AccountRole role) {
+        BooleanExpression loginIdExpression = member.loginId.eq(loginId);
+        BooleanExpression activeExpression = member.active.eq(true);
+        BooleanExpression roleExpression = member.role.eq(role);
+        return new BooleanBuilder().and(loginIdExpression.and(activeExpression.and(roleExpression)));
+    }
+
+    public BooleanBuilder findByLoginIdBuilder(String loginId) {
+        BooleanExpression loginIdExpression = member.loginId.eq(loginId);
+        BooleanExpression activeExpression = member.active.eq(true);
+        return new BooleanBuilder().and(loginIdExpression.and(activeExpression));
     }
 }

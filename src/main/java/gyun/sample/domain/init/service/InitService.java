@@ -16,18 +16,22 @@ public class InitService {
     private final MemberService memberService;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         saveMemberByRoleSuperAdmin();
     }
 
 
-//    최고관리자가 없을경우 생성
+    //    최고관리자가 없을경우 생성
     @Transactional
-    public void saveMemberByRoleSuperAdmin(){
-        if (!memberService.existByRoleSuperAdmin()){
+    public void saveMemberByRoleSuperAdmin() {
+        if (!memberService.existByRoleSuperAdmin()) {
             SaveMemberForSuperAdminRequest request = new SaveMemberForSuperAdminRequest("superAdmin", "최고관리자", "1234");
             Member member = new Member(request);
             memberService.saveMemberByRole(member);
+
+            SaveMemberForSuperAdminRequest requestSecond = new SaveMemberForSuperAdminRequest("superAdminSecond", "최고관리자Second", "1234");
+            Member memberSecond = new Member(requestSecond);
+            memberService.saveMemberByRole(memberSecond);
         }
     }
 

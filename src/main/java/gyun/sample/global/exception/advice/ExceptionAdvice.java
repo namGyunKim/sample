@@ -2,7 +2,6 @@ package gyun.sample.global.exception.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.error.utils.ErrorUtil;
 import gyun.sample.global.exception.GlobalException;

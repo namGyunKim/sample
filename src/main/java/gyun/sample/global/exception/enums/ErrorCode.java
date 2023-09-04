@@ -14,9 +14,9 @@ public enum ErrorCode {
     //  === COMMON (0000) ============================================================================================================
     REQUEST_BINDING_RESULT("0001", "리퀘스트 데이터 문제"),
     // === AUTH (1000) ============================================================================================================
-    JWT_TOKEN_EXPIRED("1001", "JWT TOKEN EXPIRED"),
-    JWT_VERIFICATION_FAIL("1002", "JWT TOKEN VERIFICATION FAILED"),
-    JWT_EXCEPTION_FAIL("1003", "JWT TOKEN EXCEPTION FAIL"),
+    JWT_TOKEN_EXPIRED("1001", "JWT 토큰 유횩기간 만료"),
+    JWT_INVALID("1002", "JWT 토큰이 유효하지 않음"),
+    JWT_REFRESH_INVALID("1003", "Refresh 토큰이 유효하지 않음"),
     REFRESH_TOKEN_NOT_FOUND("1004", "Can't find jwt refresh token."),
     UNAUTHORIZED("1005", "UNAUTHORIZED"),
     ACCESS_DENIED("1006", "ACCESS_DENIED"),
@@ -30,6 +30,9 @@ public enum ErrorCode {
     COURIER_SHIPPING_TERMS_REQUIRED_ITEM("1014", "Courier shipping terms are required to be agreed upon."),
     // === MEMBER (1100) ============================================================================================================
     ALREADY_REGISTERED_MEMBER_BY_LOGIN_ID("1101", "이미 등록된 아이디입니다."),
+    NOT_EXIST_MEMBER("1102", "존재하지 않는 회원입니다."),
+    NOT_MATCH_PASSWORD("1103", "비밀번호가 일치하지 않습니다."),
+
 
     // === other (9000) ============================================================================================================
     JSON_PROCESS_FAIL("9001", "Json 파일을 처리하는데 실패했습니다. "),

@@ -2,7 +2,9 @@ package gyun.sample.global.resolver;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.annotaion.CurrentAccount;
+import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -18,8 +20,8 @@ import org.thymeleaf.util.StringUtils;
 @Component
 @RequiredArgsConstructor
 public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
-    private static final String BEARER = "Bearer";
-    private static final String GUEST = "GUEST";
+
+    private final JwtTokenProvider jwtTokenProvider;
 
 //    private final JwtUtil jwtUtil;
 
@@ -34,18 +36,17 @@ public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+        final String GUEST = "GUEST";
         HttpServletRequest httpServletRequest = (HttpServletRequest) webRequest.getNativeRequest();
 
-        String authorization = httpServletRequest.getHeader("Authorization");
+        String authorization= httpServletRequest.getHeader("Authorization");
+        String bearer = "";
         if(StringUtils.isEmpty(authorization)){
             return new CurrentAccountDTO(GUEST, GUEST, AccountRole.GUEST);
+        }else{
+            bearer = authorization.split(" ")[1];
+            TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
+            return new CurrentAccountDTO(tokenResponse);
         }
-//        Claims claims = jwtUtil.getTokenClaims(authorization.replace(BEARER, "").trim());
-//        final String confirmAuthority = claims.get("authority", String.class);
-//        final String confirmLoginId = claims.get("loginId", String.class);
-//        final String confirmAccountId = claims.get("accountId", String.class);
-//        final String confirmUserCode = claims.get("userCode", String.class);
-//        AccountAuthority authority = AccountAuthority.valueOf(confirmAuthority);
-        return new CurrentAccountDTO(GUEST,GUEST, AccountRole.GUEST);
     }
 }

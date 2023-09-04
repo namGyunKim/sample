@@ -1,7 +1,16 @@
 package gyun.sample.domain.member.repository.custom;
 
+import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.entity.Member;
+
+import java.util.Optional;
+
 public interface MemberRepositoryCustom {
-    boolean existByLoginId(String loginId);
+    boolean existByLoginIdAndActiveAll(String loginId);
 
     boolean existByRoleSuperAdmin();
+
+    Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role);
+
+    Optional<Member> findByLoginId(String loginId);
 }

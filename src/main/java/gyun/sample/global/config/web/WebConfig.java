@@ -1,6 +1,7 @@
 package gyun.sample.global.config.web;
 
 import gyun.sample.global.resolver.CurrentAccountResolver;
+import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -25,9 +26,8 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-//    private final JwtUtil jwtUtil;
-//    private final AuthInterceptor authInterceptor;
     private final HttpSession httpSession;
+    private final JwtTokenProvider jwtTokenProvider;
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -50,7 +50,7 @@ public class WebConfig implements WebMvcConfigurer {
 //        AuthenticationPrincipalArgumentResolver authenticationPrincipalArgumentResolver = new AuthenticationPrincipalArgumentResolver();
         argumentResolvers.add(pageResolver);
 //        argumentResolvers.add(authenticationPrincipalArgumentResolver);
-        argumentResolvers.add(new CurrentAccountResolver());
+        argumentResolvers.add(new CurrentAccountResolver(jwtTokenProvider));
     }
 
     //    //    인터셉터

@@ -13,7 +13,7 @@ public class MemberValidator {
     private final MemberRepository userRepository;
 
     protected void existLoginId(String loginId){
-        boolean isExist = userRepository.existByLoginId(loginId);
+        boolean isExist = userRepository.existByLoginIdAndActiveAll(loginId);
         if (isExist) {
             throw new GlobalException(ErrorCode.ALREADY_REGISTERED_MEMBER_BY_LOGIN_ID);
         }
