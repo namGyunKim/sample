@@ -29,14 +29,14 @@ public class ExceptionEvent {
         return exceptionEvent;
     }
 
-    public static ExceptionEvent createExceptionEventNoAccount(GlobalException exception) {
-        ExceptionEvent exceptionEvent = new ExceptionEvent();
-        exceptionEvent.setErrorName(exception.getClass().getSimpleName());
-        exceptionEvent.setErrorCode(exception.getErrorCode());
-        exceptionEvent.setErrorDetailMsg(exception.getErrorDetailMessage());
-        exceptionEvent.setCreatedAt(LocalDateTime.now());
-        return exceptionEvent;
-    }
+//    public static ExceptionEvent createExceptionEventNoAccount(GlobalException exception) {
+//        ExceptionEvent exceptionEvent = new ExceptionEvent();
+//        exceptionEvent.setErrorName(exception.getClass().getSimpleName());
+//        exceptionEvent.setErrorCode(exception.getErrorCode());
+//        exceptionEvent.setErrorDetailMsg(exception.getErrorDetailMessage());
+//        exceptionEvent.setCreatedAt(LocalDateTime.now());
+//        return exceptionEvent;
+//    }
 
     public String getExceptionString() {
 
@@ -46,11 +46,9 @@ public class ExceptionEvent {
         stringBuilder.append("Exception Title : ").append(errorName).append("\n");
 
         // 1. Set User Info
-        if (this.account != null) {
-//            stringBuilder.append("Account Authority : ").append(account.authority()).append("\n");
+        stringBuilder.append("Account role : ").append(account.role()).append("\n");
 //            stringBuilder.append("Account Id : ").append(account.getId()).append("\n");
-            stringBuilder.append("Account Username : ").append(account.loginId()).append("\n");
-        }
+        stringBuilder.append("Account Username : ").append(account.loginId()).append("\n");
 
         // 2. Set Exception
         if (this.errorCode != null) {

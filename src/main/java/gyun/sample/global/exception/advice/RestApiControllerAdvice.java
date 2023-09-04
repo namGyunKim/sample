@@ -21,7 +21,7 @@ public class RestApiControllerAdvice extends RestApiController {
         applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(aException, account));
     }
 
-    protected void sendLogEventNoAccount(GlobalException aException) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventNoAccount(aException));
-    }
+//    protected void sendLogEventNoAccount(GlobalException aException) {
+//        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventNoAccount(aException));
+//    }
 }

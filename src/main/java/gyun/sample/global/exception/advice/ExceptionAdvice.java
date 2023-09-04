@@ -36,11 +36,12 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
     protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account) {
         ErrorCode errorCode = commonException.getErrorCode();
         // Event - Log
-        if (!account.role().equals(AccountRole.GUEST)) {
-            sendLogEvent(commonException, account);
-        } else {
-            sendLogEventNoAccount(commonException);
-        }
+        sendLogEvent(commonException, account);
+//        if (!account.role().equals(AccountRole.GUEST)) {
+//            sendLogEvent(commonException, account);
+//        } else {
+//            sendLogEventNoAccount(commonException);
+//        }
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 
@@ -51,11 +52,12 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
         GlobalException globalException = new GlobalException(errorCode, validationException);
 
         // Event - Log
-        if (!account.role().equals(AccountRole.GUEST)) {
-            sendLogEvent(globalException, account);
-        } else {
-            sendLogEventNoAccount(globalException);
-        }
+        sendLogEvent(globalException, account);
+//        if (!account.role().equals(AccountRole.GUEST)) {
+//            sendLogEvent(globalException, account);
+//        } else {
+//            sendLogEventNoAccount(globalException);
+//        }
 
         return createFailRestResponse(new HashMap<>() {{
             put("error", errorCode.getErrorMap());
