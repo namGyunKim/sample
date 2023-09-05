@@ -23,8 +23,8 @@ public class ChatRestController {
 
     /**
      * 구독중인사람들에게 메시지 전달 (지금은 모든사람이 하나의 채팅방을 구독하는 익명 채팅)
-     * 경로는 WebSocketConfig 에서 설정한 setApplicationDestinationPrefixes 값이 prefix 로 붙음
-     * /chat/user가 됨
+     * 경로는 WebSocketConfig 에서 설정한 setApplicationDestinationPrefixes 값이 prefix(chat) 로 붙음
+     * /chat/send 가 됨
      */
     @MessageMapping("/send")
     public void send(@RequestBody ChatMessageRequest request) {
