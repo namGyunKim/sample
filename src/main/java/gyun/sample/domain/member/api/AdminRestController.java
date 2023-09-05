@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "MemberRestController", description = "멤버 api")
 @RestController
 //@RequestMapping(value = "/api/user", headers = "X_API_VERSION=1")
-@RequestMapping(value = "/api/member")
+@RequestMapping(value = "/api/admin")
 @RequiredArgsConstructor
 //@SecurityRequirement(name = "Bearer Authentication")
 public class AdminRestController {
