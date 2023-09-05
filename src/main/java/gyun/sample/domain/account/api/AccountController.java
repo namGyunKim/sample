@@ -7,6 +7,7 @@ import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,11 +45,10 @@ public class AccountController {
         return restApiController.createSuccessRestResponse(true);
     }
 
-    @Operation(summary = "리프레쉬 토큰으로 엑세스 토큰 재발급")
-    @PostMapping(value = "/get-access-token")
-    public ResponseEntity<String> getAccessToken(@Valid @NotBlank @RequestBody String refreshToken,
-                                          BindingResult bindingResult) {
-        AccountLoginResponse response = accountService.getAccessToken(refreshToken);
+    @Operation(summary = "리프레쉬 토큰으로 JWT 토큰 재발급")
+    @PostMapping(value = "/get-token-by-refresh")
+    public ResponseEntity<String> getAccessToken(@RequestBody String refreshToken) {
+        AccountLoginResponse response = accountService.getJwtTokenByRefreshToken(refreshToken);
         return restApiController.createSuccessRestResponse(response);
     }
 

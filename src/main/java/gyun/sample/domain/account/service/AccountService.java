@@ -50,11 +50,12 @@ public class AccountService {
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
     }
 
-    public AccountLoginResponse getAccessToken(String oldRefreshToken) {
+    public AccountLoginResponse getJwtTokenByRefreshToken(String oldRefreshToken) {
         String loginId = findLoginIdByRefreshToken(oldRefreshToken);
         Member member = findMemberByLoginId(loginId);
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String newRefreshToken = jwtTokenProvider.createRefreshToken(member);
+        refreshTokenRepository.delete(oldRefreshToken);
         return new AccountLoginResponse(accessToken, newRefreshToken);
 
     }

@@ -23,4 +23,8 @@ public class RefreshTokenRepository  {
         ValueOperations valueOperations = redisTemplate.opsForValue();
         return (String) valueOperations.get(refreshToken);
     }
+
+    public void delete(String refreshToken) {
+        redisTemplate.delete(refreshToken);
+    }
 }

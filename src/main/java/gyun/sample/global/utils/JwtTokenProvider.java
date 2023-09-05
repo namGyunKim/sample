@@ -121,4 +121,7 @@ public class JwtTokenProvider {
         );
     }
 
+    public void deleteToken(String refreshToken) {
+        refreshTokenRepository.delete(refreshToken);
+    }
 }
