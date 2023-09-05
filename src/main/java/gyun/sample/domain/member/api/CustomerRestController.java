@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "CustomerRestController", description = "고객 api")
 @RestController
-@RequestMapping(value = "/api/member/customer")
+@RequestMapping(value = "/api/customer")
 //@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class CustomerRestController {
