@@ -1,9 +1,9 @@
 package gyun.sample.global.event;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
-import gyun.sample.global.exception.enums.ErrorCode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

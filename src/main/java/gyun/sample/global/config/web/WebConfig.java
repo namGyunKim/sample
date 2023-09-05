@@ -3,7 +3,6 @@ package gyun.sample.global.config.web;
 import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import gyun.sample.global.utils.JwtTokenProvider;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

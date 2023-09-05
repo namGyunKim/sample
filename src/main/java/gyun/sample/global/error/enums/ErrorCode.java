@@ -1,4 +1,4 @@
-package gyun.sample.global.exception.enums;
+package gyun.sample.global.error.enums;
 
 import gyun.sample.global.exception.payload.response.ErrorResult;
 import org.springframework.boot.configurationprocessor.json.JSONException;
