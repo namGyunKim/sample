@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+
+    <title>Websocket Chat</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+<body>
+
+<h1>guest 채팅룸으로 자동 연결(모두가 참여하는 익명 채팅)</h1>
+<input type="text" id="name" value="김남균">
+<input type="text" id="message" value="하이">
+<input type="button" onclick="send();" value="send">
+<p></p>
+<input type="button" onclick="exit();" value="웹소켓 닫기">
+<p></p>
+<div id="chat-content">
+
+</div>
+
+</body>
+<script>
+    let stompClient;
+
+    window.onload = function () {
+        connect();
+    }
+
+    /**
+     * WebSocketConfig 에서 설정한 enableSimpleBroker
+     * guest 는 chatRoomId
+     */
+    function connect() {
+        let socket = new SockJS("/websocket");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            stompClient.subscribe('/topic/guest', function (response) {
+                // console.log(JSON.parse(response.body));
+                showChat(JSON.parse(response.body))
+            });
+        });
+    }
+
+    /**
+     * 첫번째 인자는 WebSocketConfig 에서 설정한 setApplicationDestinationPrefixes
+     * 두번째 인자는 서버로 보낼때 추가하고싶은 헤더
+     * 세번째 인자는 서버로 보낼 제이슨 값
+     */
+    function send() {
+        let name = document.getElementById("name").value;
+        let message = document.getElementById("message").value;
+        stompClient.send("/chat/send", {}, JSON.stringify({name: name, message: message}))
+
+    }
+
+    // chat-content id 에 채팅내용 추가
+    function showChat(chatContent) {
+        $("#chat-content").append(`<tr><td>(${chatContent.time})${chatContent.name}  :   ${chatContent.message}</td></tr>`);
+    }
+
+    function exit() {
+        stompClient.disconnect();
+    }
+
+    /**
+     * 페이지 벗어날때 닫아줌
+     */
+    window.addEventListener("beforeunload", function (event) {
+        exit();
+    });
+
+</script>
+</html>
