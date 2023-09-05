@@ -28,9 +28,8 @@ public class AccountController {
 
     @Operation(summary = "JWT 에러")
     @GetMapping(value = "/jwt-error")
-    public ResponseEntity<String> jwtError() {
+    public void jwtError() {
      accountService.jwtErrorException();
-     return restApiController.createSuccessRestResponse(true);
     }
 
     @Operation(summary = "로그인")
