@@ -16,10 +16,10 @@ public class MemberRepositoryCustomUtil {
         return new BooleanBuilder().and(loginIdExpression);
     }
 
-    public BooleanBuilder existByRoleSuperAdminBuilder() {
-        BooleanExpression superAdminExpression = member.role.eq(AccountRole.SUPER_ADMIN);
+    public BooleanBuilder existByRoleBuilder(AccountRole role) {
+        BooleanExpression roleExpression = member.role.eq(role);
         BooleanExpression activeExpression = member.active.eq(true);
-        return new BooleanBuilder().and(superAdminExpression.and(activeExpression));
+        return new BooleanBuilder().and(roleExpression.and(activeExpression));
     }
 
     public BooleanBuilder findByLoginIdAndRoleBuilder(String loginId, AccountRole role) {

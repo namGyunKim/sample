@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface MemberRepositoryCustom {
     boolean existByLoginIdAndActiveAll(String loginId);
 
-    boolean existByRoleSuperAdmin();
+    boolean existByRole(AccountRole role);
 
     Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role);
 

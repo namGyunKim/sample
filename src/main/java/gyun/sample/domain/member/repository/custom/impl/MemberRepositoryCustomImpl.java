@@ -28,8 +28,8 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public boolean existByRoleSuperAdmin() {
-        BooleanBuilder builder = memberRepositoryCustomUtil.existByRoleSuperAdminBuilder();
+    public boolean existByRole(AccountRole role) {
+        BooleanBuilder builder = memberRepositoryCustomUtil.existByRoleBuilder(role);
         return !jpaQueryFactory
                 .selectFrom(member)
                 .where(builder)

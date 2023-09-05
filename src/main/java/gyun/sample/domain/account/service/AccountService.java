@@ -1,5 +1,6 @@
 package gyun.sample.domain.account.service;
 
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
@@ -19,10 +20,10 @@ import org.thymeleaf.util.StringUtils;
 @RequiredArgsConstructor
 public class AccountService {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final MemberRepository memberRepository;
-    private final AccountValidator accountValidator;
-    private final RefreshTokenRepository refreshTokenRepository;
+    protected final JwtTokenProvider jwtTokenProvider;
+    protected final MemberRepository memberRepository;
+    protected final AccountValidator accountValidator;
+    protected final RefreshTokenRepository refreshTokenRepository;
 
     public AccountLoginResponse login(AccountLoginRequest request) {
         Member member = findMemberByLoginIdAndRole(request);
@@ -37,7 +38,7 @@ public class AccountService {
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
     }
 
-    public String findLoginIdByRefreshToken(String refreshToken){
+    public String findLoginIdByRefreshToken(String refreshToken) {
         String loginId = refreshTokenRepository.findByRefreshToken(refreshToken);
         if (StringUtils.isEmpty(loginId)) {
             throw new GlobalException(ErrorCode.JWT_REFRESH_INVALID);
@@ -57,6 +58,14 @@ public class AccountService {
         String newRefreshToken = jwtTokenProvider.createRefreshToken(member);
         refreshTokenRepository.delete(oldRefreshToken);
         return new AccountLoginResponse(accessToken, newRefreshToken);
+    }
 
+    @Transactional
+    public void saveMember(Member member) {
+        memberRepository.save(member);
+    }
+
+    public boolean existByRole(AccountRole role) {
+        return memberRepository.existByRole(role);
     }
 }
