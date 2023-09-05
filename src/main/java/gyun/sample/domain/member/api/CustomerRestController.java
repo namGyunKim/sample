@@ -31,6 +31,4 @@ public class CustomerRestController {
         SaveMemberResponse response = customerService.saveCustomer(request);
         return restApiController.createSuccessRestResponse(response);
     }
-
-
 }

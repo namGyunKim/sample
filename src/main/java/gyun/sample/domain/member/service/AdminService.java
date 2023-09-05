@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminService extends AccountService {
 
-    public AdminService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository, AccountValidator accountValidator, RefreshTokenRepository refreshTokenRepository) {
-        super(jwtTokenProvider, memberRepository, accountValidator, refreshTokenRepository);
+    public AdminService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, AccountValidator accountValidator, JwtTokenProvider jwtTokenProvider) {
+        super(memberRepository, refreshTokenRepository, accountValidator, jwtTokenProvider);
     }
 
 }

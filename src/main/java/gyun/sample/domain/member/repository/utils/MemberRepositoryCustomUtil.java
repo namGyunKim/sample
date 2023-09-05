@@ -16,6 +16,12 @@ public class MemberRepositoryCustomUtil {
         return new BooleanBuilder().and(loginIdExpression);
     }
 
+    public BooleanBuilder existByLoginIdAndRoleBuilder(String loginId,AccountRole role) {
+        BooleanExpression loginIdExpression = member.loginId.eq(loginId);
+        BooleanExpression roleExpression = member.role.eq(role);
+        return new BooleanBuilder().and(loginIdExpression.and(roleExpression));
+    }
+
     public BooleanBuilder existByRoleBuilder(AccountRole role) {
         BooleanExpression roleExpression = member.role.eq(role);
         BooleanExpression activeExpression = member.active.eq(true);

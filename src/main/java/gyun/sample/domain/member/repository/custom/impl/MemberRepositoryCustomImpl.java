@@ -28,6 +28,15 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     }
 
     @Override
+    public boolean existByLoginIdAndRole(String loginId,AccountRole role) {
+        BooleanBuilder builder = memberRepositoryCustomUtil.existByLoginIdAndRoleBuilder(loginId,role);
+        return !jpaQueryFactory
+                .selectFrom(member)
+                .where(builder)
+                .fetch().isEmpty();
+    }
+
+    @Override
     public boolean existByRole(AccountRole role) {
         BooleanBuilder builder = memberRepositoryCustomUtil.existByRoleBuilder(role);
         return !jpaQueryFactory

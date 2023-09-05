@@ -20,10 +20,15 @@ import org.thymeleaf.util.StringUtils;
 @RequiredArgsConstructor
 public class AccountService {
 
-    protected final JwtTokenProvider jwtTokenProvider;
+    //    repository
     protected final MemberRepository memberRepository;
-    protected final AccountValidator accountValidator;
     protected final RefreshTokenRepository refreshTokenRepository;
+
+    //    validator
+    protected final AccountValidator accountValidator;
+
+    //    utils
+    protected final JwtTokenProvider jwtTokenProvider;
 
     public AccountLoginResponse login(AccountLoginRequest request) {
         Member member = findMemberByLoginIdAndRole(request);

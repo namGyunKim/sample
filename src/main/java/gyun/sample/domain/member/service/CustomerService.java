@@ -18,8 +18,8 @@ public class CustomerService extends AccountService {
 
     private final CustomerValidator customerValidator;
 
-    public CustomerService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository, AccountValidator accountValidator, RefreshTokenRepository refreshTokenRepository, CustomerValidator customerValidator) {
-        super(jwtTokenProvider, memberRepository, accountValidator, refreshTokenRepository);
+    public CustomerService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, AccountValidator accountValidator, JwtTokenProvider jwtTokenProvider, CustomerValidator customerValidator) {
+        super(memberRepository, refreshTokenRepository, accountValidator, jwtTokenProvider);
         this.customerValidator = customerValidator;
     }
 
