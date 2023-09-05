@@ -1,5 +1,6 @@
 package gyun.sample.global.config.web;
 
+import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpSession;
@@ -26,8 +27,8 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final HttpSession httpSession;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JWTInterceptor jwtInterceptor;
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -61,6 +62,8 @@ public class WebConfig implements WebMvcConfigurer {
 //                .addPathPatterns("/admin/**")
 //                .excludePathPatterns("/admin/login-page","/admin/login-process");
         registry.addInterceptor(localeChangeInterceptor());
+        registry.addInterceptor(jwtInterceptor)
+                .excludePathPatterns("/api/account/jwt-error");
     }
 
 

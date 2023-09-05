@@ -8,6 +8,7 @@ import gyun.sample.domain.account.validator.AccountValidator;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -72,5 +73,9 @@ public class AccountService {
 
     public boolean existByRole(AccountRole role) {
         return memberRepository.existByRole(role);
+    }
+
+    public void jwtErrorException() {
+        throw new JWTInterceptorException(ErrorCode.JWT_INVALID);
     }
 }

@@ -2,6 +2,7 @@ package gyun.sample.global.event;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,14 +30,14 @@ public class ExceptionEvent {
         return exceptionEvent;
     }
 
-//    public static ExceptionEvent createExceptionEventNoAccount(GlobalException exception) {
-//        ExceptionEvent exceptionEvent = new ExceptionEvent();
-//        exceptionEvent.setErrorName(exception.getClass().getSimpleName());
-//        exceptionEvent.setErrorCode(exception.getErrorCode());
-//        exceptionEvent.setErrorDetailMsg(exception.getErrorDetailMessage());
-//        exceptionEvent.setCreatedAt(LocalDateTime.now());
-//        return exceptionEvent;
-//    }
+    public static ExceptionEvent createExceptionEventNoAccount(JWTInterceptorException exception) {
+        ExceptionEvent exceptionEvent = new ExceptionEvent();
+        exceptionEvent.setErrorName(exception.getClass().getSimpleName());
+        exceptionEvent.setErrorCode(exception.getErrorCode());
+        exceptionEvent.setErrorDetailMsg(exception.getErrorDetailMessage());
+        exceptionEvent.setCreatedAt(LocalDateTime.now());
+        return exceptionEvent;
+    }
 
     public String getExceptionString() {
 
@@ -46,10 +47,11 @@ public class ExceptionEvent {
         stringBuilder.append("Exception Title : ").append(errorName).append("\n");
 
         // 1. Set User Info
-        stringBuilder.append("Account role : ").append(account.role()).append("\n");
+        if (account != null) {
+            stringBuilder.append("Account role : ").append(account.role()).append("\n");
 //            stringBuilder.append("Account Id : ").append(account.getId()).append("\n");
-        stringBuilder.append("Account Username : ").append(account.loginId()).append("\n");
-
+            stringBuilder.append("Account Username : ").append(account.loginId()).append("\n");
+        }
         // 2. Set Exception
         if (this.errorCode != null) {
             stringBuilder.append("Error Code & Msg : ").append(errorCode.getCode()).append(" / ").append(errorCode.getErrorMessage()).append("\n");

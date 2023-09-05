@@ -13,10 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 // TODO: 2023/09/04 JWT 기능 고도화 필요 리프레쉬로 토큰 재발급 기능 및 로그아웃 미구현 로그인 기능이 재발급과 겹치는부분이 많아서 정리 필요
 @Tag(name = "AccountController", description = "계정 관련 기능 api")
@@ -27,6 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
     private final RestApiController restApiController;
     private final AccountService accountService;
+
+
+    @Operation(summary = "JWT 에러")
+    @GetMapping(value = "/jwt-error")
+    public ResponseEntity<String> jwtError() {
+     accountService.jwtErrorException();
+     return restApiController.createSuccessRestResponse(true);
+    }
 
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")

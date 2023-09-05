@@ -5,6 +5,7 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.event.ExceptionEvent;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.JWTInterceptorException;
 import org.springframework.context.ApplicationEventPublisher;
 
 public class RestApiControllerAdvice extends RestApiController {
@@ -17,11 +18,11 @@ public class RestApiControllerAdvice extends RestApiController {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    protected void sendLogEvent(GlobalException aException, CurrentAccountDTO account) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(aException, account));
+    protected void sendLogEvent(GlobalException exception, CurrentAccountDTO account) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(exception, account));
     }
 
-//    protected void sendLogEventNoAccount(GlobalException aException) {
-//        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventNoAccount(aException));
-//    }
+    protected void sendLogEvent(JWTInterceptorException exception) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventNoAccount(exception));
+    }
 }

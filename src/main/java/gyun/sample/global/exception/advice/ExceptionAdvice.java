@@ -5,6 +5,7 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.error.utils.ErrorUtil;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import io.micrometer.core.instrument.config.validate.ValidationException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,7 +31,6 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
         this.errorUtil = errorUtil;
     }
 
-    // Business Exception Catch
     @ExceptionHandler(value = GlobalException.class)
     protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account) {
         ErrorCode errorCode = commonException.getErrorCode();
@@ -41,6 +41,15 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
 //        } else {
 //            sendLogEventNoAccount(commonException);
 //        }
+        return createFailRestResponse(errorCode.getErrorResponse());
+    }
+
+    @ExceptionHandler(value = JWTInterceptorException.class)
+    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException) {
+        ErrorCode errorCode = jwtInterceptorException.getErrorCode();
+        // Event - Log
+        sendLogEvent(jwtInterceptorException);
+        System.out.println(" 체크");
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 

@@ -1,7 +1,9 @@
 package gyun.sample.domain.member.api;
 
 
+import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.member.service.AdminService;
+import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,7 +26,7 @@ public class AdminRestController {
     protected final RestApiController restApiController;
 
     @GetMapping(value = "/information-for-admin")
-    public ResponseEntity<String> informationForAdmin(){
+    public ResponseEntity<String> informationForAdmin(@CurrentAccount CurrentAccountDTO account){
 
         return restApiController.createSuccessRestResponse("informationForAdmin");
     }
