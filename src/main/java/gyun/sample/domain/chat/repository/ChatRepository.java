@@ -17,7 +17,7 @@ public class ChatRepository {
     @Value("${spring.data.redis.chat.timeout}")
     private long timeout;
 
-    // TODO: 2023/09/06 redis에 저장할때 만료설정이 안되서 메모리에 계속 쌓이는 이슈가 있음 익명채팅은 저장하지말고 1:1 혹은 1:1 다 채팅만 저장하도록 수정
+    // TODO: 2023/09/06 1:1 혹은 1:1 다 채팅만 저장하도록 수정 list 자체는 삭제가 되기때문에 guest채팅만 저장안하면됨 list 안의 값들은 개별로 만료설정이 안됨
     public void save(String request) {
         ListOperations listOperations = redisTemplate.opsForList();
         listOperations.leftPush("guestChat", request);
