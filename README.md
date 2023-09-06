@@ -21,3 +21,5 @@ BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdv
 
 
 로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장
+
+stomp 와 redis 를 사용한 채팅기능 구현
