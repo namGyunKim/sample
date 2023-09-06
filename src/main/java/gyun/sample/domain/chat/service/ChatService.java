@@ -1,36 +1,35 @@
 package gyun.sample.domain.chat.service;
 
-import gyun.sample.domain.chat.enums.MessageType;
 import gyun.sample.domain.chat.payload.request.ChatMessageRequest;
+import gyun.sample.domain.chat.repository.ChatRepository;
+import gyun.sample.domain.chat.utils.ChatServiceUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class ChatService {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-
+    private final ChatRepository chatRepository;
+    private final ChatServiceUtil chatServiceUtil;
+    @Transactional
     public void send(ChatMessageRequest request) {
-        Map<String , Object> dataMap = new HashMap<>();
-        dataMap.put("name",request.name());
-        dataMap.put("message",request.message());
-        dataMap.put("time", nowHourAndMinute());
-        dataMap.put("type", MessageType.TALK.name());
-        simpMessagingTemplate.convertAndSend("/topic/guest",dataMap);
+        chatRepository.save(chatServiceUtil.chatMessage(request));
+        simpMessagingTemplate.convertAndSend("/topic/guest",chatServiceUtil.chatMessageMap(request));
     }
 
-    private String nowHourAndMinute(){
-        String now = LocalDateTime.now().toString().split("T")[1];
-        StringBuilder sb = new StringBuilder();
-        sb.append(now.split(":")[0]);
-        sb.append(":");
-        sb.append(now.split(":")[1]);
-        return sb.toString();
+//    최신순 조회
+    public List<String> getChatList(){
+        return chatRepository.findAll();
+    }
+
+    public void delete(String chatRoomId) {
+        chatRepository.delete(chatRoomId);
     }
 }

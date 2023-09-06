@@ -1,14 +1,15 @@
 package gyun.sample.domain.chat.api;
 
 import gyun.sample.domain.chat.payload.request.ChatMessageRequest;
+import gyun.sample.domain.chat.payload.request.DeleteChatRoomRequest;
 import gyun.sample.domain.chat.service.ChatService;
+import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "ChatRestController", description = "채팅 관련 기능 api")
 @RestController
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatRestController {
 
     private final ChatService chatService;
-
+    private final RestApiController restApiController;
 
     /**
      * 구독중인사람들에게 메시지 전달 (지금은 모든사람이 하나의 채팅방을 구독하는 익명 채팅)
@@ -29,5 +30,16 @@ public class ChatRestController {
     @MessageMapping(value = "/send")
     public void send(@RequestBody ChatMessageRequest request) {
         chatService.send(request);
+    }
+
+    @GetMapping(value = "/guest-chat-list")
+    public ResponseEntity<String> getChatList(){
+        return restApiController.createRestResponse(chatService.getChatList());
+    }
+
+    @PostMapping(value = "/delete")
+    public ResponseEntity<String> delete(@RequestBody DeleteChatRoomRequest request){
+        chatService.delete(request.chatRoomId());
+        return restApiController.createRestResponse("삭제완료");
     }
 }
