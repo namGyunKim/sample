@@ -26,7 +26,7 @@ public class ChatRestController {
      * 경로는 WebSocketConfig 에서 설정한 setApplicationDestinationPrefixes 값이 prefix(chat) 로 붙음
      * /chat/send 가 됨
      */
-    @MessageMapping("/send")
+    @MessageMapping(value = "/send")
     public void send(@RequestBody ChatMessageRequest request) {
         chatService.send(request);
     }

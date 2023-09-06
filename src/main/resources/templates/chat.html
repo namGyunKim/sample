@@ -39,7 +39,6 @@
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             stompClient.subscribe('/topic/guest', function (response) {
-                // console.log(JSON.parse(response.body));
                 showChat(JSON.parse(response.body))
             });
         });
