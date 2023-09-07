@@ -14,7 +14,7 @@ public class CustomerValidator extends AccountValidator {
     }
 
     public void validateSaveCustomer(SaveMemberForCustomerRequest request){
-        existLoginIdAndActiveAll(request.loginId());
+        existByLoginIdAndActiveAll(request.loginId());
     }
 
 }

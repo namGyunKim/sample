@@ -33,15 +33,15 @@ public class AccountService {
     protected final JwtTokenProvider jwtTokenProvider;
 
     public AccountLoginResponse login(AccountLoginRequest request) {
-        Member member = findMemberByLoginIdAndRole(request);
+        Member member = findMemberByLoginIdAndRole(request.loginId(),request.role());
         accountValidator.validateLogin(member, request.password());
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
         return new AccountLoginResponse(accessToken, refreshToken);
     }
 
-    public Member findMemberByLoginIdAndRole(AccountLoginRequest request) {
-        return memberRepository.findByLoginIdAndRole(request.loginId(), request.role())
+    public Member findMemberByLoginIdAndRole(String loginId, AccountRole role) {
+        return memberRepository.findByLoginIdAndRole(loginId, role)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
     }
 
