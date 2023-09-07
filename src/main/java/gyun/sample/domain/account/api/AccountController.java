@@ -1,10 +1,9 @@
 package gyun.sample.domain.account.api;
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
+import gyun.sample.domain.account.payload.request.AccountLogoutRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.service.AccountService;
-import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -41,10 +40,13 @@ public class AccountController {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @Operation(summary = "로그아웃")
+    @Operation(summary = "로그아웃(Refresh Token Delete)")
     @PostMapping(value = "/logout")
-    public ResponseEntity<String> logout(@CurrentAccount CurrentAccountDTO account) {
-        return restApiController.createSuccessRestResponse(true);
+    public ResponseEntity<String> logout(@Valid @RequestBody AccountLogoutRequest request,
+                                         BindingResult bindingResult) {
+
+        boolean response = accountService.logout(request);
+        return restApiController.createSuccessRestResponse(response);
     }
 
     @Operation(summary = "리프레쉬 토큰으로 JWT 토큰 재발급")

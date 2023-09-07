@@ -28,6 +28,7 @@ public class ChatRestController {
      * /chat/send 가 됨
      */
     @MessageMapping(value = "/send")
+    @GetMapping(value = "/send")
     public void send(@RequestBody ChatMessageRequest request) {
         chatService.send(request);
     }

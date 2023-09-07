@@ -2,6 +2,7 @@ package gyun.sample.domain.account.service;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
+import gyun.sample.domain.account.payload.request.AccountLogoutRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.validator.AccountValidator;
@@ -77,5 +78,11 @@ public class AccountService {
 
     public void jwtErrorException() {
         throw new JWTInterceptorException(ErrorCode.JWT_INVALID);
+    }
+
+//    RefreshToken 제거
+    public boolean logout(AccountLogoutRequest request) {
+        refreshTokenRepository.delete(request.refreshToken());
+        return true;
     }
 }
