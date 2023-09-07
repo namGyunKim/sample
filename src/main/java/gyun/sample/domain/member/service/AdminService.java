@@ -1,6 +1,7 @@
 package gyun.sample.domain.member.service;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.domain.account.validator.AccountValidator;
@@ -25,7 +26,7 @@ public class AdminService extends AccountService {
 
     public InformationCustomerForAdminResponse informationCustomerForAdmin(CurrentAccountDTO account, String loginId) {
         adminValidator.informationCustomerForAdmin(account);
-        Member member = findMemberByLoginIdAndRole(loginId,account.role());
+        Member member = findMemberByLoginIdAndRole(loginId, AccountRole.CUSTOMER);
         return new InformationCustomerForAdminResponse(member);
     }
 }

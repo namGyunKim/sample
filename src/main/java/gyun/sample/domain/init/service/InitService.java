@@ -20,6 +20,7 @@ public class InitService {
     @PostConstruct
     public void init() {
         saveMemberByRoleSuperAdmin();
+        saveMemberByRoleCustomer();
     }
 
 
@@ -33,13 +34,13 @@ public class InitService {
         }
     }
 
-//    고객이 없을경우 생성
-@Transactional
-public void saveMemberByRoleCustomer() {
-    if (!adminService.existByRole(AccountRole.CUSTOMER)) {
-        SaveMemberForCustomerRequest request = new SaveMemberForCustomerRequest("skarbs01", "최초의 고객", "1234!@#Abcd");
-        Member member = new Member(request);
-        adminService.saveMember(member);
+    //    고객이 없을경우 생성
+    @Transactional
+    public void saveMemberByRoleCustomer() {
+        if (!adminService.existByRole(AccountRole.CUSTOMER)) {
+            SaveMemberForCustomerRequest request = new SaveMemberForCustomerRequest("skarbs01", "최초의 고객", "1234!@#Abcd");
+            Member member = new Member(request);
+            adminService.saveMember(member);
+        }
     }
-}
 }
