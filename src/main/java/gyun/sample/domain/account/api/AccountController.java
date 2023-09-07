@@ -14,14 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-// TODO: 2023/09/04 JWT 기능 고도화 필요 리프레쉬로 토큰 재발급 기능 및 로그아웃 미구현 로그인 기능이 재발급과 겹치는부분이 많아서 정리 필요
 @Tag(name = "AccountController", description = "계정 관련 기능 api")
 @RestController
 @RequestMapping(value = "/api/account")
 //@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class AccountController {
+    //    utils
     private final RestApiController restApiController;
+    //    service
     private final AccountService accountService;
 
 

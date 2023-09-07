@@ -3,6 +3,8 @@ package gyun.sample.global.payload.response;
 import lombok.Builder;
 import lombok.Data;
 
+
+// REST API 응답
 @Data
 @Builder
 public class RestApiResponse {

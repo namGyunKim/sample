@@ -22,12 +22,17 @@ import java.util.List;
 import java.util.Locale;
 
 
+// Web 설정
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
+    // utils
     private final JwtTokenProvider jwtTokenProvider;
+    //    인터셉터
     private final JWTInterceptor jwtInterceptor;
+
+    // cors 설정
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -38,12 +43,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .maxAge(3000);
     }
 
+    //    리소스 핸들러
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**", "/webjars/**")
                 .addResourceLocations("classpath:/templates/", "classpath:/static/", "classpath:/META-INF/resources/webjars/");
     }
-
+    //  리졸버
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         PageableHandlerMethodArgumentResolver pageResolver = new PageableHandlerMethodArgumentResolver();
@@ -53,7 +59,7 @@ public class WebConfig implements WebMvcConfigurer {
         argumentResolvers.add(new CurrentAccountResolver(jwtTokenProvider));
     }
 
-    //    //    인터셉터
+    //    인터셉터
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //        관리자
@@ -66,7 +72,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
 
-    //    messages
+    //    messages 국제화 관련 설정
     @Bean
     public LocaleResolver localeResolver() {
 
@@ -76,7 +82,9 @@ public class WebConfig implements WebMvcConfigurer {
         return resolver;
     }
 
-//    lang 키 값의 쿠키 인터셉트
+    //    lang 키 값의 쿠키 인터셉트
+    //    messages 국제화 관련 설정
+
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
@@ -84,6 +92,7 @@ public class WebConfig implements WebMvcConfigurer {
         return interceptor;
     }
 
+    //    messages 국제화 관련 설정
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();

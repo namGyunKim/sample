@@ -16,10 +16,13 @@ public class IndexController {
 
 
 
+    //    전역으로 사용할 수 있는 지역 리스트
     @ModelAttribute("regionTypeList")
     public List<String> globalRegionsTypeList(){
          return Arrays.stream(RegionsType.values()).map(RegionsType::getValue).toList();
     }
+
+    //    메인 페이지
     @GetMapping(value = "/")
     public String index(HttpServletRequest request){
         return "index";

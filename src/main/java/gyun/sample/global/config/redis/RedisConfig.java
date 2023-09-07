@@ -8,19 +8,24 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+// Redis 설정
 @Configuration
 public class RedisConfig {
+    //    Redis host 설정
     @Value(value = "${spring.data.redis.host}")
     private String host;
+    //    Redis port 설정
     @Value(value = "${spring.data.redis.port}")
     private int port;
 
+    //    RedisConnectionFactory 설정
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(host, port);
     }
 
 
+    //    RedisTemplate 설정
     @Bean
     RedisTemplate<String ,String> redisTemplate() {
 //        redisTemplate로 get,set,delete 등의 기능을 사용할 수 있다.

@@ -15,7 +15,7 @@ public class AdminValidator extends AccountValidator {
     }
 
 
-//    고객 조회는 관리자 이상의 권한이 필요합니다.
+    //    고객 조회는 관리자 이상의 권한이 필요합니다.
     public void informationCustomerForAdmin(CurrentAccountDTO account) {
         checkRole(account, AccountRole.ADMIN);
     }

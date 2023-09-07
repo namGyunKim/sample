@@ -13,6 +13,8 @@ public class CustomerValidator extends AccountValidator {
         super(userRepository);
     }
 
+
+    //    고객 회원가입
     public void validateSaveCustomer(SaveMemberForCustomerRequest request){
         existByLoginIdAndActiveAll(request.loginId());
     }

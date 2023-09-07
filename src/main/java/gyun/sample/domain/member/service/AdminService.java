@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminService extends AccountService {
 
+    // validator
     private final AdminValidator adminValidator;
 
     public AdminService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, AccountValidator accountValidator, JwtTokenProvider jwtTokenProvider, AdminValidator adminValidator) {
@@ -24,6 +25,7 @@ public class AdminService extends AccountService {
         this.adminValidator = adminValidator;
     }
 
+    //  관리자 권한으로 회원 정보 조회
     public InformationCustomerForAdminResponse informationCustomerForAdmin(CurrentAccountDTO account, String loginId) {
         adminValidator.informationCustomerForAdmin(account);
         Member member = findMemberByLoginIdAndRole(loginId, AccountRole.CUSTOMER);

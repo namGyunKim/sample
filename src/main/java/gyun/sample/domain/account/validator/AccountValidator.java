@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class AccountValidator {
     protected final MemberRepository userRepository;
 
+    //    로그인
     public void validateLogin(Member member, String password) {
         passwordCheck(member, password);
     }

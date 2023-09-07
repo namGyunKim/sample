@@ -15,17 +15,21 @@ public abstract class BaseTimeEntity {
 
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt;            //  생성일
 
     @LastModifiedDate
-    private LocalDateTime modifiedAt;
+    private LocalDateTime modifiedAt;           //  수정일
 
+
+    //  생성일, 수정일 자동화
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.modifiedAt = LocalDateTime.now();
     }
 
+
+    //  수정일 자동화
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

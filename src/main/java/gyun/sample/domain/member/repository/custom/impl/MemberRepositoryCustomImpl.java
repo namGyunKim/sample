@@ -13,11 +13,15 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
+    //    querydsl
     private final JPAQueryFactory jpaQueryFactory;
+    //    querydsl util
     private final MemberRepositoryCustomUtil memberRepositoryCustomUtil;
 
     QMember member = QMember.member;
 
+
+    //    로그인 아이디로 활성화 및 비활성화 된 유저 존재여부 확인
     @Override
     public boolean existByLoginIdAndActiveAll(String loginId) {
         BooleanBuilder builder = memberRepositoryCustomUtil.existByLoginIdAndActiveAllBuilder(loginId);
@@ -27,6 +31,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .fetch().isEmpty();
     }
 
+    //    로그인 아이디와 권환으로 활성화 된 유저 존재여부 확인
     @Override
     public boolean existByLoginIdAndRole(String loginId,AccountRole role) {
         BooleanBuilder builder = memberRepositoryCustomUtil.existByLoginIdAndRoleBuilder(loginId,role);
@@ -36,6 +41,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .fetch().isEmpty();
     }
 
+    //    권한으로 활성화 된 유저 존재여부 확인
     @Override
     public boolean existByRole(AccountRole role) {
         BooleanBuilder builder = memberRepositoryCustomUtil.existByRoleBuilder(role);
@@ -45,6 +51,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .fetch().isEmpty();
     }
 
+    //    로그인 아이디와 권한으로 활성화 된 유저 찾기
     @Override
     public Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role) {
         BooleanBuilder builder = memberRepositoryCustomUtil.findByLoginIdAndRoleBuilder(loginId,role);
@@ -54,6 +61,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .fetchOne());
     }
 
+    //    로그인 아이디로 활성화 된 유저 찾기
     @Override
     public Optional<Member> findByLoginId(String loginId) {
         BooleanBuilder builder = memberRepositoryCustomUtil.findByLoginIdBuilder(loginId);

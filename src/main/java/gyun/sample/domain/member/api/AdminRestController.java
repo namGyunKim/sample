@@ -22,14 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "Bearer Authentication")
 public class AdminRestController {
 
+    //    service
     private final AdminService adminService;
-
+    //    utils
     protected final RestApiController restApiController;
 
+    //    관리자가 고객의 정보를 조회
     @GetMapping(value = "/information-customer-for-admin/{loginId}")
     public ResponseEntity<String> informationForAdmin(@CurrentAccount CurrentAccountDTO account,
-                                                      @PathVariable String loginId){
-        InformationCustomerForAdminResponse response = adminService.informationCustomerForAdmin(account,loginId);
+                                                      @PathVariable String loginId) {
+        InformationCustomerForAdminResponse response = adminService.informationCustomerForAdmin(account, loginId);
         return restApiController.createSuccessRestResponse(response);
     }
 

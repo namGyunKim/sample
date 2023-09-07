@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CustomerService extends AccountService {
 
+    // validator
     private final CustomerValidator customerValidator;
 
     public CustomerService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, AccountValidator accountValidator, JwtTokenProvider jwtTokenProvider, CustomerValidator customerValidator) {
@@ -23,6 +24,7 @@ public class CustomerService extends AccountService {
         this.customerValidator = customerValidator;
     }
 
+    //  고객 회원가입
     @Transactional
     public SaveMemberResponse saveCustomer(SaveMemberForCustomerRequest request){
         customerValidator.validateSaveCustomer(request);
@@ -30,6 +32,4 @@ public class CustomerService extends AccountService {
         saveMember(member);
         return new SaveMemberResponse(member);
     }
-
-
 }

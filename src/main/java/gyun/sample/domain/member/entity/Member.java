@@ -35,6 +35,7 @@ public class Member extends BaseTimeEntity {
     private LocalDateTime deletedAt;                        //  탈퇴일
 
 
+    //    고객 리퀘스트로 생성
     public Member(SaveMemberForCustomerRequest request) {
         this.loginId = request.loginId();
         this.name = request.name();
@@ -43,9 +44,12 @@ public class Member extends BaseTimeEntity {
         active = true;
     }
 
+    //    비밀번호 암호화
     private String passwordEncoding(String password){
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
+
+    //    최고 관리자 리퀘스트로 생성
     public Member (SaveMemberForSuperAdminRequest request) {
         this.loginId = request.loginId();
         this.name = request.name();

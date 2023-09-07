@@ -9,7 +9,6 @@ import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import io.micrometer.core.instrument.config.validate.ValidationException;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +18,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 
 
-@Profile(value = {"local"})
+// 예외 처리
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice(basePackages = "gyun.sample")
 public class ExceptionAdvice extends RestApiControllerAdvice {
 
+    // utils
     private final ErrorUtil errorUtil;
 
     public ExceptionAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher, ErrorUtil errorUtil) {
@@ -31,19 +31,16 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
         this.errorUtil = errorUtil;
     }
 
+    // Global Exception Catch
     @ExceptionHandler(value = GlobalException.class)
     protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account) {
         ErrorCode errorCode = commonException.getErrorCode();
         // Event - Log
         sendLogEvent(commonException, account);
-//        if (!account.role().equals(AccountRole.GUEST)) {
-//            sendLogEvent(commonException, account);
-//        } else {
-//            sendLogEventNoAccount(commonException);
-//        }
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 
+    // JWT Interceptor Exception Catch
     @ExceptionHandler(value = JWTInterceptorException.class)
     protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException) {
         ErrorCode errorCode = jwtInterceptorException.getErrorCode();
@@ -60,12 +57,6 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
 
         // Event - Log
         sendLogEvent(globalException, account);
-//        if (!account.role().equals(AccountRole.GUEST)) {
-//            sendLogEvent(globalException, account);
-//        } else {
-//            sendLogEventNoAccount(globalException);
-//        }
-
         return createFailRestResponse(new HashMap<>() {{
             put("error", errorCode.getErrorMap());
         }});

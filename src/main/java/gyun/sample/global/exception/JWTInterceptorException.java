@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+// JWT 인터셉터 예외 처리
 @Getter
 public class JWTInterceptorException extends RuntimeException {
 

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+//  예외 발생 시, 예외 정보를 담는 이벤트 객체
 @Data
 @NoArgsConstructor
 public class ExceptionEvent {
@@ -19,6 +20,7 @@ public class ExceptionEvent {
     protected CurrentAccountDTO account;
     protected LocalDateTime createdAt;
 
+    //  예외 발생 시, 로그인 계정 데이터를 포함한 예외 정보를 담는 이벤트 객체
     public static ExceptionEvent createExceptionEvent(GlobalException exception, CurrentAccountDTO account) {
         ExceptionEvent exceptionEvent = new ExceptionEvent();
         exceptionEvent.setErrorName(exception.getClass().getSimpleName());
@@ -30,6 +32,7 @@ public class ExceptionEvent {
         return exceptionEvent;
     }
 
+    //  예외 발생 시, 로그인 데이터가 없는 예외 정보를 담는 이벤트 객체 GUEST 계정
     public static ExceptionEvent createExceptionEventNoAccount(JWTInterceptorException exception) {
         ExceptionEvent exceptionEvent = new ExceptionEvent();
         exceptionEvent.setErrorName(exception.getClass().getSimpleName());
@@ -39,6 +42,7 @@ public class ExceptionEvent {
         return exceptionEvent;
     }
 
+    //  예외 발생 시, 이벤트 로그 생성
     public String getExceptionString() {
 
         StringBuilder stringBuilder = new StringBuilder();

@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.util.stream.Stream;
 
+// 지역 타입
 @Getter
 public enum RegionsType {
     KOREA("ko"),
@@ -14,6 +15,7 @@ public enum RegionsType {
     RegionsType(String value) {
         this.value = value;
     }
+
     @JsonCreator
     public static RegionsType create(String requestValue) {
         return Stream.of(values())

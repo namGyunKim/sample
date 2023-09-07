@@ -1,8 +1,6 @@
 package gyun.sample.global.error.enums;
 
 import gyun.sample.global.exception.payload.response.ErrorResult;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,32 +59,6 @@ public enum ErrorCode {
             put("code", code);
             put("message", errorMessage);
         }};
-    }
-
-    public Map<String, String> getErrorMap(String detail) {
-        return new HashMap<>() {{
-            put("code", code);
-            put("message", errorMessage);
-            put("detail", detail);
-        }};
-    }
-
-    public String getErrorString() {
-        return getErrorJson().toString();
-    }
-
-    public JSONObject getErrorJson() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("code", code);
-            jsonObject.put("errorMessage", errorMessage);
-        } catch (JSONException ignore) {
-        }
-        return jsonObject;
-    }
-
-    public String getCustomErrorCodeStr() {
-        return "ERRORCODE_" + this.code;
     }
 
 }

@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+
+// JWT 토큰 생성 및 검증 유틸
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -69,14 +71,6 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-//         redis에 저장
-//        redisTemplate.opsForValue().set(
-//                TokenType.REFRESH.name(),
-//                refreshToken,
-//                refreshExpirationTime,
-//                TimeUnit.MILLISECONDS
-//        );
-
         refreshTokenRepository.save(refreshToken,member.getLoginId(),refreshExpirationTime);
         refreshTokenRepository.findByRefreshToken("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJSRUZSRVNIIiwibG9naW5JZCI6InN1cGVyQWRtaW4iLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJuYW1lIjoi7LWc6rOg6rSA66as7J6QIiwiaWF0IjoxNjkzODQ4NTM3LCJleHAiOjE2OTQ0NTMzMzd9.3AVwpE7bQtU29h9qjNQHShhdWeNXWnM2iERqjD282Gc");
         return refreshToken;
@@ -112,6 +106,7 @@ public class JwtTokenProvider {
         return claims;
     }
 
+    // 토큰에서 회원 정보 추출
     public TokenResponse getTokenResponse(String token){
         Claims claims = getTokenClaims(token);
         return new TokenResponse(
@@ -121,6 +116,8 @@ public class JwtTokenProvider {
         );
     }
 
+
+    // 리프레쉬 토큰 제거
     public void deleteToken(String refreshToken) {
         refreshTokenRepository.delete(refreshToken);
     }

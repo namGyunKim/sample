@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+// Swagger 설정
 @OpenAPIDefinition(info = @Info(title = "SAMPLE API"))
 @Configuration
 @SecurityScheme(

@@ -8,8 +8,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+// P6spy 포맷 설정
 public class P6spyPrettySqlFormatter implements MessageFormattingStrategy {
 
+    // P6spy 포맷 메시지 설정
     @Override
     public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared, String sql, String url) {
         sql = formatSql(category, sql);
@@ -21,6 +23,8 @@ public class P6spyPrettySqlFormatter implements MessageFormattingStrategy {
         return format1.format(currentDate) + " | "+ "OperationTime : "+ elapsed + "ms" + sql;
     }
 
+
+    // P6spy 포맷 메시지 설정 구현부
     private String formatSql(String category,String sql) {
         if(sql ==null || sql.trim().equals("")) return sql;
 

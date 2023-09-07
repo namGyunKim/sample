@@ -15,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class InitService {
 
+    //    service
     private final AdminService adminService;
 
+    //    서버 시작시 실행
     @PostConstruct
     public void init() {
         saveMemberByRoleSuperAdmin();

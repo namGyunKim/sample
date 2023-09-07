@@ -22,9 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CustomerRestController {
 
+    //    service
     private final CustomerService customerService;
+    //    utils
     private final RestApiController restApiController;
 
+    //    고객 정보 저장
     @PostMapping(value = "/save")
     public ResponseEntity<String> save(@Valid @RequestBody SaveMemberForCustomerRequest request,
                                            BindingResult bindingResult){

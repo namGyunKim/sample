@@ -17,6 +17,8 @@ public enum AccountRole {
     AccountRole(String value) {
         this.value = value;
     }
+
+    //  요청값으로 Enum 매칭
     @JsonCreator
     public static AccountRole create(String requestValue) {
         return Stream.of(values())

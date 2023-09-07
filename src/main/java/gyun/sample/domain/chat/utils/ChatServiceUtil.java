@@ -12,6 +12,7 @@ import java.util.Map;
 public class ChatServiceUtil {
 
 
+    //    채팅 메시지
     public String chatMessage(ChatMessageRequest request) {
         String now = LocalDateTime.now().toString().split("T")[1];
         StringBuilder sb = new StringBuilder();
@@ -26,16 +27,19 @@ public class ChatServiceUtil {
         return sb.toString();
     }
 
-    public Map<String,String> chatMessageMap(ChatMessageRequest request) {
-        Map<String ,String> dataMap = new HashMap<>();
-        dataMap.put("name",request.name());
-        dataMap.put("message",request.message());
+    //    채팅 메시지 맵
+
+    public Map<String, String> chatMessageMap(ChatMessageRequest request) {
+        Map<String, String> dataMap = new HashMap<>();
+        dataMap.put("name", request.name());
+        dataMap.put("message", request.message());
         dataMap.put("time", nowHourAndMinute());
         dataMap.put("type", MessageType.TALK.name());
         return dataMap;
     }
 
-    private String nowHourAndMinute(){
+    //    현재 시간
+    private String nowHourAndMinute() {
         String now = LocalDateTime.now().toString().split("T")[1];
         StringBuilder sb = new StringBuilder();
         sb.append(now.split(":")[0]);

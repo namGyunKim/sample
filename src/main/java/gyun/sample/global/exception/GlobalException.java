@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+// 전역 예외 처리
 @Getter
 public class GlobalException extends RuntimeException {
 

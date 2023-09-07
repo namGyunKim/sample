@@ -16,7 +16,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.thymeleaf.util.StringUtils;
 
 
-// TODO: 2023/09/03 JWT 토큰을 이용한 인증 처리 작업 필요
+// 컨트롤러 메서드의 파라메터를 바인딩하는 역할
 @Component
 @RequiredArgsConstructor
 public class CurrentAccountResolver implements HandlerMethodArgumentResolver {

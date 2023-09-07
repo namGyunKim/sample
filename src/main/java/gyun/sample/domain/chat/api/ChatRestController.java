@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class ChatRestController {
 
-    private final ChatService chatService;
+    //    utils
     private final RestApiController restApiController;
+    //    service
+    private final ChatService chatService;
 
     /**
      * 구독중인사람들에게 메시지 전달 (지금은 모든사람이 하나의 채팅방을 구독하는 익명 채팅)
@@ -33,11 +35,13 @@ public class ChatRestController {
         chatService.send(request);
     }
 
+    //    채팅방 리스트
     @GetMapping(value = "/guest-chat-list")
     public ResponseEntity<String> getChatList(){
         return restApiController.createRestResponse(chatService.getChatList());
     }
 
+    //    채팅방 삭제
     @PostMapping(value = "/delete")
     public ResponseEntity<String> delete(@RequestBody DeleteChatRoomRequest request){
         chatService.delete(request.chatRoomId());
