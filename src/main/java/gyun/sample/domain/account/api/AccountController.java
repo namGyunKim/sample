@@ -1,7 +1,6 @@
 package gyun.sample.domain.account.api;
 
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
-import gyun.sample.domain.account.payload.request.AccountLogoutRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.global.api.RestApiController;
@@ -42,17 +41,16 @@ public class AccountController {
 
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "로그아웃(Refresh Token Delete)")
-    @PostMapping(value = "/logout")
-    public ResponseEntity<String> logout(@Valid @RequestBody AccountLogoutRequest request,
-                                         BindingResult bindingResult) {
+    @PostMapping(value = "/logout/{refreshToken}")
+    public ResponseEntity<String> logout(@PathVariable String refreshToken) {
 
-        boolean response = accountService.logout(request);
+        boolean response = accountService.logout(refreshToken);
         return restApiController.createSuccessRestResponse(response);
     }
 
     @Operation(summary = "리프레쉬 토큰으로 JWT 토큰 재발급")
-    @PostMapping(value = "/get-token-by-refresh")
-    public ResponseEntity<String> getAccessToken(@RequestBody String refreshToken) {
+    @PostMapping(value = "/get-token-by-refresh/{refreshToken}")
+    public ResponseEntity<String> getAccessToken(@PathVariable String refreshToken) {
         AccountLoginResponse response = accountService.getJwtTokenByRefreshToken(refreshToken);
         return restApiController.createSuccessRestResponse(response);
     }
