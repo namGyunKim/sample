@@ -12,7 +12,9 @@ import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.utils.JwtTokenProvider;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
@@ -75,6 +77,7 @@ public class AccountService {
 
     //    멤버 저장
     @Transactional
+    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     public void saveMember(Member member) {
         memberRepository.save(member);
     }
