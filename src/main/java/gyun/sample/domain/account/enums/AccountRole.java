@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 @Getter
 public enum AccountRole {
-    ALL("모든 권한"),
     SUPER_ADMIN("최고 관리자"),
     ADMIN("관리자"),
     CUSTOMER("사용자"),

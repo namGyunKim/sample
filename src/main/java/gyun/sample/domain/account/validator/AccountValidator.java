@@ -21,6 +21,5 @@ public class AccountValidator extends AccountValidatorUtil {
     //    로그인
     public void login(Member member, String password, AccountRole role) {
         passwordCheck(member, password);
-        checkTargetRole(member, role);
     }
 }

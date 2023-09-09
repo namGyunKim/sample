@@ -2,15 +2,13 @@ package gyun.sample.domain.jwt;
 
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.SaveMemberForCustomerRequest;
+import gyun.sample.domain.member.payload.request.customer.SaveMemberForCustomerRequest;
 import gyun.sample.global.utils.JwtTokenProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Base64;
 
 @SpringBootTest
 @Transactional

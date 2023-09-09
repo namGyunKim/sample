@@ -42,13 +42,24 @@ public class AccountServiceUtil {
     }
 
     //    해당 권한의 계정이 존재하는지 체크
-    public boolean existByRole(AccountRole role) {
-        return memberRepository.existByRole(role);
+    public boolean existsByRole(AccountRole role) {
+        return memberRepository.existsByRole(role);
     }
 
-    //    로그인 아이디로 멤버 조회 활성 여부 검증
+    //    로그인 아이디로 멤버 조회 및 활성 여부 검증
     public Member findByLoginId(String loginId) {
         Member member= memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+
+        if(!member.isActive()){
+            throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        }
+        return member;
+    }
+
+    //    로그인 아이디와 권한으로 멤버 조회 및 활성 여부 검증
+    public Member findByLoginIdAndRole(String loginId, AccountRole role) {
+        Member member= memberRepository.findByLoginIdAndRole(loginId,role)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
 
         if(!member.isActive()){

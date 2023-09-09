@@ -31,25 +31,23 @@ public class AccountValidatorUtil {
         }
     }
 
-//    권한이 있는지 검사
-
-    protected void checkRole(AccountRole myRole, AccountRole requiredRole) {
-
-
-        boolean checkRole = myRole.equals(requiredRole);
-//        관리자 권한이 필요할 경우 슈퍼관리자도 가능하게
-        if (requiredRole.equals(AccountRole.ADMIN) && myRole.equals(AccountRole.SUPER_ADMIN)) {
-            checkRole = true;
-        }
-
-        if (!requiredRole.equals(AccountRole.ALL) && !checkRole) {
+    //   관리자 이상의 권한이 있는지 검사
+    protected void checkAdminRole(AccountRole role) {
+        if (!(role == AccountRole.ADMIN || role == AccountRole.SUPER_ADMIN)) {
             throw new GlobalException(ErrorCode.ACCESS_DENIED);
         }
     }
 
-//    조회한 멤버의 권한이 타겟 권한과 같은지 검사
-    protected void checkTargetRole(Member member,AccountRole targetRole) {
-        if (!member.getRole().equals(targetRole)) {
+    //   슈퍼 관리자 권한이 있는지 검사
+    protected void checkSuperAdminRole(AccountRole role) {
+        if (role != AccountRole.SUPER_ADMIN) {
+            throw new GlobalException(ErrorCode.ACCESS_DENIED);
+        }
+    }
+
+    //   고객 권한이 있는지 검사
+    protected void checkCustomerRole(AccountRole role) {
+        if (role != AccountRole.CUSTOMER) {
             throw new GlobalException(ErrorCode.ACCESS_DENIED);
         }
     }

@@ -1,13 +1,13 @@
-package gyun.sample.domain.member.payload.response;
+package gyun.sample.domain.member.payload.response.admin;
 
 import gyun.sample.domain.member.entity.Member;
 
-public record InformationCustomerForAdminResponse(
+public record SaveMemberForAdminResponse(
         String loginId,             // 로그인 아이디
         String name                 // 이름
 ) {
 
-    public InformationCustomerForAdminResponse(Member member) {
+    public SaveMemberForAdminResponse(Member member) {
         this(member.getLoginId(), member.getName());
     }
 }

@@ -3,8 +3,8 @@ package gyun.sample.domain.member.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.member.payload.request.SaveMemberForCustomerRequest;
-import gyun.sample.domain.member.payload.request.SaveMemberForSuperAdminRequest;
+import gyun.sample.domain.member.payload.request.admin.SaveMemberForSuperAdminRequest;
+import gyun.sample.domain.member.payload.request.customer.SaveMemberForCustomerRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;

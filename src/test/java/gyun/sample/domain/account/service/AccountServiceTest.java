@@ -1,7 +1,7 @@
 package gyun.sample.domain.account.service;
 
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.SaveMemberForSuperAdminRequest;
+import gyun.sample.domain.member.payload.request.admin.SaveMemberForSuperAdminRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
