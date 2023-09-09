@@ -1,7 +1,6 @@
 package gyun.sample.domain.account.entity;
 
 import jakarta.persistence.*;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;

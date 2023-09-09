@@ -9,8 +9,6 @@ import gyun.sample.domain.member.payload.response.SaveMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.validator.CustomerValidator;
 import gyun.sample.global.utils.JwtTokenProvider;
-import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
