@@ -28,7 +28,6 @@ public class CustomerService extends AccountService {
 
     //  고객 회원가입
     @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     public SaveMemberResponse saveCustomer(SaveMemberForCustomerRequest request){
         customerValidator.validateSaveCustomer(request);
         Member member = new Member(request);

@@ -77,7 +77,6 @@ public class AccountService {
 
     //    멤버 저장
     @Transactional
-    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     public void saveMember(Member member) {
         memberRepository.save(member);
     }
