@@ -6,10 +6,12 @@ import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.domain.account.validator.AccountValidator;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.customer.SaveMemberForCustomerRequest;
+import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
+import gyun.sample.domain.member.payload.request.customer.UpdateCustomerForSelfRequest;
 import gyun.sample.domain.member.payload.response.admin.InformationCustomerForAdminResponse;
 import gyun.sample.domain.member.payload.response.customer.InformationCustomerForSelfResponse;
-import gyun.sample.domain.member.payload.response.customer.SaveMemberForCustomerResponse;
+import gyun.sample.domain.member.payload.response.customer.SaveCustomerForSelfResponse;
+import gyun.sample.domain.member.payload.response.customer.UpdateCustomerForSelfResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.validator.CustomerValidator;
 import gyun.sample.global.utils.JwtTokenProvider;
@@ -30,11 +32,11 @@ public class CustomerService extends AccountService {
 
     //  고객 회원가입
     @Transactional
-    public SaveMemberForCustomerResponse saveCustomer(SaveMemberForCustomerRequest request){
+    public SaveCustomerForSelfResponse saveCustomer(SaveCustomerForSelfRequest request){
         customerValidator.validateSaveCustomer(request);
         Member member = new Member(request);
         saveMember(member);
-        return new SaveMemberForCustomerResponse(member);
+        return new SaveCustomerForSelfResponse(member);
     }
 
     //  관리자 전용 고객 조회
@@ -49,5 +51,13 @@ public class CustomerService extends AccountService {
         customerValidator.informationCustomerForSelf(account);
         Member member = findByLoginIdAndRole(account.loginId(), AccountRole.CUSTOMER);
         return new InformationCustomerForSelfResponse(member);
+    }
+
+    @Transactional
+    public UpdateCustomerForSelfResponse updateCustomerForSelf(CurrentAccountDTO account, UpdateCustomerForSelfRequest request) {
+        customerValidator.updateCustomerForSelf(request);
+        Member member = findByLoginIdAndRole(account.loginId(), AccountRole.CUSTOMER);
+        member.update(request);
+        return new UpdateCustomerForSelfResponse(member);
     }
 }

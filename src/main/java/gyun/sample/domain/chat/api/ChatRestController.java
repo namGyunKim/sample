@@ -4,6 +4,7 @@ import gyun.sample.domain.chat.payload.request.ChatMessageRequest;
 import gyun.sample.domain.chat.payload.request.DeleteChatRoomRequest;
 import gyun.sample.domain.chat.service.ChatService;
 import gyun.sample.global.api.RestApiController;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,19 +30,20 @@ public class ChatRestController {
      * 경로는 WebSocketConfig 에서 설정한 setApplicationDestinationPrefixes 값이 prefix(chat) 로 붙음
      * /chat/send 가 됨
      */
+    @Operation(summary = "채팅방에 메시지 전송")
     @MessageMapping(value = "/send")
-    @GetMapping(value = "/send")
+    @PostMapping(value = "/send")
     public void send(@RequestBody ChatMessageRequest request) {
         chatService.send(request);
     }
 
-    //    채팅방 리스트
+    @Operation(summary = "채팅방 리스트")
     @GetMapping(value = "/guest-chat-list")
     public ResponseEntity<String> getChatList(){
         return restApiController.createRestResponse(chatService.getChatList());
     }
 
-    //    채팅방 삭제
+    @Operation(summary = "채팅방 삭제")
     @PostMapping(value = "/delete")
     public ResponseEntity<String> delete(@RequestBody DeleteChatRoomRequest request){
         chatService.delete(request.chatRoomId());

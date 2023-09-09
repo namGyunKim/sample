@@ -23,13 +23,14 @@ public class AccountService extends AccountServiceUtil {
 
     //    로그인
     public AccountLoginResponse login(AccountLoginRequest request) {
-        Member member = findByLoginIdAndRole(request.loginId(),request.role());
-        accountValidator.login(member, request.password(),request.role());
+        Member member = findByLoginIdAndRole(request.loginId(), request.role());
+        accountValidator.login(member, request.password(), request.role());
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
         return new AccountLoginResponse(accessToken, refreshToken);
     }
-//    리프레시 토큰으로 토큰 재발급
+
+    //    리프레시 토큰으로 토큰 재발급
     public AccountLoginResponse getJwtTokenByRefreshToken(String oldRefreshToken) {
         Member member = findLoginIdByRefreshToken(oldRefreshToken);
         String accessToken = jwtTokenProvider.createAccessToken(member);

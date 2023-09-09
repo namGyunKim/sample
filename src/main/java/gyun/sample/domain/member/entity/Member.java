@@ -4,12 +4,14 @@ package gyun.sample.domain.member.entity;
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.payload.request.admin.SaveMemberForSuperAdminRequest;
-import gyun.sample.domain.member.payload.request.customer.SaveMemberForCustomerRequest;
+import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
+import gyun.sample.domain.member.payload.request.customer.UpdateCustomerForSelfRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.mindrot.jbcrypt.BCrypt;
 
 @Entity
@@ -21,7 +23,7 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "member_id")
     private String id;                                     //  유저 아이디
-    @Column(unique = true)
+    @Column(unique = true,updatable = false)
     private String loginId;                                //  유저 로그인 아이디
     private String name;                                   //  유저 이름
     private String password;                               //  유저 비밀번호
@@ -31,7 +33,7 @@ public class Member extends BaseTimeEntity {
     private AccountRole role;                               //  유저 권한
 
     //    고객 리퀘스트로 생성
-    public Member(SaveMemberForCustomerRequest request) {
+    public Member(SaveCustomerForSelfRequest request) {
         this.loginId = request.loginId();
         this.name = request.name();
         this.password = passwordEncoding(request.password());
@@ -53,4 +55,10 @@ public class Member extends BaseTimeEntity {
         active = true;
     }
 
+    public void update(UpdateCustomerForSelfRequest request) {
+        this.name = request.name();
+        if(!StringUtils.isBlank(request.password())){
+            this.password = passwordEncoding(request.password());
+        }
+    }
 }

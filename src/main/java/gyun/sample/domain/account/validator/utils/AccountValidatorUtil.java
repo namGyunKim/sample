@@ -5,6 +5,7 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,14 @@ public class AccountValidatorUtil {
     protected void checkCustomerRole(AccountRole role) {
         if (role != AccountRole.CUSTOMER) {
             throw new GlobalException(ErrorCode.ACCESS_DENIED);
+        }
+    }
+
+//    비밀번호 유효성 체크
+    protected void passwordValidation(String password) {
+        String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,15}$";
+        if (!password.matches(regex) && !StringUtils.isBlank(password)) {
+            throw new GlobalException(ErrorCode.PASSWORD_INVALID);
         }
     }
 }

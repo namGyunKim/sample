@@ -3,7 +3,7 @@ package gyun.sample.domain.init.service;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.admin.SaveMemberForSuperAdminRequest;
-import gyun.sample.domain.member.payload.request.customer.SaveMemberForCustomerRequest;
+import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
 import gyun.sample.domain.member.service.AdminService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class InitService {
     @Transactional
     public void saveMemberByRoleCustomer() {
         if (!adminService.existsByRole(AccountRole.CUSTOMER)) {
-            SaveMemberForCustomerRequest request = new SaveMemberForCustomerRequest("skarbs01", "최초의 고객", "1234");
+            SaveCustomerForSelfRequest request = new SaveCustomerForSelfRequest("skarbs01", "최초의 고객", "1234");
             Member member = new Member(request);
             adminService.saveMember(member);
         }
