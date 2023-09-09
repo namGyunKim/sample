@@ -32,9 +32,6 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
 
-    private LocalDateTime deletedAt;                        //  탈퇴일
-
-
     //    고객 리퀘스트로 생성
     public Member(SaveMemberForCustomerRequest request) {
         this.loginId = request.loginId();
