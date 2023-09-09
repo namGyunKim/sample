@@ -1,7 +1,6 @@
 package gyun.sample.domain.member.service;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.domain.account.validator.AccountValidator;

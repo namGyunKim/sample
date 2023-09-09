@@ -8,6 +8,7 @@ import gyun.sample.domain.member.payload.response.SaveMemberResponse;
 import gyun.sample.domain.member.service.CustomerService;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "CustomerRestController", description = "고객 api")
 @RestController
 @RequestMapping(value = "/api/customer")
-//@SecurityRequirement(name = "Bearer Authentication")
+@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class CustomerRestController {
 

@@ -34,7 +34,15 @@ public class AccountValidatorUtil {
 //    권한이 있는지 검사
 
     protected void checkRole(AccountRole myRole, AccountRole requiredRole) {
-        if (!requiredRole.equals(AccountRole.ALL) && myRole.equals(requiredRole)) {
+
+
+        boolean checkRole = myRole.equals(requiredRole);
+//        관리자 권한이 필요할 경우 슈퍼관리자도 가능하게
+        if (requiredRole.equals(AccountRole.ADMIN) && myRole.equals(AccountRole.SUPER_ADMIN)) {
+            checkRole = true;
+        }
+
+        if (!requiredRole.equals(AccountRole.ALL) && !checkRole) {
             throw new GlobalException(ErrorCode.ACCESS_DENIED);
         }
     }

@@ -32,13 +32,13 @@ public class JwtTokenProvider {
 
     @Value("${spring.jwt.token.refresh-expiration-time}")
     private long refreshExpirationTime;
-    private final Date now = new Date();
     private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * Access 토큰 생성
      */
     public String createAccessToken(Member member){
+        Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.ACCESS.name());
         Date expireDate = new Date(now.getTime() + accessExpirationTime);
 
@@ -57,6 +57,7 @@ public class JwtTokenProvider {
      * Refresh 토큰 생성
      */
     public String createRefreshToken(Member member){
+        Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
         Date expireDate = new Date(now.getTime() + refreshExpirationTime);
 
