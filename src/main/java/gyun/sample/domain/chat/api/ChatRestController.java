@@ -1,6 +1,6 @@
 package gyun.sample.domain.chat.api;
 
-import gyun.sample.domain.chat.payload.request.ChatMessageRequest;
+/*import gyun.sample.domain.chat.payload.request.ChatMessageRequest;
 import gyun.sample.domain.chat.payload.request.DeleteChatRoomRequest;
 import gyun.sample.domain.chat.service.ChatService;
 import gyun.sample.global.api.RestApiController;
@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;*/
 
-@Tag(name = "ChatRestController", description = "채팅 관련 기능 api")
+/*@Tag(name = "ChatRestController", description = "채팅 관련 기능 api")
 @RestController
 @RequestMapping(value = "/api/chat")
 //@SecurityRequirement(name = "Bearer Authentication")
@@ -25,11 +25,11 @@ public class ChatRestController {
     //    service
     private final ChatService chatService;
 
-    /**
+    *//**
      * 구독중인사람들에게 메시지 전달 (지금은 모든사람이 하나의 채팅방을 구독하는 익명 채팅)
      * 경로는 WebSocketConfig 에서 설정한 setApplicationDestinationPrefixes 값이 prefix(chat) 로 붙음
      * /chat/send 가 됨
-     */
+     *//*
     @Operation(summary = "채팅방에 메시지 전송")
     @MessageMapping(value = "/send")
     @PostMapping(value = "/send")
@@ -49,4 +49,4 @@ public class ChatRestController {
         chatService.delete(request.chatRoomId());
         return restApiController.createRestResponse("삭제완료");
     }
-}
+}*/
