@@ -24,7 +24,7 @@ public class AccountService extends AccountServiceUtil {
     //    로그인
     public AccountLoginResponse login(AccountLoginRequest request) {
         Member member = findByLoginId(request.loginId());
-        accountValidator.login(member, request.password());
+        accountValidator.login(member, request.password(),request.role());
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
         return new AccountLoginResponse(accessToken, refreshToken);

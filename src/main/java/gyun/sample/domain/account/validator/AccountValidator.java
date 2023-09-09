@@ -1,5 +1,6 @@
 package gyun.sample.domain.account.validator;
 
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.validator.utils.AccountValidatorUtil;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -18,7 +19,8 @@ public class AccountValidator extends AccountValidatorUtil {
     }
 
     //    로그인
-    public void login(Member member, String password) {
+    public void login(Member member, String password, AccountRole role) {
         passwordCheck(member, password);
+        checkTargetRole(member, role);
     }
 }

@@ -3,10 +3,13 @@ package gyun.sample.domain.member.repository.custom.impl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.entity.QMember;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
 import gyun.sample.domain.member.repository.utils.MemberRepositoryCustomUtil;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
