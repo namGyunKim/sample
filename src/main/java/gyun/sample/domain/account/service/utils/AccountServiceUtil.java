@@ -26,27 +26,13 @@ public class AccountServiceUtil {
 
     //    utils
     protected final JwtTokenProvider jwtTokenProvider;
-
-    //    로그인 아이디와 권한으로 멤버 조회
-    protected Member findMemberByLoginIdAndRole(String loginId, AccountRole role) {
-        Member member = memberRepository.findByLoginIdAndRole(loginId, role)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-
-        if(!member.isActive()){
-            throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
-        }
-
-        return member;
-    }
-
-
     //    리프레시 토큰으로 로그인 아이디 조회
-    public String findLoginIdByRefreshToken(String refreshToken) {
+    public Member findLoginIdByRefreshToken(String refreshToken) {
         String loginId = refreshTokenRepository.findByRefreshToken(refreshToken);
         if (StringUtils.isEmpty(loginId)) {
             throw new GlobalException(ErrorCode.JWT_REFRESH_INVALID);
         }
-        return loginId;
+        return findByLoginId(loginId);
     }
 
     //    멤버 저장
@@ -60,21 +46,14 @@ public class AccountServiceUtil {
         return memberRepository.existByRole(role);
     }
 
-
-
-    //    로그인 아이디로 멤버 조회
-    public Member findMemberByLoginId(String loginId) {
-
-        Member member= memberRepository.findByLoginIdAndActiveAll(loginId)
+    //    로그인 아이디로 멤버 조회 활성 여부 검증
+    public Member findByLoginId(String loginId) {
+        Member member= memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
 
         if(!member.isActive()){
             throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         }
-
         return member;
     }
-
-
-
 }

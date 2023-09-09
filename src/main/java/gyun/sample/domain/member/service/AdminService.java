@@ -1,12 +1,8 @@
 package gyun.sample.domain.member.service;
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.domain.account.validator.AccountValidator;
-import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.response.InformationCustomerForAdminResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.validator.AdminValidator;
 import gyun.sample.global.utils.JwtTokenProvider;
@@ -25,10 +21,5 @@ public class AdminService extends AccountService {
         this.adminValidator = adminValidator;
     }
 
-    //  관리자 권한으로 회원 정보 조회
-    public InformationCustomerForAdminResponse informationCustomerForAdmin(CurrentAccountDTO account, String loginId) {
-        adminValidator.informationCustomerForAdmin(account);
-        Member member = findMemberByLoginIdAndRole(loginId, AccountRole.CUSTOMER);
-        return new InformationCustomerForAdminResponse(member);
-    }
+
 }

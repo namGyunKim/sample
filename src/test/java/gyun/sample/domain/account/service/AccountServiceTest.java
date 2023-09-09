@@ -2,12 +2,9 @@ package gyun.sample.domain.account.service;
 
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.SaveMemberForSuperAdminRequest;
-import gyun.sample.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +22,7 @@ class AccountServiceTest {
         Member member = new Member(request);
         //when
         accountService.saveMember(member);
-        Member findMember = accountService.findMemberByLoginId("superAdminTest");
+        Member findMember = accountService.findByLoginId("superAdminTest");
         //then
         assertEquals(member.getId(), findMember.getId());
 
@@ -34,7 +31,7 @@ class AccountServiceTest {
     @Test
     void findMember() {
         //given
-        Member Admin = accountService.findMemberByLoginId("superAdmin");
+        Member Admin = accountService.findByLoginId("superAdmin");
         //when
         //then
         assertEquals(Admin.getLoginId(), "superAdmin");

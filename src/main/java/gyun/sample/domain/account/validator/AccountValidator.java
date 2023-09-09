@@ -21,10 +21,4 @@ public class AccountValidator extends AccountValidatorUtil {
     public void login(Member member, String password) {
         passwordCheck(member, password);
     }
-
-
-    //    토큰 재발급 전에 유효한 회원인지 검증
-    public void getJwtTokenByRefreshToken(String loginId) {
-
-    }
 }

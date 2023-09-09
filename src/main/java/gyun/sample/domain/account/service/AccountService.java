@@ -23,20 +23,15 @@ public class AccountService extends AccountServiceUtil {
 
     //    로그인
     public AccountLoginResponse login(AccountLoginRequest request) {
-        Member member = findMemberByLoginIdAndRole(request.loginId(),request.role());
+        Member member = findByLoginId(request.loginId());
         accountValidator.login(member, request.password());
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
         return new AccountLoginResponse(accessToken, refreshToken);
     }
-
-
-
 //    리프레시 토큰으로 토큰 재발급
     public AccountLoginResponse getJwtTokenByRefreshToken(String oldRefreshToken) {
-        String loginId = findLoginIdByRefreshToken(oldRefreshToken);
-        Member member = findMemberByLoginId(loginId);
-        accountValidator.getJwtTokenByRefreshToken(loginId);
+        Member member = findLoginIdByRefreshToken(oldRefreshToken);
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String newRefreshToken = jwtTokenProvider.createRefreshToken(member);
         jwtTokenProvider.deleteToken(oldRefreshToken);
