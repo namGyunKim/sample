@@ -24,7 +24,6 @@ public class JWTInterceptor implements HandlerInterceptor {
             throws Exception {
 
         try {
-            // TODO Auto-generated method stub
             String authorization = request.getHeader("Authorization");
             String bearer = "";
             if (!StringUtils.isEmpty(authorization)) {

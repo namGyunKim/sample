@@ -13,5 +13,17 @@
 <h2 th:text="#{index.welcome}"></h2>
 <!--<button th:text="#{button.regions}" onclick="/messages"></button>-->
 <button onclick="location.href='/chat.html'"> move chat</button>
+
+<button onclick= kakaoLogin()> 카카오 로그인</button>
 </body>
+
+
+<!--소셜로그인 테스트용-->
+<script th:inline="javascript">
+    let clientId= [[${clientId}]];
+    let redirectUri= [[${redirectUri}]];
+    function kakaoLogin(){
+        location.href=`https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+    }
+</script>
 </html>

@@ -31,6 +31,10 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//    https://spring.io/projects/spring-cloud
+//    https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2022.0-Release-Notes
+    implementation platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.3")
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
 //    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
@@ -72,6 +76,7 @@ dependencies {
 
 //	junit5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+
 }
 
 tasks.named('test') {
