@@ -65,4 +65,11 @@ public class CustomerRestController {
         return restApiController.createSuccessRestResponse(response);
     }
 
+    @Operation(summary = "고객이 회원탈퇴")
+    @PostMapping(value = "/deactivate-customer-for-self")
+    public ResponseEntity<String> deactivateCustomerForSelf(@CurrentAccount CurrentAccountDTO account) {
+        customerService.deactivateCustomerForSelf(account);
+        return restApiController.createSuccessRestResponse("회원탈퇴가 완료되었습니다.");
+    }
+
 }

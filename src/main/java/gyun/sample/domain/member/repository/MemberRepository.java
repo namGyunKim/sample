@@ -20,6 +20,6 @@ public interface MemberRepository extends JpaRepository<Member, String >, Member
     Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role);
     boolean existsByLoginId(String loginId);
 
-    //    권한으로 활성화 된 유저 존재여부 확인
     boolean existsByRole(AccountRole role);
+
 }

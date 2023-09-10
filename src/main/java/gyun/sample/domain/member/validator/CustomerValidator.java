@@ -31,7 +31,11 @@ public class CustomerValidator extends AccountValidator {
         checkCustomerRole(account.role());
     }
 
+    //  고객이 자신의 정보 수정
     public void updateCustomerForSelf(UpdateCustomerForSelfRequest request) {
         passwordValidation(request.password());
+    }
+    //  고객 탈퇴
+    public void deactivateCustomerForSelf(CurrentAccountDTO account) {checkCustomerRole(account.role());
     }
 }

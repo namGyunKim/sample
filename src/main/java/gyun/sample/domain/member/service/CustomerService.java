@@ -53,11 +53,19 @@ public class CustomerService extends AccountService {
         return new InformationCustomerForSelfResponse(member);
     }
 
+    //  고객이 자신의 정보 수정
     @Transactional
     public UpdateCustomerForSelfResponse updateCustomerForSelf(CurrentAccountDTO account, UpdateCustomerForSelfRequest request) {
         customerValidator.updateCustomerForSelf(request);
         Member member = findByLoginIdAndRole(account.loginId(), AccountRole.CUSTOMER);
         member.update(request);
         return new UpdateCustomerForSelfResponse(member);
+    }
+
+    //  고객 탈퇴
+    @Transactional
+    public void deactivateCustomerForSelf(CurrentAccountDTO account) {
+        customerValidator.deactivateCustomerForSelf(account);
+        deactivateMember(account.loginId());
     }
 }

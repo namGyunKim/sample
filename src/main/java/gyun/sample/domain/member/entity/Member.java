@@ -61,4 +61,9 @@ public class Member extends BaseTimeEntity {
             this.password = passwordEncoding(request.password());
         }
     }
+
+//    멤버 비활성화
+    public void deactivate() {
+        this.active = false;
+    }
 }
