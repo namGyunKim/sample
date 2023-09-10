@@ -44,5 +44,10 @@ public class KakaoController {
         return restApiController.createRestResponse(response);
     }
 
+    @Operation(summary = "토큰으로 정보 얻는 api")
+    @GetMapping(value = "/get-information")
+    public ResponseEntity<String> getInformation(@RequestParam("access_token") String accessToken) {
+        return restApiController.createRestResponse(kakaoService.getInformation(accessToken));
+    }
 
 }

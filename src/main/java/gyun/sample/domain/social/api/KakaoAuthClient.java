@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "KakaoClient", url = "https://kauth.kakao.com/oauth")
-public interface KakaoClient {
+public interface KakaoAuthClient {
 
 
 //    code 받는 api 지만 redirect 문제가 있어서 get 방식으로 주소창에 쳐서 처리함
