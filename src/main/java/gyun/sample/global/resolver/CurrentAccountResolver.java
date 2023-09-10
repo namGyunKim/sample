@@ -2,7 +2,7 @@ package gyun.sample.global.resolver;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.social.payload.response.KakaoTokenResponse;
+import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,8 +46,8 @@ public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
             return new CurrentAccountDTO(GUEST, GUEST, AccountRole.GUEST);
         }else{
             bearer = authorization.split(" ")[1];
-            KakaoTokenResponse kakaoTokenResponse = jwtTokenProvider.getTokenResponse(bearer);
-            return new CurrentAccountDTO(kakaoTokenResponse);
+            TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
+            return new CurrentAccountDTO(tokenResponse);
         }
     }
 }
