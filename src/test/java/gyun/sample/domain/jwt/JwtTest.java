@@ -1,6 +1,6 @@
 package gyun.sample.domain.jwt;
 
-import gyun.sample.domain.account.payload.response.TokenResponse;
+import gyun.sample.domain.social.payload.response.KakaoTokenResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
 import gyun.sample.global.utils.JwtTokenProvider;
@@ -24,11 +24,11 @@ public class JwtTest {
 
         //when
         String accessToken = jwtTokenProvider.createAccessToken(member);
-        TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(accessToken);
+        KakaoTokenResponse kakaoTokenResponse = jwtTokenProvider.getTokenResponse(accessToken);
 
         //then
-        Assertions.assertThat(tokenResponse.loginId()).isEqualTo(member.getLoginId());
-        System.out.println("tokenResponse = " + tokenResponse);
+        Assertions.assertThat(kakaoTokenResponse.loginId()).isEqualTo(member.getLoginId());
+        System.out.println("tokenResponse = " + kakaoTokenResponse);
 
     }
 }

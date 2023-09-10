@@ -1,4 +1,4 @@
-package gyun.sample.domain.account.payload.request;
+package gyun.sample.domain.social.payload.request;
 
 public record KakaoInfoRequest(
 

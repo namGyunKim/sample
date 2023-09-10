@@ -1,9 +1,9 @@
 package gyun.sample.global.utils;
 
 import gyun.sample.domain.account.enums.TokenType;
-import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.social.payload.response.KakaoTokenResponse;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import io.jsonwebtoken.*;
@@ -108,9 +108,9 @@ public class JwtTokenProvider {
     }
 
     // 토큰에서 회원 정보 추출
-    public TokenResponse getTokenResponse(String token){
+    public KakaoTokenResponse getTokenResponse(String token){
         Claims claims = getTokenClaims(token);
-        return new TokenResponse(
+        return new KakaoTokenResponse(
                 claims.get("loginId", String.class),
                 claims.get("role", String.class),
                 claims.get("name", String.class)
