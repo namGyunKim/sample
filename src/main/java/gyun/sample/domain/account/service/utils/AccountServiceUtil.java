@@ -63,8 +63,6 @@ public class AccountServiceUtil {
         Member member = memberRepository.findByLoginIdAndRole(loginId, role)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
 
-        System.out.println("member = " + member.isActive());
-
         if (!member.isActive()) {
             throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         }
