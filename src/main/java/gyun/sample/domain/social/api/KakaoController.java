@@ -1,5 +1,6 @@
 package gyun.sample.domain.social.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gyun.sample.domain.social.payload.request.KakaoTokenRequest;
 import gyun.sample.domain.social.serviece.KakaoService;
 import gyun.sample.global.api.RestApiController;
@@ -46,7 +47,7 @@ public class KakaoController {
 
     @Operation(summary = "토큰으로 정보 얻는 api")
     @GetMapping(value = "/get-information")
-    public ResponseEntity<String> getInformation(@RequestParam("access_token") String accessToken) {
+    public ResponseEntity<String> getInformation(@RequestParam("access_token") String accessToken) throws JsonProcessingException {
         return restApiController.createRestResponse(kakaoService.getInformation(accessToken));
     }
 

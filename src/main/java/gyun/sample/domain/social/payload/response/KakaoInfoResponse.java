@@ -10,4 +10,5 @@ public class KakaoInfoResponse {
     private String id;
     private Object kakaoAccount;
     private Object properties;
+    private String nickname;
 }

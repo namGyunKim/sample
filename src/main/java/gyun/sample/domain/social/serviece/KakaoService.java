@@ -1,7 +1,8 @@
 package gyun.sample.domain.social.serviece;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import gyun.sample.domain.social.api.KakaoApiClient;
 import gyun.sample.domain.social.api.KakaoAuthClient;
-import gyun.sample.domain.social.api.KakaoInfoClient;
 import gyun.sample.domain.social.payload.request.KakaoTokenRequest;
 import gyun.sample.domain.social.payload.response.KakaoInfoResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class KakaoService {
 
     private final KakaoAuthClient kakaoAuthClient;
-    private final KakaoInfoClient kakaoInfoClient;
+    private final KakaoApiClient kakaoApiClient;
 
     @Value("${social.kakao.clientId}")
     private String clientId;
@@ -37,7 +38,14 @@ public class KakaoService {
     }
 
 
-    public KakaoInfoResponse getInformation(String accessToken) {
-        return kakaoInfoClient.getInformation(accessToken);
+    // TODO: 2023/09/11 json data 를 string 으로 변경 필요 
+    public KakaoInfoResponse getInformation(String accessToken) throws JsonProcessingException {
+        KakaoInfoResponse response = kakaoApiClient.getInformation(accessToken);
+        String kakaoAccount= response.getKakaoAccount().toString();
+        System.out.println("kakaoAccount = " + kakaoAccount);
+        String properties= response.getProperties().toString();
+        System.out.println("properties = " + properties);
+
+        return response;
     }
 }

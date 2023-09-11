@@ -35,6 +35,7 @@ dependencies {
 //    https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2022.0-Release-Notes
     implementation platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.3")
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
+    implementation "io.github.openfeign:feign-jackson"
 //    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
