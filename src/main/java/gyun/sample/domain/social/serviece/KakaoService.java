@@ -58,7 +58,7 @@ public class KakaoService {
 
 
     @Transactional
-    public AccountLoginResponse getInformationByToken(String accessToken) {
+    public AccountLoginResponse saveOrLoginByToken(String accessToken) {
         try {
             KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
             Map<String, Object> properties = request.getProperties();

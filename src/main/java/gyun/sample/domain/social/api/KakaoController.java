@@ -37,7 +37,7 @@ public class KakaoController {
         return kakaoService.getCode();
     }
 
-    @Operation(summary = "카카오 로그인을 위한 토큰을 받는 api")
+    @Operation(summary = "코드로 카카오 로그인을 위한 토큰을 받는 api")
     @GetMapping(value = "/get-token-by-code")
     public ResponseEntity<String> getTokenByCode(@RequestParam("code") String code) {
 
@@ -45,10 +45,10 @@ public class KakaoController {
         return restApiController.createRestResponse(response);
     }
 
-    @Operation(summary = "토큰으로 정보 얻는 api")
-    @GetMapping(value = "/get-information-by-token")
-    public ResponseEntity<String> getInformationByToken(@RequestParam("access_token") String accessToken) throws JsonProcessingException {
-        return restApiController.createRestResponse(kakaoService.getInformationByToken(accessToken));
+    @Operation(summary = "토큰으로 정보 가입 및 로그인 처리")
+    @GetMapping(value = "/save-by-token")
+    public ResponseEntity<String> saveOrLoginByToken(@RequestParam("access_token") String accessToken) throws JsonProcessingException {
+        return restApiController.createRestResponse(kakaoService.saveOrLoginByToken(accessToken));
     }
 
 }

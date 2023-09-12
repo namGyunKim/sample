@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "KakaoInfoClient", url = "https://kapi.kakao.com", configuration = KakaoApiClientConfig.class)
+@FeignClient(name = "KakaoInfoClient", url = "https://kapi.kakao.com")
 public interface KakaoApiClient {
 
 //    https://developers.kakao.com/tool/rest-api/open/get/v2-user-me
