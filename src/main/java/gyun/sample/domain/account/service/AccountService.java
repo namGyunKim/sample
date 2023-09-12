@@ -30,6 +30,15 @@ public class AccountService extends AccountServiceUtil {
         return new AccountLoginResponse(accessToken, refreshToken);
     }
 
+    // 소셜 계정 로그인
+    public AccountLoginResponse login(Member member) {
+        String accessToken = jwtTokenProvider.createAccessToken(member);
+        String refreshToken = jwtTokenProvider.createRefreshToken(member);
+        return new AccountLoginResponse(accessToken, refreshToken);
+    }
+
+
+
     //    리프레시 토큰으로 토큰 재발급
     public AccountLoginResponse getJwtTokenByRefreshToken(String oldRefreshToken) {
         Member member = findLoginIdByRefreshToken(oldRefreshToken);

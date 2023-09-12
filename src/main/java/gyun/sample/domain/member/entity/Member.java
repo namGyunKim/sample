@@ -23,7 +23,7 @@ public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "member_id")
-    private String id;                                     //  유저 아이디
+    private String id;                                     //  유저 아이디 및 소셜키
     @Column(unique = true,updatable = false)
     private String loginId;                                //  유저 로그인 아이디
     private String nickName;                                   //  닉네임
@@ -33,8 +33,9 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
 
+
     @Enumerated(EnumType.STRING)
-    private MemberType memberType = MemberType.GENERAL;                          //  유저 타입
+    private MemberType memberType;                          //  유저 타입
 
     //    고객 리퀘스트로 생성
     public Member(SaveCustomerForSelfRequest request) {
@@ -42,7 +43,8 @@ public class Member extends BaseTimeEntity {
         this.nickName = request.nickName();
         this.password = passwordEncoding(request.password());
         this.role = AccountRole.CUSTOMER;
-        active = true;
+        this.active = true;
+        this.memberType = MemberType.GENERAL;
     }
 
     //    비밀번호 암호화
@@ -56,9 +58,11 @@ public class Member extends BaseTimeEntity {
         this.nickName = request.nickName();
         this.password = passwordEncoding(request.password());
         this.role = AccountRole.SUPER_ADMIN;
-        active = true;
+        this.active = true;
+        this.memberType = MemberType.GENERAL;
     }
 
+//    고객이 자신의 정보 수정
     public void update(UpdateCustomerForSelfRequest request) {
         this.nickName = request.nickName();
         if(!StringUtils.isBlank(request.password())){
@@ -69,5 +73,14 @@ public class Member extends BaseTimeEntity {
 //    멤버 비활성화
     public void deactivate() {
         this.active = false;
+    }
+
+//    소셜 회원가입
+    public Member(String socialKey, String nickName,MemberType memberType) {
+        this.loginId = socialKey;
+        this.nickName = nickName;
+        this.role = AccountRole.CUSTOMER;
+        this.active = true;
+        this.memberType = memberType;
     }
 }

@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
 
+import java.util.Optional;
+
 
 @RequiredArgsConstructor
 public class AccountServiceUtil {
@@ -69,10 +71,15 @@ public class AccountServiceUtil {
         return member;
     }
 
+    public Optional<Member> findByIdAndActive(String socialKey, boolean active) {
+        return memberRepository.findByIdAndActive(socialKey, active);
+    }
+
     //    회원 탈퇴
     @Transactional
     public void deactivateMember(String loginId) {
         Member member = findByLoginId(loginId);
         member.deactivate();
     }
+
 }
