@@ -26,7 +26,7 @@ public enum ErrorCode {
     // === SOCIAL (1200) ============================================================================================================
     KAKAO_API_GET_CODE_ERROR("1201", "카카오 API Get Code Error"),
     KAKAO_API_GET_TOKEN_ERROR("1202", "카카오 API Get Token Error"),
-    KAKAO_API_GET_INFORMATION_ERROR("1202", "카카오 API Get Information Error"),
+    KAKAO_API_GET_INFORMATION_ERROR("1203", "카카오 API Get Information Error"),
 
 
     // === other (9000) ============================================================================================================

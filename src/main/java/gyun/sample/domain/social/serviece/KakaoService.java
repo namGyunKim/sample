@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 import java.util.Optional;
 
-// TODO: 2023/09/12 에러처리 및 개선 필요 기능만 넣어논 상태
 @RequiredArgsConstructor
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
