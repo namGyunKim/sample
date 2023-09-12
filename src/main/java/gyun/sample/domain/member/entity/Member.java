@@ -3,6 +3,7 @@ package gyun.sample.domain.member.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.admin.SaveMemberForSuperAdminRequest;
 import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
 import gyun.sample.domain.member.payload.request.customer.UpdateCustomerForSelfRequest;
@@ -25,17 +26,20 @@ public class Member extends BaseTimeEntity {
     private String id;                                     //  유저 아이디
     @Column(unique = true,updatable = false)
     private String loginId;                                //  유저 로그인 아이디
-    private String name;                                   //  유저 이름
+    private String nickName;                                   //  닉네임
     private String password;                               //  유저 비밀번호
     @NotNull
     private boolean active;                                 //  활성
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
 
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType = MemberType.GENERAL;                          //  유저 타입
+
     //    고객 리퀘스트로 생성
     public Member(SaveCustomerForSelfRequest request) {
         this.loginId = request.loginId();
-        this.name = request.name();
+        this.nickName = request.nickName();
         this.password = passwordEncoding(request.password());
         this.role = AccountRole.CUSTOMER;
         active = true;
@@ -49,14 +53,14 @@ public class Member extends BaseTimeEntity {
     //    최고 관리자 리퀘스트로 생성
     public Member (SaveMemberForSuperAdminRequest request) {
         this.loginId = request.loginId();
-        this.name = request.name();
+        this.nickName = request.nickName();
         this.password = passwordEncoding(request.password());
         this.role = AccountRole.SUPER_ADMIN;
         active = true;
     }
 
     public void update(UpdateCustomerForSelfRequest request) {
-        this.name = request.name();
+        this.nickName = request.nickName();
         if(!StringUtils.isBlank(request.password())){
             this.password = passwordEncoding(request.password());
         }

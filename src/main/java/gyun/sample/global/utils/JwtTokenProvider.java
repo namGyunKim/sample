@@ -44,7 +44,7 @@ public class JwtTokenProvider {
 
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
-        claims.put("name", member.getName());
+        claims.put("name", member.getNickName());
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -63,7 +63,7 @@ public class JwtTokenProvider {
 
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
-        claims.put("name", member.getName());
+        claims.put("name", member.getNickName());
 
         String refreshToken= Jwts.builder()
                 .setClaims(claims)
@@ -113,7 +113,7 @@ public class JwtTokenProvider {
         return new TokenResponse(
                 claims.get("loginId", String.class),
                 claims.get("role", String.class),
-                claims.get("name", String.class)
+                claims.get("nickName", String.class)
         );
     }
 

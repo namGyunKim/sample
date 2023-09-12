@@ -8,9 +8,9 @@ public record SaveCustomerForSelfRequest(
         @NotBlank(message = "로그인 아이디를 입력해주세요.")
         @Schema(description = "로그인 아이디", example = "skarbs01")
         String loginId,
-        @NotBlank(message = "이름을 입력해주세요.")
-        @Schema(description = "이름", example = "김남균")
-        String name,
+        @NotBlank(message = "닉네임을 입력해주세요.")
+        @Schema(description = "닉네임", example = "남균찡")
+        String nickName,
         @NotBlank(message = "비밀번호를 입력해주세요.")
         @Schema(description = "비밀번호", example = "Password1!")
         @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,15}$",

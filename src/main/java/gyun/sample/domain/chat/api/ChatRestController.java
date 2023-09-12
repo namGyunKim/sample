@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "ChatRestController", description = "채팅 관련 기능 api")
+@Tag(nickName = "ChatRestController", description = "채팅 관련 기능 api")
 @RestController
 @RequestMapping(value = "/api/chat")
-//@SecurityRequirement(name = "Bearer Authentication")
+//@SecurityRequirement(nickName = "Bearer Authentication")
 @RequiredArgsConstructor
 @Slf4j
 public class ChatRestController {

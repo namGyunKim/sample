@@ -21,7 +21,7 @@ public class ChatServiceUtil {
         sb.append(":");
         sb.append(now.split(":")[1]);
         sb.append(")");
-        sb.append(request.name());
+        sb.append(request.nickName());
         sb.append(" : ");
         sb.append(request.message());
         return sb.toString();
@@ -31,7 +31,7 @@ public class ChatServiceUtil {
 
     public Map<String, String> chatMessageMap(ChatMessageRequest request) {
         Map<String, String> dataMap = new HashMap<>();
-        dataMap.put("name", request.name());
+        dataMap.put("name", request.nickName());
         dataMap.put("message", request.message());
         dataMap.put("time", nowHourAndMinute());
         dataMap.put("type", MessageType.TALK.name());

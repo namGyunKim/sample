@@ -35,16 +35,15 @@ public class KakaoService {
     }
 
 //    토큰 받는 api
-    public KakaoTokenRequest getToken(String code) {
+    public KakaoTokenRequest getTokenByCode(String code) {
         return kakaoAuthClient.getToken("authorization_code",code,redirectUri,clientId,clientSecret);
     }
 
 
     // TODO: 2023/09/11 json data 를 string 으로 변경 필요 
-    public KakaoInfoResponse getInformation(String accessToken) throws JsonProcessingException {
+    public KakaoInfoResponse getInformationByToken(String accessToken) throws JsonProcessingException {
         KakaoInfoResponse response = kakaoApiClient.getInformation(accessToken);
         Map<String ,Object> kakaoAccount= response.getKakaoAccount();
-        System.out.println("response = " + response);
         Map<String ,Object> properties= response.getProperties();
         System.out.println("kakaoAccount = " + kakaoAccount);
         System.out.println("kakaoAccount.get(\"profile\") = " + kakaoAccount.get("profile"));
