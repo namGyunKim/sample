@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @RequiredArgsConstructor
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
@@ -41,11 +43,14 @@ public class KakaoService {
     // TODO: 2023/09/11 json data 를 string 으로 변경 필요 
     public KakaoInfoResponse getInformation(String accessToken) throws JsonProcessingException {
         KakaoInfoResponse response = kakaoApiClient.getInformation(accessToken);
-        String kakaoAccount= response.getKakaoAccount().toString();
+        Map<String ,Object> kakaoAccount= response.getKakaoAccount();
+        System.out.println("response = " + response);
+        Map<String ,Object> properties= response.getProperties();
         System.out.println("kakaoAccount = " + kakaoAccount);
-        String properties= response.getProperties().toString();
+        System.out.println("kakaoAccount.get(\"profile\") = " + kakaoAccount.get("profile"));
+        
         System.out.println("properties = " + properties);
-
+        System.out.println("properties.get(\"nickname\") = " + properties.get("nickname"));
         return response;
     }
 }

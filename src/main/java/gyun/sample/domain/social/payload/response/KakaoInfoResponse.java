@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KakaoInfoResponse {
     private String id;
-    private Object kakaoAccount;
-    private Object properties;
+    private Map<String ,Object> kakaoAccount;
+    private Map<String ,Object> properties;
     private String nickname;
 }
