@@ -1,5 +1,6 @@
 package gyun.sample.domain.riot.api;
 
+import gyun.sample.domain.riot.payload.Request.PlatformStatusRequest;
 import gyun.sample.domain.riot.payload.Request.SummonerRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,6 +18,15 @@ public interface RiotClient {
     @GetMapping(value = "/lol/summoner/v4/summoners/by-name/{summonerName}")
     SummonerRequest getSummonerBySummonerName(
             @PathVariable("summonerName") String summonerName,
+            @RequestParam("api_key") String apiKey
+    );
+
+
+
+//    https://developer.riotgames.com/apis#lol-status-v4/GET_getPlatformData
+    @Operation(summary = "플랫폼 별 상태 가져오는 api")
+    @GetMapping(value = "/lol/status/v4/platform-data")
+    PlatformStatusRequest getPlatformStatus(
             @RequestParam("api_key") String apiKey
     );
 

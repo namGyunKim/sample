@@ -27,4 +27,10 @@ public class RiotController {
         return restApiController.createRestResponse(response);
     }
 
+    @Operation(summary = "플랫폼 별 상태 가져오는 api")
+    @GetMapping(value = "/get-platform-status")
+    public ResponseEntity<String> getPlatformStatus()  {
+        return restApiController.createRestResponse(riotService.getPlatformStatus());
+    }
+
 }
