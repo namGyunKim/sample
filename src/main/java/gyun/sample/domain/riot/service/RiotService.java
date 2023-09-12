@@ -3,6 +3,7 @@ package gyun.sample.domain.riot.service;
 
 import gyun.sample.domain.riot.api.RiotClient;
 import gyun.sample.domain.riot.payload.Request.SummonerRequest;
+import gyun.sample.domain.riot.payload.Response.SummonerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -19,8 +20,9 @@ public class RiotService {
     @Value("${riot.key}")
     private String apiKey;
 
-    public void getSummonerBySummonerName(String summonerName) {
+    public SummonerResponse getSummonerBySummonerName(String summonerName) {
         SummonerRequest summoner = riotClient.getSummonerBySummonerName(summonerName, apiKey);
-        System.out.println("summoner.toString() = " + summoner.toString());
+
+        return new SummonerResponse(summoner);
     }
 }

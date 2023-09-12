@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RiotClient {
 
 
-//    code 받는 api 지만 redirect 문제가 있어서 get 방식으로 주소창에 쳐서 처리함
 
+//    https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
     @Operation(summary = "닉네임으로 소환사 정보를 가져오는 api")
     @GetMapping(value = "/lol/summoner/v4/summoners/by-name/{summonerName}")
     SummonerRequest getSummonerBySummonerName(

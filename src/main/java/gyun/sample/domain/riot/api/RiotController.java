@@ -1,5 +1,6 @@
 package gyun.sample.domain.riot.api;
 
+import gyun.sample.domain.riot.payload.Response.SummonerResponse;
 import gyun.sample.domain.riot.service.RiotService;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,8 +23,8 @@ public class RiotController {
     @Operation(summary = "닉네임으로 소환사 정보를 가져오는 api")
     @GetMapping(value = "/get-summoner-by-summoner-name/{summonerName}")
     public ResponseEntity<String> getSummonerBySummonerName(@PathVariable String summonerName)  {
-        riotService.getSummonerBySummonerName(summonerName);
-        return restApiController.createRestResponse(true);
+        SummonerResponse response = riotService.getSummonerBySummonerName(summonerName);
+        return restApiController.createRestResponse(response);
     }
 
 }
