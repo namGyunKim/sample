@@ -8,6 +8,8 @@ import gyun.sample.domain.social.api.KakaoApiClient;
 import gyun.sample.domain.social.api.KakaoAuthClient;
 import gyun.sample.domain.social.payload.request.KakaoInfoRequest;
 import gyun.sample.domain.social.payload.request.KakaoTokenRequest;
+import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -38,30 +40,44 @@ public class KakaoService {
 
     //    code 받는 api 지만 redirect 문제가 있어서 get 방식으로 주소창에 쳐서 처리함
     public String getCode() {
-        return kakaoAuthClient.getCode("code", clientId, redirectUri);
+        try {
+            return kakaoAuthClient.getCode("code", clientId, redirectUri);
+        }catch (Exception e){
+            throw new GlobalException(ErrorCode.KAKAO_API_GET_CODE_ERROR);
+        }
     }
 
     //    토큰 받는 api
     public KakaoTokenRequest getTokenByCode(String code) {
-        return kakaoAuthClient.getToken("authorization_code", code, redirectUri, clientId, clientSecret);
+        try {
+            return kakaoAuthClient.getToken("authorization_code", code, redirectUri, clientId, clientSecret);
+        }
+        catch (Exception e){
+            throw new GlobalException(ErrorCode.KAKAO_API_GET_TOKEN_ERROR);
+        }
     }
 
 
     @Transactional
     public AccountLoginResponse getInformationByToken(String accessToken) {
-        KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
-        Map<String, Object> properties = request.getProperties();
-        String nickName = (String) properties.get("nickname");
+        try {
+            KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
+            Map<String, Object> properties = request.getProperties();
+            String nickName = (String) properties.get("nickname");
 //        가입 여부 확인
-        Optional<Member> member = customerService.findByIdAndActive(request.getId(), true);
-        if (member.isEmpty()) {
+            Optional<Member> member = customerService.findByIdAndActive(request.getId(), true);
+            if (member.isEmpty()) {
 //            가입되어 있지 않다면 회원가입
-            Member saveMember = new Member(request.getId(), nickName, MemberType.KAKAO);
-            customerService.saveMember(saveMember);
-            return customerService.login(saveMember);
-        } else {
-            return customerService.login(member.get());
+                Member saveMember = new Member(request.getId(), nickName, MemberType.KAKAO);
+                customerService.saveMember(saveMember);
+                return customerService.login(saveMember);
+            } else {
+                return customerService.login(member.get());
+            }
+        }catch (Exception e){
+            throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR);
         }
+
     }
 
 

@@ -23,6 +23,12 @@ public enum ErrorCode {
     INACTIVE_MEMBER("1103", "탈퇴한 회원입니다."),
     PASSWORD_INVALID("1104", "비밀번호는 8~15자리의 영문, 숫자, 특수문자 조합이어야 합니다."),
 
+    // === SOCIAL (1200) ============================================================================================================
+    KAKAO_API_GET_CODE_ERROR("1201", "카카오 API Get Code Error"),
+    KAKAO_API_GET_TOKEN_ERROR("1202", "카카오 API Get Token Error"),
+    KAKAO_API_GET_INFORMATION_ERROR("1202", "카카오 API Get Information Error"),
+
+
     // === other (9000) ============================================================================================================
     JSON_PROCESS_FAIL("9001", "Json 파일을 처리하는데 실패했습니다. "),
     CONSTRAINT_PROCESS_FAIL("9002", "정보가 서로 일치하지 않습니다."),
