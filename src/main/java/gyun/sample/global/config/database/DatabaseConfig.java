@@ -1,4 +1,4 @@
-package gyun.sample.global.config;
+package gyun.sample.global.config.database;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

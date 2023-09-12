@@ -1,4 +1,4 @@
-package gyun.sample.global.config.web;
+package gyun.sample.global.config.message;
 
 import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
@@ -25,39 +25,12 @@ import java.util.Locale;
 // Web 설정
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
-public class WebConfig implements WebMvcConfigurer {
+public class MessageConfig implements WebMvcConfigurer {
 
     // utils
     private final JwtTokenProvider jwtTokenProvider;
     //    인터셉터
     private final JWTInterceptor jwtInterceptor;
-
-    // cors 설정
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .exposedHeaders("Authorization")
-                .maxAge(3000);
-    }
-
-    //    리소스 핸들러
-    @Override
-    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/**", "/webjars/**")
-                .addResourceLocations("classpath:/templates/", "classpath:/static/", "classpath:/META-INF/resources/webjars/");
-    }
-    //  리졸버
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        PageableHandlerMethodArgumentResolver pageResolver = new PageableHandlerMethodArgumentResolver();
-//        AuthenticationPrincipalArgumentResolver authenticationPrincipalArgumentResolver = new AuthenticationPrincipalArgumentResolver();
-        argumentResolvers.add(pageResolver);
-//        argumentResolvers.add(authenticationPrincipalArgumentResolver);
-        argumentResolvers.add(new CurrentAccountResolver(jwtTokenProvider));
-    }
 
     //    인터셉터
     @Override
@@ -66,7 +39,38 @@ public class WebConfig implements WebMvcConfigurer {
 //        registry.addInterceptor(authInterceptor)
 //                .addPathPatterns("/admin/**")
 //                .excludePathPatterns("/admin/login-page","/admin/login-process");
-        registry.addInterceptor(jwtInterceptor)
-                .excludePathPatterns("/api/account/jwt-error");
+        registry.addInterceptor(localeChangeInterceptor());
     }
+
+
+    //    messages 국제화 관련 설정
+    @Bean
+    public LocaleResolver localeResolver() {
+
+        CookieLocaleResolver resolver = new CookieLocaleResolver();
+        resolver.setDefaultLocale(Locale.getDefault());
+        resolver.setCookieName("lang");
+        return resolver;
+    }
+
+    //    lang 키 값의 쿠키 인터셉트
+    //    messages 국제화 관련 설정
+
+    @Bean
+    public LocaleChangeInterceptor localeChangeInterceptor() {
+        LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+        interceptor.setParamName("lang");
+        return interceptor;
+    }
+
+    //    messages 국제화 관련 설정
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:/messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
+    }
+
+
 }
