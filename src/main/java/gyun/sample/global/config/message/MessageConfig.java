@@ -1,6 +1,6 @@
 package gyun.sample.global.config.message;
 
-import gyun.sample.global.interceptor.JWTInterceptor;
+/*import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -73,4 +73,4 @@ public class MessageConfig implements WebMvcConfigurer {
     }
 
 
-}
+}*/
