@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/*
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -37,4 +38,4 @@ public class ChatService {
     public void delete(String chatRoomId) {
         chatRepository.delete(chatRoomId);
     }
-}
+}*/

@@ -8,7 +8,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 // WebSocket 설정
-@Configuration
+/*@Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -29,4 +29,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/websocket").setAllowedOriginPatterns("*");
         registry.addEndpoint("/websocket").setAllowedOriginPatterns("*").withSockJS();
     }
-}
+}*/
