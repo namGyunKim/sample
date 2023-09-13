@@ -24,6 +24,8 @@ https://blog.naver.com/skarbs01/223210410721
 
 로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장
 
+https://blog.naver.com/skarbs01/223210430457
+
 stomp 와 redis 를 사용한 채팅기능 구현
 
 OpenFeign을 사용하여 외부 api를 호출
