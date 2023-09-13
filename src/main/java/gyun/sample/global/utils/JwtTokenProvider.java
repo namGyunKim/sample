@@ -73,7 +73,6 @@ public class JwtTokenProvider {
                 .compact();
 
         refreshTokenRepository.save(refreshToken,member.getLoginId(),refreshExpirationTime);
-        refreshTokenRepository.findByRefreshToken("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJSRUZSRVNIIiwibG9naW5JZCI6InN1cGVyQWRtaW4iLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJuYW1lIjoi7LWc6rOg6rSA66as7J6QIiwiaWF0IjoxNjkzODQ4NTM3LCJleHAiOjE2OTQ0NTMzMzd9.3AVwpE7bQtU29h9qjNQHShhdWeNXWnM2iERqjD282Gc");
         return refreshToken;
     }
 
