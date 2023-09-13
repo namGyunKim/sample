@@ -7,12 +7,11 @@ import java.util.List;
 
 public record PlatformStatusResponse(
         String id,
-        String name,
         List<StatusBoardDto> content
 ) {
 
     public PlatformStatusResponse(PlatformStatusRequest request,List<StatusBoardDto> content){
-        this(request.getId(), request.getName(), content);
+        this(request.getId(), content);
     }
 
 }

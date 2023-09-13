@@ -2,10 +2,8 @@ package gyun.sample.domain.riot.service;
 
 
 import gyun.sample.domain.riot.api.RiotClient;
-import gyun.sample.domain.riot.dto.ContentDto;
 import gyun.sample.domain.riot.dto.StatusBoardDto;
 import gyun.sample.domain.riot.dto.StatusDto;
-import gyun.sample.domain.riot.dto.UpdateDto;
 import gyun.sample.domain.riot.payload.Request.PlatformStatusRequest;
 import gyun.sample.domain.riot.payload.Request.SummonerRequest;
 import gyun.sample.domain.riot.payload.Response.PlatformStatusResponse;
@@ -46,24 +44,24 @@ public class RiotService {
         PlatformStatusRequest request = riotClient.getPlatformStatus(apiKey);
         List<StatusBoardDto> statusBoardDtoList = new ArrayList<>();
 
+
         for (int i = 0; i < request.getMaintenances().size(); i++) {
             StatusDto maintenance = request.getMaintenances().get(i);
-            log.info("maintenance.getId() = " + maintenance.getId());
-            log.info("maintenance.getMaintenanceStatus() = " + maintenance.getMaintenanceStatus());
-            log.info("maintenance.getIncidentSeverity() = " + maintenance.getIncidentSeverity());
-            log.info("maintenance.getTitles() = " + maintenance.getTitles());
-            log.info("maintenance.getUpdates() = " + maintenance.getUpdates());
-            log.info("maintenance.getCreatedAt() = " + maintenance.getCreatedAt());
-            log.info("maintenance.getArchiveAt() = " + maintenance.getArchiveAt());
-            log.info("maintenance.getUpdatedAt() = " + maintenance.getUpdatedAt());
-            log.info("maintenance.getPlatforms() = " + maintenance.getPlatforms());
-            ContentDto titleContentDto = maintenance.getTitles().get(i);
-            String title = titleContentDto.getContent();
+            StringBuilder stringBuilder = new StringBuilder();
+            String title = maintenance.getTitles().stream().filter(contentDto -> contentDto.getLocale().equals("ko_KR")).findFirst().get().getContent();
+//            update 내용이 여러개일 경우
+            for (int j = 0; j < maintenance.getUpdates().size(); j++) {
+                String description = maintenance.getUpdates().get(j).getTranslations().stream().filter(updateDto -> updateDto.getLocale().equals("ko_KR")).findFirst().get().getContent();
+                stringBuilder.append("\n");
+                stringBuilder.append(description);
+            }
+            String createAt = maintenance.getCreatedAt();
+            String updateAt = maintenance.getUpdatedAt();
+            List<String> platforms = maintenance.getPlatforms();
 
-            UpdateDto updateDto = maintenance.getUpdates().get(i);
-            String description = updateDto.getTranslations().get(i).getContent();
 
-            statusBoardDtoList.add(new StatusBoardDto(title, description));
+            statusBoardDtoList.add(new StatusBoardDto(title, stringBuilder.toString(), createAt, updateAt, platforms));
+
         }
 
         return new PlatformStatusResponse(request, statusBoardDtoList);

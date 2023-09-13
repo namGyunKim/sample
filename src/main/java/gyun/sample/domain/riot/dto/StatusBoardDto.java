@@ -1,6 +1,13 @@
 package gyun.sample.domain.riot.dto;
 
-public record StatusBoardDto (
+import java.util.List;
+
+public record StatusBoardDto(
         String title,
-        String content
-        ){}
+        String content,
+        String createAt,
+        String updateAt,
+        List<String> platforms
+) {
+
+}
