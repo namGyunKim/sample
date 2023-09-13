@@ -60,7 +60,7 @@ public class RiotService {
             List<String> platforms = maintenance.getPlatforms();
 
 
-            statusBoardDtoList.add(new StatusBoardDto(title, stringBuilder.toString(), createAt, updateAt, platforms));
+            statusBoardDtoList.add(new StatusBoardDto(title, stringBuilder.toString(), createAt.split("\\.")[0], updateAt.split("\\.")[0], platforms));
 
         }
 
