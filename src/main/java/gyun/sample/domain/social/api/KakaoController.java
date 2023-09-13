@@ -30,13 +30,6 @@ public class KakaoController {
 //        return kakaoService.getInfo(code).getKakaoAccount().getEmail();
     }
 
-
-    @Operation(summary = "code 받는 api 지만 redirect 문제가 있어서 get 방식으로 주소창에 쳐서 처리함")
-    @GetMapping(value = "/get-code")
-    public String getCode() {
-        return kakaoService.getCode();
-    }
-
     @Operation(summary = "코드로 카카오 로그인을 위한 토큰을 받는 api")
     @GetMapping(value = "/get-token-by-code")
     public ResponseEntity<String> getTokenByCode(@RequestParam("code") String code) {
