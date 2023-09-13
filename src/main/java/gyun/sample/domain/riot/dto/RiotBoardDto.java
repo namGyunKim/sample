@@ -2,7 +2,8 @@ package gyun.sample.domain.riot.dto;
 
 import java.util.List;
 
-public record StatusBoardDto(
+public record RiotBoardDto(
+        long id,
         String title,
         String content,
         String createAt,

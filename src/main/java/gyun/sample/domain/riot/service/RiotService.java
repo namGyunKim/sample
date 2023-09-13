@@ -2,7 +2,7 @@ package gyun.sample.domain.riot.service;
 
 
 import gyun.sample.domain.riot.api.RiotClient;
-import gyun.sample.domain.riot.dto.StatusBoardDto;
+import gyun.sample.domain.riot.dto.RiotBoardDto;
 import gyun.sample.domain.riot.dto.StatusDto;
 import gyun.sample.domain.riot.payload.Request.PlatformStatusRequest;
 import gyun.sample.domain.riot.payload.Request.SummonerRequest;
@@ -37,17 +37,16 @@ public class RiotService {
     }
 
 
-    // TODO: 2023/09/13 추가적인 작업 필요 어떤 값을 가져올지 등등 
-    //    플랫폼 별 상태 가져오는 api
     public PlatformStatusResponse getPlatformStatus() {
 
         PlatformStatusRequest request = riotClient.getPlatformStatus(apiKey);
-        List<StatusBoardDto> statusBoardDtoList = new ArrayList<>();
+        List<RiotBoardDto> statusBoardDtoList = new ArrayList<>();
 
 
         for (int i = 0; i < request.getMaintenances().size(); i++) {
             StatusDto maintenance = request.getMaintenances().get(i);
             StringBuilder stringBuilder = new StringBuilder();
+            long id = maintenance.getId();
             String title = maintenance.getTitles().stream().filter(contentDto -> contentDto.getLocale().equals("ko_KR")).findFirst().get().getContent();
 //            update 내용이 여러개일 경우
             for (int j = 0; j < maintenance.getUpdates().size(); j++) {
@@ -60,7 +59,7 @@ public class RiotService {
             List<String> platforms = maintenance.getPlatforms();
 
 
-            statusBoardDtoList.add(new StatusBoardDto(title, stringBuilder.toString(), createAt.split("\\.")[0], updateAt.split("\\.")[0], platforms));
+            statusBoardDtoList.add(new RiotBoardDto(id,title, stringBuilder.toString(), createAt.split("\\.")[0], updateAt.split("\\.")[0], platforms));
 
         }
 

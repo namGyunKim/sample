@@ -1,17 +1,16 @@
 package gyun.sample.domain.riot.payload.Response;
 
-import gyun.sample.domain.riot.dto.StatusBoardDto;
+import gyun.sample.domain.riot.dto.RiotBoardDto;
 import gyun.sample.domain.riot.payload.Request.PlatformStatusRequest;
 
 import java.util.List;
 
 public record PlatformStatusResponse(
-        String id,
-        List<StatusBoardDto> content
+        List<RiotBoardDto> content
 ) {
 
-    public PlatformStatusResponse(PlatformStatusRequest request,List<StatusBoardDto> content){
-        this(request.getId(), content);
+    public PlatformStatusResponse(PlatformStatusRequest request,List<RiotBoardDto> content){
+        this(content);
     }
 
 }
