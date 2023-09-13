@@ -21,20 +21,16 @@ https://blog.naver.com/skarbs01/223210410721
 <img width="384" alt="image" src="https://github.com/namGyunKim/sample/assets/30253535/a6871642-bfd7-4f7e-b31c-89a6095d0305">
 
 
-
 로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장
+
+https://blog.naver.com/skarbs01/223210430457
+
+카카오 로그인의 경우 OpenFeign을 이용하여 카카오 api를 사용하여 구현하였으며
+
+getCode getTokenByCode getInfoByToken 의 3가지 api를 사용하였습니다.
 
 stomp 와 redis 를 사용한 채팅기능 구현
 
-OpenFeign을 사용하여 외부 api를 호출
-
-JWT 를 사용한 로그인 기능 구현
-
-로그인의 경우 JWT를 사용하여 로그인을 구현하였고 카카오 로그인의 경우 카카오 api를 사용하여 구현하였습니다.
-
-ResreshToken의 경우 Redis에 저장하여 구현하였습니다.
-
-Kakao의 경우 getCode getTokenByCode getInfoByToken 의 3가지 api를 사용하였습니다.
 
 라이엇 api 는 공식문서를 보고 구현하였습니다.
 https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
