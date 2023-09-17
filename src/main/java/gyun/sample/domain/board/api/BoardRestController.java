@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +29,10 @@ public class BoardRestController {
     //    utils
     protected final RestApiController restApiController;
 
-    @PostMapping(value = "/save")
+    @PostMapping(value = "/save",consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "게시판 생성", description = "게시판 생성")
-    public ResponseEntity<String> save(@Valid @RequestBody SaveBoardRequest request,
+    public ResponseEntity<String> save(@Valid @ModelAttribute SaveBoardRequest request,
                                        @CurrentAccount CurrentAccountDTO account,
                                        BindingResult bindingResult) {
         SaveBoardResponse response = boardService.save(account,request);
