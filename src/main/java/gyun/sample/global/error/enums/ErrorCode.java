@@ -22,6 +22,8 @@ public enum ErrorCode {
     NOT_EXIST_MEMBER("1102", "존재하지 않는 회원입니다."),
     INACTIVE_MEMBER("1103", "탈퇴한 회원입니다."),
     PASSWORD_INVALID("1104", "비밀번호는 8~15자리의 영문, 숫자, 특수문자 조합이어야 합니다."),
+    ALREADY_REGISTERED_MEMBER_BY_NICK_NAME("1105", "이미 등록된 닉네임입니다."),
+
 
     // === SOCIAL (1200) ============================================================================================================
     KAKAO_API_GET_CODE_ERROR("1201", "카카오 API Get Code Error"),

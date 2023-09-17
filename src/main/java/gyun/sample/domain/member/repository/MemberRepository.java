@@ -20,6 +20,8 @@ public interface MemberRepository extends JpaRepository<Member, String >, Member
     Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role);
     boolean existsByLoginId(String loginId);
 
+    boolean existsByNickName(String nickName);
+
     boolean existsByRole(AccountRole role);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

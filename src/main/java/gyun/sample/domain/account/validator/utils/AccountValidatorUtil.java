@@ -30,6 +30,12 @@ public class AccountValidatorUtil {
         if (isExist) {
             throw new GlobalException(ErrorCode.ALREADY_REGISTERED_MEMBER_BY_LOGIN_ID);
         }
+    }    //    로그인 아이디로 활성화 여부 관계없이 존재하는지 체크
+    protected void notExistByNickName(String nickName) {
+        boolean isExist = memberRepository.existsByNickName(nickName);
+        if (isExist) {
+            throw new GlobalException(ErrorCode.ALREADY_REGISTERED_MEMBER_BY_NICK_NAME);
+        }
     }
 
     //   관리자 이상의 권한이 있는지 검사

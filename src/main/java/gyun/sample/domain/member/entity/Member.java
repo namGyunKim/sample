@@ -30,6 +30,7 @@ public class Member extends BaseTimeEntity {
     private String id;                                     //  유저 아이디 및 소셜키
     @Column(unique = true,updatable = false)
     private String loginId;                                //  유저 로그인 아이디
+    @Column(unique = true)
     private String nickName;                                   //  닉네임
     private String password;                               //  유저 비밀번호
     @NotNull
