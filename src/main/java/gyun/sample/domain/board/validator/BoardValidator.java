@@ -1,24 +1,31 @@
 package gyun.sample.domain.board.validator;
 
+import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.account.validator.AccountValidator;
+import gyun.sample.domain.account.validator.utils.AccountValidatorUtil;
 import gyun.sample.domain.board.payload.request.SaveBoardRequest;
-import gyun.sample.domain.board.repository.BoardRepository;
 import gyun.sample.domain.board.validator.utils.BoardValidatorUtil;
-import lombok.AllArgsConstructor;
+import gyun.sample.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Component;
 
 
 @Component
-@AllArgsConstructor
-public class BoardValidator {
+public class BoardValidator extends AccountValidator {
 
-    //    repository
-    private final BoardRepository boardRepository;
     //    utils
     private final BoardValidatorUtil boardValidatorUtil;
 
+    public BoardValidator(MemberRepository userRepository, MemberRepository userRepository1, AccountValidatorUtil accountValidatorUtil, BoardValidatorUtil boardValidatorUtil) {
+        super(userRepository, userRepository1, accountValidatorUtil);
+        this.boardValidatorUtil = boardValidatorUtil;
+    }
 
     public void save(SaveBoardRequest request, AccountRole role) {
         boardValidatorUtil.checkGuestWrite(request.boardType(), role);
+    }
+
+    public void informationForAdminById(CurrentAccountDTO account) {
+        checkAdminRole(account.role());
     }
 }

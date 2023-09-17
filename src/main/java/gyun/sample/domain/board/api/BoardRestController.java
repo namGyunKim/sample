@@ -14,10 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "BoardRestController", description = "게시판 api")
 @RestController
@@ -40,5 +37,11 @@ public class BoardRestController {
         return restApiController.createSuccessRestResponse(response);
     }
 
+    @GetMapping(value = "/information-for-admin/{id}")
+    @Operation(summary = "게시판 정보", description = "게시판 정보")
+    public ResponseEntity<String> informationForAdminById(@CurrentAccount CurrentAccountDTO account,
+                                                  @PathVariable String id) {
+        return restApiController.createSuccessRestResponse(boardService.informationForAdminById(account,id));
+    }
 
 }

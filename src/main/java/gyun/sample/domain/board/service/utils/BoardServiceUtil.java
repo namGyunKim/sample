@@ -5,6 +5,7 @@ import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.payload.request.SaveBoardRequest;
+import gyun.sample.domain.board.repository.BoardRepository;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
@@ -17,7 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class BoardServiceUtil {
 
+//    service
     private final AccountService accountService;
+//    repository
+    private final BoardRepository boardRepository;
 
 //    게시판 생성 로직
     @Transactional
@@ -28,5 +32,10 @@ public class BoardServiceUtil {
             Member member = accountService.findByLoginIdAndActive(account.loginId(),true).orElseThrow( () -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
             return new Board(request, member);
         }
+    }
+
+//    관리자를 위한 게시글 조회
+    public Board findByIdForAdmin(String id){
+        return boardRepository.findById(id).orElseThrow( () -> new GlobalException(ErrorCode.NOT_EXIST_BOARD));
     }
 }
