@@ -4,6 +4,7 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
+import gyun.sample.global.exception.payload.response.BindingResultResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,36 +16,51 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ExceptionEvent {
 
+    protected String requestPath;
+    protected String requestMethod;
     protected String errorName;
     protected ErrorCode errorCode;
     protected String errorDetailMsg;
     protected CurrentAccountDTO account;
     protected LocalDateTime createdAt;
-    protected String requestUrl;
-    protected String requestMethod;
+
 
     //  예외 발생 시, 로그인 계정 데이터를 포함한 예외 정보를 담는 이벤트 객체
     public static ExceptionEvent createExceptionEvent(GlobalException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
         ExceptionEvent exceptionEvent = new ExceptionEvent();
+        exceptionEvent.setRequestPath(httpServletRequest.getRequestURL().toString());
+        exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
         exceptionEvent.setErrorName(exception.getClass().getSimpleName());
         exceptionEvent.setErrorCode(exception.getErrorCode());
         exceptionEvent.setErrorDetailMsg(exception.getErrorDetailMessage());
         exceptionEvent.setAccount(account);
         exceptionEvent.setCreatedAt(LocalDateTime.now());
-        exceptionEvent.setRequestUrl(httpServletRequest.getRequestURL().toString());
-        exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
         return exceptionEvent;
     }
 
     //  예외 발생 시, 로그인 데이터가 없는 예외 정보를 담는 이벤트 객체 GUEST 계정
     public static ExceptionEvent createExceptionEventNoAccount(JWTInterceptorException exception,HttpServletRequest httpServletRequest) {
         ExceptionEvent exceptionEvent = new ExceptionEvent();
+        exceptionEvent.setRequestPath(httpServletRequest.getRequestURL().toString());
+        exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
         exceptionEvent.setErrorName(exception.getClass().getSimpleName());
         exceptionEvent.setErrorCode(exception.getErrorCode());
         exceptionEvent.setErrorDetailMsg(exception.getErrorDetailMessage());
         exceptionEvent.setCreatedAt(LocalDateTime.now());
-        exceptionEvent.setRequestUrl(httpServletRequest.getRequestURL().toString());
-        exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
+        return exceptionEvent;
+    }
+
+
+    //  예외 발생 시, 바인딩 리절트 에러 정보를 담는 이벤트 객체
+    public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response) {
+        ExceptionEvent exceptionEvent = new ExceptionEvent();
+        GlobalException exception = new GlobalException(ErrorCode.REQUEST_BINDING_RESULT);
+        exceptionEvent.setRequestPath(response.path());
+        exceptionEvent.setRequestMethod(response.method());
+        exceptionEvent.setErrorName(exception.getClass().getSimpleName());
+        exceptionEvent.setErrorCode(exception.getErrorCode());
+        exceptionEvent.setErrorDetailMsg(response.content().toString());
+        exceptionEvent.setCreatedAt(LocalDateTime.now());
         return exceptionEvent;
     }
 
@@ -53,13 +69,13 @@ public class ExceptionEvent {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("\nlogStart=== === === === === === === === === === === === === === === === === === === === === === === === === === logStart\n\n");
+        stringBuilder.append("\nlogStart=== === === === === === === === === === === === === === === === === === === === === === === === === === logStart\n");
         stringBuilder.append("Exception Title : ").append(errorName).append("\n");
 
 
         // 1. Set Request Info
-        stringBuilder.append("Request URL : ").append(requestUrl).append("\n");
-        stringBuilder.append("Request Method : ").append(requestMethod).append("\n\n");
+        stringBuilder.append("Request Path : ").append(requestPath).append("\n");
+        stringBuilder.append("Request Method : ").append(requestMethod).append("\n");
 
         // 2. Set User Info
         if (account != null) {
@@ -73,7 +89,7 @@ public class ExceptionEvent {
         }
 
         // 4. Occur Date
-        stringBuilder.append("createDate : ").append(createdAt.toString()).append("\n");
+        stringBuilder.append("createDate : ").append(createdAt.toString()).append("\n\n");
 
 
 
