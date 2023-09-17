@@ -38,8 +38,6 @@ out/
 .vscode/
 
 #application properties
-application.yml
-application-local.yml
-application-dev.yml
+*.yml
 
 #generated files

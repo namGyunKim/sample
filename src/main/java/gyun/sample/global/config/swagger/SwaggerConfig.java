@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 // Swagger 설정
+
 @OpenAPIDefinition(info = @Info(title = "SAMPLE API"))
 @Configuration
 @SecurityScheme(
@@ -22,7 +23,6 @@ import org.springframework.context.annotation.Profile;
         paramName = "Authorization")
 public class SwaggerConfig {
 
-    @Profile(value = "dev")
     @Bean
     public GroupedOpenApi openApi() {
         String[] paths = {"/api/**"};
