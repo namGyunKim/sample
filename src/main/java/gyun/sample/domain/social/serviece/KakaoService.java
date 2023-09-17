@@ -57,6 +57,7 @@ public class KakaoService {
     }
 
 
+//    토큰으로 정보 가입 및 로그인 처리
     @Transactional
     public AccountLoginResponse saveOrLoginByToken(String accessToken) {
         try {
@@ -76,8 +77,15 @@ public class KakaoService {
         }catch (Exception e){
             throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR);
         }
-
     }
 
+//    토큰으로 로그아웃 처리
+    public KakaoInfoRequest logout(String accessToken) {
+        try {
+            return kakaoApiClient.logout(accessToken);
+        }catch (Exception e){
+            throw new GlobalException(ErrorCode.KAKAO_API_LOGOUT_ERROR);
+        }
+    }
 
 }
