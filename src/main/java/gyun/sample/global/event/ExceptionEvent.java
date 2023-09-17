@@ -56,23 +56,26 @@ public class ExceptionEvent {
         stringBuilder.append("\nlogStart=== === === === === === === === === === === === === === === === === === === === === === === === === === logStart\n\n");
         stringBuilder.append("Exception Title : ").append(errorName).append("\n");
 
-        // 1. Set User Info
+
+        // 1. Set Request Info
+        stringBuilder.append("Request URL : ").append(requestUrl).append("\n");
+        stringBuilder.append("Request Method : ").append(requestMethod).append("\n\n");
+
+        // 2. Set User Info
         if (account != null) {
             stringBuilder.append("Account role : ").append(account.role()).append("\n");
 //            stringBuilder.append("Account Id : ").append(account.getId()).append("\n");
             stringBuilder.append("Account Username : ").append(account.loginId()).append("\n");
         }
-        // 2. Set Exception
+        // 3. Set Exception
         if (this.errorCode != null) {
             stringBuilder.append("Error Code & Msg : ").append(errorCode.getCode()).append(" / ").append(errorCode.getErrorMessage()).append("\n");
         }
 
-        // 3. Occur Date
+        // 4. Occur Date
         stringBuilder.append("createDate : ").append(createdAt.toString()).append("\n");
 
-        // 4. Set Request Info
-        stringBuilder.append("Request URL : ").append(requestUrl).append("\n");
-        stringBuilder.append("Request Method : ").append(requestMethod).append("\n\n");
+
 
         // 5. Set Error Detail Msg
         stringBuilder.append(errorDetailMsg);
