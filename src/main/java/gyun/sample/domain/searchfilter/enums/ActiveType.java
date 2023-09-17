@@ -1,40 +1,33 @@
-package gyun.sample.domain.member.enums;
+package gyun.sample.domain.searchfilter.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import gyun.sample.domain.board.enums.BoardType;
 import lombok.Getter;
 
 import java.util.stream.Stream;
 
 @Getter
-public enum MemberType {
-
-    GENERAL("일반"),
-    KAKAO("카카오"),
-    NAVER("네이버"),
-    GOOGLE("구글"),
-    FACEBOOK("페이스북"),
-    APPLE("애플"),
-    ALL("전체");
-
-
+public enum ActiveType {
+    ALL("전체"),
+    ACTIVE_TYPE("활성화"),
+    INACTIVE_TYPE("비활성화");
     private final String value;
+
+    ActiveType(String value) {
+        this.value = value;
+    }
 
     public static String toStrings() {
         StringBuilder sb = new StringBuilder();
-        for (BoardType option : BoardType.values()) {
+        for (ActiveType option : ActiveType.values()) {
             sb.append(option.name()).append("(").append(option.getValue()).append(")").append(",");
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 
-    MemberType(String value) {
-        this.value = value;
-    }
     //  요청값으로 Enum 매칭
     @JsonCreator
-    public static MemberType create(String requestValue) {
+    public static ActiveType create(String requestValue) {
         return Stream.of(values())
                 .filter(v -> v.name().equals(requestValue.toUpperCase()))
                 .findFirst()

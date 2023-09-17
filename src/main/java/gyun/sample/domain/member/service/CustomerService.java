@@ -7,14 +7,19 @@ import gyun.sample.domain.account.service.AccountService;
 import gyun.sample.domain.account.validator.AccountValidator;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
+import gyun.sample.domain.member.payload.request.customer.SearchCustomerForAdminRequest;
 import gyun.sample.domain.member.payload.request.customer.UpdateCustomerForSelfRequest;
 import gyun.sample.domain.member.payload.response.admin.InformationCustomerForAdminResponse;
 import gyun.sample.domain.member.payload.response.customer.InformationCustomerForSelfResponse;
 import gyun.sample.domain.member.payload.response.customer.SaveCustomerForSelfResponse;
+import gyun.sample.domain.member.payload.response.customer.SearchCustomerForAdminResponse;
 import gyun.sample.domain.member.payload.response.customer.UpdateCustomerForSelfResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.validator.CustomerValidator;
 import gyun.sample.global.utils.JwtTokenProvider;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +37,7 @@ public class CustomerService extends AccountService {
 
     //  고객 회원가입
     @Transactional
-    public SaveCustomerForSelfResponse saveCustomer(SaveCustomerForSelfRequest request){
+    public SaveCustomerForSelfResponse saveCustomer(SaveCustomerForSelfRequest request) {
         customerValidator.validateSaveCustomer(request);
         Member member = new Member(request);
         saveMember(member);
@@ -64,8 +69,15 @@ public class CustomerService extends AccountService {
 
     //  고객 탈퇴
     @Transactional
-    public void deactivateCustomerForSelf(CurrentAccountDTO account,String accessToken) {
+    public void deactivateCustomerForSelf(CurrentAccountDTO account, String accessToken) {
         customerValidator.deactivateCustomerForSelf(account);
         deactivateMember(account.loginId());
+    }
+
+    public Page<SearchCustomerForAdminResponse> listForAdmin(CurrentAccountDTO account, SearchCustomerForAdminRequest request) {
+        customerValidator.listForAdmin(account);
+        Pageable pageable = PageRequest.of(request.page()-1, request.size());
+        Page<Member> page = memberRepository.searchCustomerForAdmin(request, pageable);
+        return page.map(SearchCustomerForAdminResponse::new);
     }
 }

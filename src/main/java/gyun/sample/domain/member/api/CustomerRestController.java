@@ -3,10 +3,12 @@ package gyun.sample.domain.member.api;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
+import gyun.sample.domain.member.payload.request.customer.SearchCustomerForAdminRequest;
 import gyun.sample.domain.member.payload.request.customer.UpdateCustomerForSelfRequest;
 import gyun.sample.domain.member.payload.response.admin.InformationCustomerForAdminResponse;
 import gyun.sample.domain.member.payload.response.customer.InformationCustomerForSelfResponse;
 import gyun.sample.domain.member.payload.response.customer.SaveCustomerForSelfResponse;
+import gyun.sample.domain.member.payload.response.customer.SearchCustomerForAdminResponse;
 import gyun.sample.domain.member.payload.response.customer.UpdateCustomerForSelfResponse;
 import gyun.sample.domain.member.service.CustomerService;
 import gyun.sample.domain.social.serviece.KakaoService;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -75,4 +78,12 @@ public class CustomerRestController {
         return restApiController.createSuccessRestResponse("회원탈퇴가 완료되었습니다.");
     }
 
+    @Operation(summary = "고객 목록 최신순 조회")
+    @GetMapping(value = "/list-for-admin")
+    public ResponseEntity<String> listForAdmin(@CurrentAccount CurrentAccountDTO account,
+                                       @Valid @ModelAttribute SearchCustomerForAdminRequest request,
+                                       BindingResult bindingResult) {
+        Page<SearchCustomerForAdminResponse> response = customerService.listForAdmin(account, request);
+        return restApiController.createSuccessRestResponse(response);
+    }
 }

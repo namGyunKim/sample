@@ -40,4 +40,8 @@ public class CustomerValidator extends AccountValidator {
     //  고객 탈퇴
     public void deactivateCustomerForSelf(CurrentAccountDTO account) {checkCustomerRole(account.role());
     }
+
+    public void listForAdmin(CurrentAccountDTO account) {
+        checkAdminRole(account.role());
+    }
 }
