@@ -10,17 +10,17 @@ BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdv
 
 https://blog.naver.com/skarbs01/223210410721
 
-![img.png](img.png)
+![img.png](gitimage/img.png)
 
-![img_1.png](img_1.png)
+![img_1.png](gitimage/img_1.png)
 
 예외처리는 @RestControllerAdvice 및 @ExceptionHandler를 사용하여 구현
 
-![img_2.png](img_2.png)
+![img_2.png](gitimage/img_2.png)
 
 예외처리시 @EventListener를 사용하여 로그를 남기도록 구현
 
-![img_3.png](img_3.png)
+![img_3.png](gitimage/img_3.png)
 
 로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장
 
