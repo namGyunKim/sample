@@ -28,6 +28,7 @@ public enum ErrorCode {
     KAKAO_API_GET_TOKEN_ERROR("1202", "카카오 API Get Token Error"),
     KAKAO_API_GET_INFORMATION_ERROR("1203", "카카오 API Get Information Error"),
     KAKAO_API_LOGOUT_ERROR("1204", "카카오 API Logout Error"),
+    KAKAO_API_UNLINK_ERROR("1205", "카카오 API Unlink Error"),
 
 
     // === other (9000) ============================================================================================================

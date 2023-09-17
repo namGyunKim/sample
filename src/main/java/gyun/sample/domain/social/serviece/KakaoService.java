@@ -41,7 +41,7 @@ public class KakaoService {
     public String getCode() {
         try {
             return kakaoAuthClient.getCode("code", clientId, redirectUri);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_CODE_ERROR);
         }
     }
@@ -50,14 +50,13 @@ public class KakaoService {
     public KakaoTokenRequest getTokenByCode(String code) {
         try {
             return kakaoAuthClient.getToken("authorization_code", code, redirectUri, clientId, clientSecret);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_TOKEN_ERROR);
         }
     }
 
 
-//    토큰으로 정보 가입 및 로그인 처리
+    //    토큰으로 정보 가입 및 로그인 처리
     @Transactional
     public AccountLoginResponse saveOrLoginByToken(String accessToken) {
         try {
@@ -74,17 +73,28 @@ public class KakaoService {
             } else {
                 return customerService.login(member.get());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR);
         }
     }
 
-//    토큰으로 로그아웃 처리
+    //    토큰으로 로그아웃 처리
     public KakaoInfoRequest logout(String accessToken) {
         try {
             return kakaoApiClient.logout(accessToken);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_LOGOUT_ERROR);
+        }
+    }
+
+    //    토큰으로 회원탈퇴 처리
+    public void unlink(String accessToken,MemberType memberType) {
+        try {
+            if (!memberType.equals(MemberType.GENERAL)){
+                kakaoApiClient.unlink(accessToken);
+            }
+        } catch (Exception e) {
+            throw new GlobalException(ErrorCode.KAKAO_API_UNLINK_ERROR);
         }
     }
 

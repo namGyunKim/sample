@@ -20,6 +20,4 @@ public class AdminService extends AccountService {
         super(memberRepository, refreshTokenRepository, accountValidator, jwtTokenProvider);
         this.adminValidator = adminValidator;
     }
-
-
 }

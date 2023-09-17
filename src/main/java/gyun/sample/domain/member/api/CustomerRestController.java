@@ -9,6 +9,7 @@ import gyun.sample.domain.member.payload.response.customer.InformationCustomerFo
 import gyun.sample.domain.member.payload.response.customer.SaveCustomerForSelfResponse;
 import gyun.sample.domain.member.payload.response.customer.UpdateCustomerForSelfResponse;
 import gyun.sample.domain.member.service.CustomerService;
+import gyun.sample.domain.social.serviece.KakaoService;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +22,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
-// TODO: 2023/09/09 CustomerRestController 부터 작업 필요 
 @Tag(name = "CustomerRestController", description = "고객 api")
 @RestController
 @RequestMapping(value = "/api/customer")
@@ -31,13 +31,14 @@ public class CustomerRestController {
 
     //    service
     private final CustomerService customerService;
+    private final KakaoService kakaoService;
     //    utils
     private final RestApiController restApiController;
 
     @Operation(summary = "고객 회원가입")
     @PostMapping(value = "/save")
     public ResponseEntity<String> save(@Valid @RequestBody SaveCustomerForSelfRequest request,
-                                           BindingResult bindingResult){
+                                       BindingResult bindingResult) {
         SaveCustomerForSelfResponse response = customerService.saveCustomer(request);
         return restApiController.createSuccessRestResponse(response);
     }
@@ -61,14 +62,16 @@ public class CustomerRestController {
     @PostMapping(value = "/update-customer-for-self")
     public ResponseEntity<String> updateCustomerForSelf(@CurrentAccount CurrentAccountDTO account,
                                                         @RequestBody UpdateCustomerForSelfRequest request) {
-        UpdateCustomerForSelfResponse response = customerService.updateCustomerForSelf(account,request);
+        UpdateCustomerForSelfResponse response = customerService.updateCustomerForSelf(account, request);
         return restApiController.createSuccessRestResponse(response);
     }
 
     @Operation(summary = "고객이 회원탈퇴")
     @PostMapping(value = "/deactivate-customer-for-self")
-    public ResponseEntity<String> deactivateCustomerForSelf(@CurrentAccount CurrentAccountDTO account) {
-        customerService.deactivateCustomerForSelf(account);
+    public ResponseEntity<String> deactivateCustomerForSelf(@CurrentAccount CurrentAccountDTO account,
+                                                            @RequestParam(required = false) String accessToken) {
+        kakaoService.unlink(accessToken, account.memberType());
+        customerService.deactivateCustomerForSelf(account, accessToken);
         return restApiController.createSuccessRestResponse("회원탈퇴가 완료되었습니다.");
     }
 

@@ -21,4 +21,9 @@ public interface KakaoApiClient {
     @GetMapping(value = "/v1/user/logout")
     KakaoInfoRequest logout(@RequestParam("access_token") String accessToken);
 
+//    https://developers.kakao.com/tool/rest-api/open/post/v1-user-unlink
+    @Operation(summary = "회원탈퇴 api access token 및 refresh token 만료")
+    @GetMapping(value = "/v1/user/unlink")
+    KakaoInfoRequest unlink(@RequestParam("access_token") String accessToken);
+
 }

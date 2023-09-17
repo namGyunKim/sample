@@ -64,7 +64,7 @@ public class CustomerService extends AccountService {
 
     //  고객 탈퇴
     @Transactional
-    public void deactivateCustomerForSelf(CurrentAccountDTO account) {
+    public void deactivateCustomerForSelf(CurrentAccountDTO account,String accessToken) {
         customerValidator.deactivateCustomerForSelf(account);
         deactivateMember(account.loginId());
     }
