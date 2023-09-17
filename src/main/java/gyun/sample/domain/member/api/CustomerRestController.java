@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class CustomerRestController {
     }
 
     @Operation(summary = "관리자를 위한 고객 조회")
-    @GetMapping(value = "/information-customer-for-admin/{loginId}")
+    @PostMapping(value = "/information-customer-for-admin/{loginId}")
     public ResponseEntity<String> informationForAdmin(@CurrentAccount CurrentAccountDTO account,
                                                       @PathVariable String loginId) {
         InformationCustomerForAdminResponse response = customerService.informationCustomerForAdmin(account, loginId);
@@ -78,8 +79,9 @@ public class CustomerRestController {
         return restApiController.createSuccessRestResponse("회원탈퇴가 완료되었습니다.");
     }
 
-    @Operation(summary = "고객 목록 최신순 조회")
-    @GetMapping(value = "/list-for-admin")
+    @Operation(summary = "관리자를 위한 고객 목록 최신순 조회")
+    @PostMapping(value = "/list-for-admin",consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> listForAdmin(@CurrentAccount CurrentAccountDTO account,
                                        @Valid @ModelAttribute SearchCustomerForAdminRequest request,
                                        BindingResult bindingResult) {
