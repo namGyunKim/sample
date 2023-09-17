@@ -26,9 +26,11 @@ https://blog.naver.com/skarbs01/223210410721
 
 https://blog.naver.com/skarbs01/223210430457
 
-카카오 로그인의 경우 OpenFeign을 이용하여 카카오 api를 사용하여 구현하였으며
+카카오 로그인의 경우 OpenFeign을 이용하여 카카오 공식문서를 보고 구현하였습니다.
 
-getCode getTokenByCode getInfoByToken 의 3가지 api를 사용하였습니다.
+https://blog.naver.com/skarbs01/223213988052
+
+
 
 stomp 와 redis 를 사용한 채팅기능 구현
 
