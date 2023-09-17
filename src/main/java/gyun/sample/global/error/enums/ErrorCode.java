@@ -30,6 +30,8 @@ public enum ErrorCode {
     KAKAO_API_LOGOUT_ERROR("1204", "카카오 API Logout Error"),
     KAKAO_API_UNLINK_ERROR("1205", "카카오 API Unlink Error"),
 
+    //    === BOARD (2000) ============================================================================================================
+    GUEST_NOT_WRITE("2001", "비회원은 익명 게시판에만 글을 작성할 수 있습니다."),
 
     // === other (9000) ============================================================================================================
     JSON_PROCESS_FAIL("9001", "Json 파일을 처리하는데 실패했습니다. "),
@@ -55,6 +57,7 @@ public enum ErrorCode {
     public String getCode() {
         return code;
     }
+
     public String getErrorMessage() {
         return errorMessage;
     }

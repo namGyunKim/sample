@@ -3,6 +3,7 @@ package gyun.sample.domain.member.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.admin.SaveMemberForSuperAdminRequest;
 import gyun.sample.domain.member.payload.request.customer.SaveCustomerForSelfRequest;
@@ -14,6 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,6 +36,9 @@ public class Member extends BaseTimeEntity {
     private boolean active;                                 //  활성
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Board> boardList = new ArrayList<>(); //  유저 주소
 
 
     @Enumerated(EnumType.STRING)

@@ -23,6 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, String >, Member
     boolean existsByRole(AccountRole role);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Member> findByIdAndActive(String socialKey, boolean active);
+    Optional<Member> findByLoginIdAndActive(String loginId, boolean active);
 
 }

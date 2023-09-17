@@ -71,8 +71,9 @@ public class AccountServiceUtil {
         return member;
     }
 
-    public Optional<Member> findByIdAndActive(String socialKey, boolean active) {
-        return memberRepository.findByIdAndActive(socialKey, active);
+//    로그인 아이디와 활성화 여부로 조회
+    public Optional<Member> findByLoginIdAndActive(String socialKey, boolean active) {
+        return memberRepository.findByLoginIdAndActive(socialKey, active);
     }
 
     //    회원 탈퇴

@@ -64,7 +64,7 @@ public class KakaoService {
             Map<String, Object> properties = request.getProperties();
             String nickName = (String) properties.get("nickname");
 //        가입 여부 확인
-            Optional<Member> member = customerService.findByIdAndActive(request.getId(), true);
+            Optional<Member> member = customerService.findByLoginIdAndActive(request.getId(), true);
             if (member.isEmpty()) {
 //            가입되어 있지 않다면 회원가입
                 Member saveMember = new Member(request.getId(), nickName, MemberType.KAKAO);

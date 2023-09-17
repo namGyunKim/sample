@@ -6,7 +6,6 @@ import lombok.Getter;
 import java.util.stream.Stream;
 
 @Getter
-//입장 메시지, 퇴장 메시지, 채팅 메시지
 public enum MemberType {
 
     GENERAL("일반"),
