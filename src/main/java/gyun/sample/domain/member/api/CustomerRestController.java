@@ -79,7 +79,7 @@ public class CustomerRestController {
         return restApiController.createSuccessRestResponse("회원탈퇴가 완료되었습니다.");
     }
 
-    // TODO: 2023/09/18 추가적인 필터 검색 조건 작업 필요 
+    // TODO: 2023/09/18 추가적인 필터 검색 조건 작업 필정
     @Operation(summary = "관리자를 위한 고객 목록 최신순 조회")
     @PostMapping(value = "/list-for-admin",consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
