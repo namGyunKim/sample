@@ -1,5 +1,6 @@
 package gyun.sample.domain.account.validator.utils;
 
+import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -30,7 +31,16 @@ public class AccountValidatorUtil {
         if (isExist) {
             throw new GlobalException(ErrorCode.ALREADY_REGISTERED_MEMBER_BY_LOGIN_ID);
         }
-    }    //    로그인 아이디로 활성화 여부 관계없이 존재하는지 체크
+    }
+    //    닉네임 변경시 활성화 여부 관계없이 존재하는지 체크
+    protected void notExistByNickName(String nickName, CurrentAccountDTO account) {
+        boolean isExist = memberRepository.existsByNickName(nickName);
+        if (isExist && !account.nickName().equals(nickName)) {
+            throw new GlobalException(ErrorCode.ALREADY_REGISTERED_MEMBER_BY_NICK_NAME);
+        }
+    }
+
+    //    회원가입시 닉네임 활성화 여부 관계없이 존재하는지 체크
     protected void notExistByNickName(String nickName) {
         boolean isExist = memberRepository.existsByNickName(nickName);
         if (isExist) {
@@ -59,7 +69,7 @@ public class AccountValidatorUtil {
         }
     }
 
-//    비밀번호 유효성 체크
+    //    비밀번호 유효성 체크
     protected void passwordValidation(String password) {
         String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,15}$";
         if (!password.matches(regex) && !StringUtils.isBlank(password)) {

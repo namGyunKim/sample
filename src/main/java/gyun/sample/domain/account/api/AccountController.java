@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +33,9 @@ public class AccountController {
     }
 
     @Operation(summary = "로그인")
-    @PostMapping(value = "/login")
-    public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest request,
+    @PostMapping(value = "/login",consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> login(@Valid @ModelAttribute AccountLoginRequest request,
                                         BindingResult bindingResult) {
         AccountLoginResponse response = accountService.login(request);
         return restApiController.createRestResponse(response);

@@ -61,7 +61,7 @@ public class CustomerService extends AccountService {
     //  고객이 자신의 정보 수정
     @Transactional
     public UpdateCustomerForSelfResponse updateCustomerForSelf(CurrentAccountDTO account, UpdateCustomerForSelfRequest request) {
-        customerValidator.updateCustomerForSelf(request);
+        customerValidator.updateCustomerForSelf(request,account);
         Member member = findByLoginIdAndRole(account.loginId(), AccountRole.CUSTOMER);
         member.update(request);
         return new UpdateCustomerForSelfResponse(member);

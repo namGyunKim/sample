@@ -40,8 +40,9 @@ public class CustomerRestController {
     private final RestApiController restApiController;
 
     @Operation(summary = "고객 회원가입")
-    @PostMapping(value = "/save")
-    public ResponseEntity<String> save(@Valid @RequestBody SaveCustomerForSelfRequest request,
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> save(@Valid @ModelAttribute SaveCustomerForSelfRequest request,
                                        BindingResult bindingResult) {
         SaveCustomerForSelfResponse response = customerService.saveCustomer(request);
         return restApiController.createSuccessRestResponse(response);
@@ -63,9 +64,10 @@ public class CustomerRestController {
     }
 
     @Operation(summary = "고객이 자신의 정보 수정")
-    @PostMapping(value = "/update-customer-for-self")
+    @PostMapping(value = "/update-customer-for-self", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updateCustomerForSelf(@CurrentAccount CurrentAccountDTO account,
-                                                        @RequestBody UpdateCustomerForSelfRequest request) {
+                                                        @ModelAttribute UpdateCustomerForSelfRequest request) {
         UpdateCustomerForSelfResponse response = customerService.updateCustomerForSelf(account, request);
         return restApiController.createSuccessRestResponse(response);
     }
