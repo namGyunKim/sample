@@ -84,6 +84,6 @@ public class CustomerRestController {
                                        @Valid @ModelAttribute SearchCustomerForAdminRequest request,
                                        BindingResult bindingResult) {
         Page<SearchCustomerForAdminResponse> response = customerService.listForAdmin(account, request);
-        return restApiController.createSuccessRestResponse(response);
+        return restApiController.createRestResponse(response);
     }
 }

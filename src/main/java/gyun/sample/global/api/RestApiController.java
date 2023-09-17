@@ -2,6 +2,7 @@ package gyun.sample.global.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.payload.response.RestApiResponse;
@@ -40,6 +41,7 @@ public class RestApiController {
     private ResponseEntity<String> convertToResponseEntity(HttpStatus status, RestApiResponse restApiResponse) {
         String responseBody;
         try {
+            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
             responseBody = objectMapper.writeValueAsString(restApiResponse);
         } catch (JsonProcessingException exception) {
             throw new GlobalException(ErrorCode.JSON_PROCESS_FAIL, exception);
