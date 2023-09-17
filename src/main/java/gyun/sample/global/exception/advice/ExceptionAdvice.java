@@ -7,15 +7,13 @@ import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.error.utils.ErrorUtil;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
-import io.micrometer.core.instrument.config.validate.ValidationException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
 
 
 // 예외 처리
@@ -33,32 +31,20 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
 
     // Global Exception Catch
     @ExceptionHandler(value = GlobalException.class)
-    protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account) {
+    protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
         ErrorCode errorCode = commonException.getErrorCode();
         // Event - Log
-        sendLogEvent(commonException, account);
+        sendLogEvent(commonException, account,httpServletRequest);
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 
     // JWT Interceptor Exception Catch
     @ExceptionHandler(value = JWTInterceptorException.class)
-    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException) {
+    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException,HttpServletRequest httpServletRequest) {
         ErrorCode errorCode = jwtInterceptorException.getErrorCode();
         // Event - Log
-        sendLogEvent(jwtInterceptorException);
+        sendLogEvent(jwtInterceptorException,httpServletRequest);
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 
-    // Validation Exception Catch
-    @ExceptionHandler(value = ValidationException.class)
-    protected ResponseEntity<String> processValidationException(ValidationException validationException, @CurrentAccount CurrentAccountDTO account) {
-        ErrorCode errorCode = errorUtil.findErrorCodeOnMessage(validationException.getMessage(), ErrorCode.CONSTRAINT_PROCESS_FAIL);
-        GlobalException globalException = new GlobalException(errorCode, validationException);
-
-        // Event - Log
-        sendLogEvent(globalException, account);
-        return createFailRestResponse(new HashMap<>() {{
-            put("error", errorCode.getErrorMap());
-        }});
-    }
 }
