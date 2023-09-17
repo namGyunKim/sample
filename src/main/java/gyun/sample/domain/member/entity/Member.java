@@ -22,7 +22,6 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-// TODO: 2023/09/11 Member Entity filed 논의가 필요 
 public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
