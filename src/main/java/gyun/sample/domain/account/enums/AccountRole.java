@@ -4,6 +4,8 @@ package gyun.sample.domain.account.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Getter
@@ -18,11 +20,30 @@ public enum AccountRole {
         this.value = value;
     }
 
-    //  요청값으로 Enum 매칭
+
+//    toStrings
+    public static List<String> toStrings() {
+        List<String> list = new ArrayList<>();
+        for (AccountRole option : AccountRole.values()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(option.name()).append("(").append(option.getValue()).append(")");
+            list.add(sb.toString());
+        }
+        return list;
+    }
+    //  name 값으로 Enum 매칭
     @JsonCreator
-    public static AccountRole create(String requestValue) {
+    public static AccountRole createByName(String requestValue) {
         return Stream.of(values())
                 .filter(v -> v.name().equals(requestValue.toUpperCase()))
+                .findFirst()
+                .orElse(null);
+    }
+
+//    value 값으로 Enum 매칭
+    public static AccountRole createByValue(String requestValue) {
+        return Stream.of(values())
+                .filter(v -> v.getValue().equals(requestValue.toUpperCase()))
                 .findFirst()
                 .orElse(null);
     }
