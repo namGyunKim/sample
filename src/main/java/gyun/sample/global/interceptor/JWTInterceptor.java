@@ -24,6 +24,11 @@ public class JWTInterceptor implements HandlerInterceptor {
             throws Exception {
 
         try {
+            String uri = request.getRequestURI();
+//            /api/account/logout 으로 시작하는 로그아웃 페이지는 예외
+            if (uri.startsWith("/api/account/logout")) {
+                return true;
+            }
             String authorization = request.getHeader("Authorization");
             String bearer = "";
             if (!StringUtils.isEmpty(authorization)) {

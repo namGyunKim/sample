@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+
 public record AccountLoginRequest(
         @NotBlank(message = "로그인 아이디를 입력해주세요.")
         @Schema(description = "로그인 아이디", example = "superAdmin")

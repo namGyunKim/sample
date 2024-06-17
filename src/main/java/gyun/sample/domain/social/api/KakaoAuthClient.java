@@ -14,7 +14,7 @@ public interface KakaoAuthClient {
     //    code 받는 api 지만 redirect 문제가 있어서 get 방식으로 주소창에 쳐서 처리함
 //    https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-code-info
 //     https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST API KEY}&redirect_uri={RedirectURL}
-    @Operation(summary = "카카오 로그인을 위한 code를 받는 api 주소창에 직접 입력해야함 index.html 에 예시가 있음")
+    @Operation(summary = "카카오 로그인을 위한 code를 받는 api 주소창에 직접 입력해야함")
     @GetMapping(value = "/authorize")
     String getCode(@RequestParam("response_type") String responseType,
                    @RequestParam("client_id") String clientId,

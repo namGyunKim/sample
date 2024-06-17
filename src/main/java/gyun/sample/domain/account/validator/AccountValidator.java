@@ -1,25 +1,24 @@
 package gyun.sample.domain.account.validator;
 
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.account.validator.utils.AccountValidatorUtil;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.repository.MemberRepository;
+import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.GlobalException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 
 @Component
-public class AccountValidator extends AccountValidatorUtil {
-    protected final MemberRepository userRepository;
-    protected final AccountValidatorUtil accountValidatorUtil;
-
-    public AccountValidator(MemberRepository userRepository, MemberRepository userRepository1, AccountValidatorUtil accountValidatorUtil) {
-        super(userRepository);
-        this.userRepository = userRepository1;
-        this.accountValidatorUtil = accountValidatorUtil;
-    }
+@RequiredArgsConstructor
+public class AccountValidator {
+    private final PasswordEncoder passwordEncoder;
 
     //    로그인
     public void login(Member member, String password, AccountRole role) {
-        passwordCheck(member, password);
+        boolean matches = passwordEncoder.matches(password, member.getPassword());
+        if (!matches){
+            throw new GlobalException(ErrorCode.NOT_MATCH_PASSWORD);
+        }
     }
 }

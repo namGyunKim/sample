@@ -4,13 +4,10 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.response.customer.InformationCustomerForSelfResponse;
-import gyun.sample.domain.member.validator.CustomerValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional

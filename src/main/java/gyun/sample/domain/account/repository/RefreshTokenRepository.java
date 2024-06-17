@@ -9,14 +9,14 @@ import java.util.concurrent.TimeUnit;
 
 @Repository
 @RequiredArgsConstructor
-public class RefreshTokenRepository  {
+public class RefreshTokenRepository {
 
     //  RedisTemplate
     private final RedisTemplate redisTemplate;
 
 
     //  리프레시 토큰 저장
-    public void save(String refreshToken, String loginId,long refreshExpirationTime) {
+    public void save(String refreshToken, String loginId, long refreshExpirationTime) {
         ValueOperations valueOperations = redisTemplate.opsForValue();
         valueOperations.set(refreshToken, loginId);
         redisTemplate.expire(refreshToken, refreshExpirationTime, TimeUnit.MILLISECONDS);

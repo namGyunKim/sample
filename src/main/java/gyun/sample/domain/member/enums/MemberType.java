@@ -1,7 +1,6 @@
 package gyun.sample.domain.member.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import gyun.sample.domain.board.enums.BoardType;
 import lombok.Getter;
 
 import java.util.stream.Stream;
@@ -22,7 +21,7 @@ public enum MemberType {
 
     public static String toStrings() {
         StringBuilder sb = new StringBuilder();
-        for (BoardType option : BoardType.values()) {
+        for (MemberType option : MemberType.values()) {
             sb.append(option.name()).append("(").append(option.getValue()).append(")").append(",");
         }
         sb.deleteCharAt(sb.length() - 1);

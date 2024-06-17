@@ -10,11 +10,9 @@ import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-
 
 // JWT 토큰 생성 및 검증 유틸
 @Component
@@ -22,7 +20,7 @@ import java.util.Date;
 @Slf4j
 public class JwtTokenProvider {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${spring.jwt.secret}")
     private String secretKey;
@@ -32,7 +30,6 @@ public class JwtTokenProvider {
 
     @Value("${spring.jwt.token.refresh-expiration-time}")
     private long refreshExpirationTime;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * Access 토큰 생성
@@ -40,7 +37,7 @@ public class JwtTokenProvider {
     public String createAccessToken(Member member){
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.ACCESS.name());
-        Date expireDate = new Date(now.getTime() + accessExpirationTime);
+        Date expireDate = new Date(now.getTime() + accessExpirationTime * 1000);
 
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
@@ -60,7 +57,7 @@ public class JwtTokenProvider {
     public String createRefreshToken(Member member){
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
-        Date expireDate = new Date(now.getTime() + refreshExpirationTime);
+        Date expireDate = new Date(now.getTime() + refreshExpirationTime * 1000);
 
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
@@ -82,12 +79,14 @@ public class JwtTokenProvider {
      * Access 토큰을 검증
      */
     public boolean validateToken(String token){
-        try{
+        try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
-        } catch(ExpiredJwtException e) {
+        } catch (ExpiredJwtException e) {
+            log.error("토큰이 만료되었습니다.", e);
             throw new GlobalException(ErrorCode.JWT_TOKEN_EXPIRED);
-        } catch(JwtException e) {
+        } catch (JwtException e) {
+            log.error("유효하지 않은 토큰입니다.", e);
             throw new GlobalException(ErrorCode.JWT_INVALID);
         }
     }
@@ -95,14 +94,19 @@ public class JwtTokenProvider {
     /**
      * 토큰에서 회원 정보 추출
      */
-
     private Claims getTokenClaims(String token) {
         Claims claims;
         try {
             claims = Jwts.parser().setSigningKey(secretKey)
                     .parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+            log.error("토큰이 만료되었습니다.", e);
+            throw new GlobalException(ErrorCode.JWT_TOKEN_EXPIRED);
+        } catch (JwtException e) {
+            log.error("유효하지 않은 토큰입니다.", e);
+            throw new GlobalException(ErrorCode.JWT_INVALID);
         } catch (Exception e) {
-            log.info("유효하지 않은 토큰키");
+            log.error("토큰 파싱 중 에러 발생.", e);
             throw new GlobalException(ErrorCode.JWT_INVALID);
         }
         return claims;
@@ -118,7 +122,6 @@ public class JwtTokenProvider {
                 claims.get("memberType", String.class)
         );
     }
-
 
     // 리프레쉬 토큰 제거
     public void deleteToken(String refreshToken) {

@@ -21,7 +21,6 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
@@ -31,22 +30,18 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//    https://spring.io/projects/spring-cloud
-//    https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2022.0-Release-Notes
     implementation platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.3")
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
     implementation "io.github.openfeign:feign-jackson"
-//    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
 
     // Querydsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    //    AWS S3
+    // AWS S3
     implementation platform('software.amazon.awssdk:bom:2.20.26')
     implementation 'software.amazon.awssdk:s3'
 
@@ -57,33 +52,31 @@ dependencies {
     implementation 'org.mindrot:jbcrypt:0.4'
 
     // Http Utils
-    implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2'
-    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
+    implementation 'commons-fileupload:commons-fileupload:1.4'
+    implementation 'org.apache.poi:poi-ooxml:5.2.2'
+    implementation 'org.apache.httpcomponents:httpmime:4.5.13'
 
     // JWT Token
-    implementation group: 'com.auth0', name: 'java-jwt', version: '3.18.2'
+    implementation 'com.auth0:java-jwt:3.18.2'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'javax.xml.bind:jaxb-api:2.3.0'
 
-    //p6spy query logging
+    // p6spy query logging
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
-//	redis
+    // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-// websocket
+    // websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-//	junit5
+    // junit5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
-
 
 task cleanGeneratedDir(type: Delete) {
     delete file('build/generated')

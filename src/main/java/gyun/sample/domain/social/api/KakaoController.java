@@ -5,12 +5,10 @@ import gyun.sample.domain.social.serviece.KakaoService;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 //https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api
@@ -22,6 +20,11 @@ public class KakaoController {
 
     private final KakaoService kakaoService;
     private final RestApiController restApiController;
+
+    @ModelAttribute
+    public void addCustomHeader(HttpServletResponse response) {
+        response.addHeader("X-Header-1", "YourHeaderValue");
+    }
 
     //     https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST API KEY}&redirect_uri={RedirectURL}
     @Operation(summary = "카카오에 code 요청하고 redirect 받는 api")
@@ -38,11 +41,11 @@ public class KakaoController {
         return restApiController.createRestResponse(response);
     }
 
-    @Operation(summary = "토큰으로 정보 가입 및 로그인 처리")
-    @GetMapping(value = "/save-by-token")
-    public ResponseEntity<String> saveOrLoginByToken(@RequestParam("access_token") String accessToken)  {
-        return restApiController.createRestResponse(kakaoService.saveOrLoginByToken(accessToken));
-    }
+//    @Operation(summary = "토큰으로 정보 가입 및 로그인 처리")
+//    @GetMapping(value = "/save-by-token")
+//    public ResponseEntity<String> saveOrLoginByToken(@RequestParam("access_token") String accessToken)  {
+//        return restApiController.createRestResponse(kakaoService.saveOrLoginByToken(accessToken));
+//    }
 
     @Operation(summary = "로그아웃 api access token 및 refresh token 만료")
     @GetMapping(value = "/logout")

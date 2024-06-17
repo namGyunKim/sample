@@ -4,8 +4,11 @@ import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -46,20 +49,19 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         PageableHandlerMethodArgumentResolver pageResolver = new PageableHandlerMethodArgumentResolver();
-//        AuthenticationPrincipalArgumentResolver authenticationPrincipalArgumentResolver = new AuthenticationPrincipalArgumentResolver();
         argumentResolvers.add(pageResolver);
-//        argumentResolvers.add(authenticationPrincipalArgumentResolver);
         argumentResolvers.add(new CurrentAccountResolver(jwtTokenProvider));
     }
 
     //    인터셉터
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        //        관리자
-//        registry.addInterceptor(authInterceptor)
-//                .addPathPatterns("/admin/**")
-//                .excludePathPatterns("/admin/login-page","/admin/login-process");
         registry.addInterceptor(jwtInterceptor)
                 .excludePathPatterns("/api/account/jwt-error");
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
