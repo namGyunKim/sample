@@ -2,14 +2,11 @@ package gyun.sample.domain.member.api;
 
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.service.write.WriteMemberService;
 import gyun.sample.domain.member.validator.CreateAdminValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
-import gyun.sample.global.error.enums.ErrorCode;
-import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -45,9 +42,6 @@ public class AdminRestController {
     @PostMapping(value = "/create")
     public ResponseEntity<String> createAdmin(@Valid @RequestBody CreateMemberRequest createMemberRequest, BindingResult bindingResult,
                                               @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        if (!currentAccountDTO.role().equals(AccountRole.SUPER_ADMIN)) {
-            throw new GlobalException(ErrorCode.ACCESS_DENIED, "최고 관리자만 접근 가능합니다.");
-        }
         GlobalCreateResponse response = writeAdminService.createMember(createMemberRequest);
         return restApiController.createRestResponse(response);
     }
