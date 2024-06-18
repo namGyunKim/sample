@@ -21,7 +21,7 @@ public class ErrorUtil {
         if (!StringUtils.hasText(code)) {
             return errorCode;
         }
-        return ErrorCode.findByCode(code) != null ? ErrorCode.findByCode(code) : errorCode;
+        return ErrorCode.getByCode(code) != null ? ErrorCode.getByCode(code) : errorCode;
     }
 
     // Custom Error Code 분리

@@ -52,7 +52,7 @@ public class WriteAccountService extends AccountServiceUtil {
 
     // 인터셉터에서 터지는 JWT 토큰 에러
     public void jwtErrorException(String errorCode) {
-        ErrorCode jwtErrorCode = ErrorCode.findByCode(errorCode);
+        ErrorCode jwtErrorCode = ErrorCode.getByCode(errorCode);
         throw new JWTInterceptorException(jwtErrorCode);
     }
 

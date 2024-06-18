@@ -57,7 +57,7 @@ public enum ErrorCode {
         this.errorMessage = msg;
     }
 
-    public static ErrorCode findByCode(String code) {
+    public static ErrorCode getByCode(String code) {
         return errorMap.get(code);
     }
 
