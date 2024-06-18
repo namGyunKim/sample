@@ -4,7 +4,7 @@ package gyun.sample.domain.member.entity;
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.domain.member.payload.request.admin.SaveMemberWithSuperAdminRequest;
+import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    private String id;                                     //  유저 아이디 및 소셜키
+    private long id;                                     //  유저 아이디 및 소셜키
     @Column(unique = true, updatable = false)
     private String loginId;                                //  유저 로그인 아이디
     @Column(unique = true)
@@ -34,13 +34,13 @@ public class Member extends BaseTimeEntity {
     private MemberType memberType;                          //  유저 타입
 
     //    최고 관리자 리퀘스트로 생성
-    public Member(SaveMemberWithSuperAdminRequest request) {
+    public Member(CreateMemberRequest request) {
         this.loginId = request.loginId();
         this.nickName = request.nickName();
         this.password = request.password();
-        this.role = AccountRole.SUPER_ADMIN;
+        this.role = request.role();
         this.active = true;
-        this.memberType = MemberType.GENERAL;
+        this.memberType = request.memberType();
     }
 
     //    멤버 비활성화
@@ -55,5 +55,9 @@ public class Member extends BaseTimeEntity {
         this.role = AccountRole.CUSTOMER;
         this.active = true;
         this.memberType = memberType;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
     }
 }

@@ -1,4 +1,4 @@
-package gyun.sample.domain.member.service;
+package gyun.sample.domain.member.service.read;
 
 import org.springframework.stereotype.Service;
 

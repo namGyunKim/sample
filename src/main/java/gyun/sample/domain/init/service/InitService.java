@@ -1,12 +1,12 @@
 package gyun.sample.domain.init.service;
 
-import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.admin.SaveMemberWithSuperAdminRequest;
-import gyun.sample.domain.member.service.ReadMemberService;
-import gyun.sample.domain.member.service.WriteMemberService;
+import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.enums.MemberType;
+import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
+import gyun.sample.domain.member.service.read.ReadMemberService;
+import gyun.sample.domain.member.service.write.WriteMemberService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +17,6 @@ public class InitService {
 
     //    service
     private final ReadMemberService readAdminService;
-    private final PasswordEncoder passwordEncoder;
     private final WriteMemberService writeMemberService;
     //    서버 시작시 실행
     @PostConstruct
@@ -30,10 +29,8 @@ public class InitService {
     @Transactional
     public void saveMemberByRoleSuperAdmin() {
         if (!readAdminService.existsByRole()) {
-            final String password = passwordEncoder.encode("1234");
-            SaveMemberWithSuperAdminRequest request = new SaveMemberWithSuperAdminRequest("superAdmin", "최고관리자", password);
-            Member member = new Member(request);
-            writeMemberService.saveMember(member);
+            CreateMemberRequest request = new CreateMemberRequest("superAdmin", "최고관리자", "1234", AccountRole.SUPER_ADMIN, MemberType.GENERAL);
+            writeMemberService.createMember(request);
         }
     }
 

@@ -1,8 +1,9 @@
-package gyun.sample.domain.member.service;
+package gyun.sample.domain.member.service.read;
 
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.repository.MemberRepository;
+import gyun.sample.domain.member.service.BaseMemberService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

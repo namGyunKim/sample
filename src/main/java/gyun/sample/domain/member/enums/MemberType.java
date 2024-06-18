@@ -36,7 +36,7 @@ public enum MemberType {
     @JsonCreator
     public static MemberType create(String requestValue) {
         return Stream.of(values())
-                .filter(v -> v.name().equals(requestValue.toUpperCase()))
+                .filter(v -> v.name().equalsIgnoreCase(requestValue.toUpperCase()))
                 .findFirst()
                 .orElse(null);
     }

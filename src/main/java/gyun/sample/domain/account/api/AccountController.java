@@ -3,11 +3,12 @@ package gyun.sample.domain.account.api;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
-import gyun.sample.domain.account.payload.response.FindLoginMemberResponse;
+import gyun.sample.domain.account.payload.response.GetLoginMemberResponse;
 import gyun.sample.domain.account.service.ReadAccountService;
 import gyun.sample.domain.account.service.WriteAccountService;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,8 @@ public class AccountController {
     //    service
     private final WriteAccountService writeAccountService;
     private final ReadAccountService readAccountService;
+
+    @Hidden
     @Operation(summary = "JWT 에러")
     @GetMapping(value = "/jwt-error/{errorCode}")
     public void jwtError(@PathVariable String errorCode) {
@@ -59,9 +62,9 @@ public class AccountController {
 
     @Operation(summary = "로그인한 데이터")
     @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping(value = "/login-data")
+    @GetMapping(value = "/get-login-data")
     public ResponseEntity<String> loginData(@CurrentAccount CurrentAccountDTO request) {
-        FindLoginMemberResponse response = readAccountService.findLoginData(request);
+        GetLoginMemberResponse response = readAccountService.getLoginData(request);
         return restApiController.createSuccessRestResponse(response);
     }
 
