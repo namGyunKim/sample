@@ -3,6 +3,7 @@ package gyun.sample.domain.member.api;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
+import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
 import gyun.sample.domain.member.validator.CreateAdminValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
@@ -25,11 +26,9 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "Bearer Authentication")
 public class AdminRestController {
 
-    //    utils
     private final RestApiController restApiController;
     private final WriteMemberService writeAdminService;
-
-    //    validator
+    private final ReadMemberService readAdminService;
     private final CreateAdminValidator createAdminValidator;
 
 
@@ -46,10 +45,10 @@ public class AdminRestController {
         return restApiController.createRestResponse(response);
     }
 
-//    @Operation(summary = "관리자 목록")
-//    @GetMapping(value = "/list")
-//    public ResponseEntity<String> getAdminList() {
-//        return restApiController.createRestResponse(writeAdminService.getAdminList());
-//    }
+    @Operation(summary = "관리자 목록")
+    @GetMapping(value = "/list")
+    public ResponseEntity<String> getAdminList() {
+        return restApiController.createRestResponse(readAdminService.getList());
+    }
 
 }

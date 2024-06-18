@@ -3,7 +3,7 @@ package gyun.sample.domain.account.api;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
-import gyun.sample.domain.account.payload.response.GetLoginMemberResponse;
+import gyun.sample.domain.account.payload.response.LoginMemberResponse;
 import gyun.sample.domain.account.service.ReadAccountService;
 import gyun.sample.domain.account.service.WriteAccountService;
 import gyun.sample.global.annotaion.CurrentAccount;
@@ -71,7 +71,7 @@ public class AccountController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping(value = "/get-login-data")
     public ResponseEntity<String> loginData(@CurrentAccount CurrentAccountDTO request) {
-        GetLoginMemberResponse response = readAccountService.getLoginData(request);
+        LoginMemberResponse response = readAccountService.getLoginData(request);
         return restApiController.createSuccessRestResponse(response);
     }
 

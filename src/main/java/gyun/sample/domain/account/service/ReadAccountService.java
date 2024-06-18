@@ -2,7 +2,7 @@ package gyun.sample.domain.account.service;
 
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.payload.response.GetLoginMemberResponse;
+import gyun.sample.domain.account.payload.response.LoginMemberResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.error.enums.ErrorCode;
@@ -18,9 +18,9 @@ public class ReadAccountService extends BaseAccountService {
         super(memberRepository);
     }
 
-    public GetLoginMemberResponse getLoginData(CurrentAccountDTO request) {
+    public LoginMemberResponse getLoginData(CurrentAccountDTO request) {
         Member byLoginIdAndRole = memberRepository.findByLoginIdAndRole(request.loginId(), request.role()).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        return new GetLoginMemberResponse(byLoginIdAndRole);
+        return new LoginMemberResponse(byLoginIdAndRole);
     }
 
 }
