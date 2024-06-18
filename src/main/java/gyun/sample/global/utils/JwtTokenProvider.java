@@ -36,7 +36,7 @@ public class JwtTokenProvider {
     /**
      * Access 토큰 생성
      */
-    public String createAccessToken(Member member){
+    public String createAccessToken(Member member) {
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.ACCESS.name());
         Date expireDate = new Date(now.getTime() + accessExpirationTime * 1000);
@@ -56,7 +56,7 @@ public class JwtTokenProvider {
     /**
      * Refresh 토큰 생성
      */
-    public String createRefreshToken(Member member){
+    public String createRefreshToken(Member member) {
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
         Date expireDate = new Date(now.getTime() + refreshExpirationTime * 1000);
@@ -66,14 +66,14 @@ public class JwtTokenProvider {
         claims.put("nickName", member.getNickName());
         claims.put("memberType", member.getMemberType());
 
-        String refreshToken= Jwts.builder()
+        String refreshToken = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        refreshTokenRepository.save(refreshToken,member.getLoginId(),refreshExpirationTime);
+        refreshTokenRepository.save(refreshToken, member.getLoginId(), refreshExpirationTime);
         return refreshToken;
     }
 
@@ -82,21 +82,26 @@ public class JwtTokenProvider {
      */
     private ClaimsWithErrorCodeDTO getTokenClaims(String token) {
         try {
-            Claims claims = Jwts.parser().setSigningKey(secretKey)
-                    .parseClaimsJws(token).getBody();
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
             return new ClaimsWithErrorCodeDTO(claims, null);
         } catch (ExpiredJwtException e) {
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_TOKEN_EXPIRED);
+        } catch (SignatureException e) {
+            return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_SIGNATURE_ERROR);
         } catch (JwtException e) {
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_INVALID);
         } catch (Exception e) {
+            log.error("JWT 토큰 에러 {}", e.getMessage(),e);
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_UNKNOWN_ERROR);
         }
     }
 
 
     // 토큰에서 회원 정보 추출
-    public TokenResponse getTokenResponse(String token){
+    public TokenResponse getTokenResponse(String token) {
         ClaimsWithErrorCodeDTO claimsWithErrorCodeDTO = getTokenClaims(token);
         Claims claims = claimsWithErrorCodeDTO.claims();
 

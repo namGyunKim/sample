@@ -21,6 +21,7 @@ public enum ErrorCode {
     ACCESS_DENIED("1004", "권한이 없습니다."),
     NOT_MATCH_PASSWORD("1005", "비밀번호가 일치하지 않습니다."),
     JWT_UNKNOWN_ERROR("1006", "JWT 토큰 에러"),
+    JWT_SIGNATURE_ERROR("1007", "JWT 시그니처 에러(시크릿 키)"),
 
     // === MEMBER (1100) ===
     ALREADY_REGISTERED_MEMBER_BY_LOGIN_ID("1101", "이미 등록된 아이디입니다."),

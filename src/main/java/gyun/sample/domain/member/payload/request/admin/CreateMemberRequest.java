@@ -11,15 +11,15 @@ public record CreateMemberRequest(
         @Schema(description = "로그인 아이디", example = "admin1")
         String loginId,
         @NotBlank(message = "닉네임을 입력해주세요.")
-                @Schema(description = "닉네임", example = "테스트1")
+        @Schema(description = "닉네임", example = "테스트1")
         String nickName,
         @NotBlank(message = "비밀번호를 입력해주세요.")
-                @Schema(description = "비밀번호", example = "1234")
+        @Schema(description = "비밀번호", example = "1234")
         String password,
         @NotNull(message = "권한을 선택해주세요.")
-                @Schema(description = "권한", example = "ADMIN")
+        @Schema(description = "권한", example = "ADMIN")
         AccountRole role,
         @NotNull(message = "멤버 타입을 선택해주세요.")
-                @Schema(description = "멤버 타입", example = "GENERAL")
+        @Schema(description = "멤버 타입", example = "GENERAL")
         MemberType memberType) {
 }
