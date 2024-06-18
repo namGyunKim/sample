@@ -28,9 +28,9 @@ public class AccountController {
     private final WriteAccountService writeAccountService;
     private final ReadAccountService readAccountService;
     @Operation(summary = "JWT 에러")
-    @GetMapping(value = "/jwt-error")
-    public void jwtError() {
-     writeAccountService.jwtErrorException();
+    @GetMapping(value = "/jwt-error/{errorCode}")
+    public void jwtError(@PathVariable String errorCode) {
+     writeAccountService.jwtErrorException(errorCode);
     }
 
     @Operation(summary = "로그인")

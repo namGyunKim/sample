@@ -14,6 +14,7 @@ public enum MemberType {
     GOOGLE("구글"),
     FACEBOOK("페이스북"),
     APPLE("애플"),
+    GUEST("손님"),
     ALL("전체");
 
 

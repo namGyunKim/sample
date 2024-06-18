@@ -57,7 +57,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .excludePathPatterns("/api/account/jwt-error");
+                .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout");
     }
 
     @Bean

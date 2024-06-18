@@ -1,11 +1,13 @@
 package gyun.sample.global.utils;
 
+import gyun.sample.domain.account.dto.ClaimsWithErrorCodeDTO;
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.enums.TokenType;
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.global.error.enums.ErrorCode;
-import gyun.sample.global.exception.GlobalException;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,50 +78,39 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Access 토큰을 검증
+     * 토큰에서 회원 정보 추출
      */
-    public boolean validateToken(String token){
+    private ClaimsWithErrorCodeDTO getTokenClaims(String token) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-            return true;
+            Claims claims = Jwts.parser().setSigningKey(secretKey)
+                    .parseClaimsJws(token).getBody();
+            return new ClaimsWithErrorCodeDTO(claims, null);
         } catch (ExpiredJwtException e) {
-            log.error("토큰이 만료되었습니다.", e);
-            throw new GlobalException(ErrorCode.JWT_TOKEN_EXPIRED);
+            return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_TOKEN_EXPIRED);
         } catch (JwtException e) {
-            log.error("유효하지 않은 토큰입니다.", e);
-            throw new GlobalException(ErrorCode.JWT_INVALID);
+            return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_INVALID);
+        } catch (Exception e) {
+            return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_UNKNOWN_ERROR);
         }
     }
 
-    /**
-     * 토큰에서 회원 정보 추출
-     */
-    private Claims getTokenClaims(String token) {
-        Claims claims;
-        try {
-            claims = Jwts.parser().setSigningKey(secretKey)
-                    .parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException e) {
-            log.error("토큰이 만료되었습니다.", e);
-            throw new GlobalException(ErrorCode.JWT_TOKEN_EXPIRED);
-        } catch (JwtException e) {
-            log.error("유효하지 않은 토큰입니다.", e);
-            throw new GlobalException(ErrorCode.JWT_INVALID);
-        } catch (Exception e) {
-            log.error("토큰 파싱 중 에러 발생.", e);
-            throw new GlobalException(ErrorCode.JWT_INVALID);
-        }
-        return claims;
-    }
 
     // 토큰에서 회원 정보 추출
     public TokenResponse getTokenResponse(String token){
-        Claims claims = getTokenClaims(token);
+        ClaimsWithErrorCodeDTO claimsWithErrorCodeDTO = getTokenClaims(token);
+        Claims claims = claimsWithErrorCodeDTO.claims();
+
+        // Claims 객체가 null인 경우 처리
+        if (claims == null) {
+            return new TokenResponse("guest", AccountRole.GUEST.name(), "guest", MemberType.GUEST.name(), claimsWithErrorCodeDTO.errorCode());
+        }
+
         return new TokenResponse(
                 claims.get("loginId", String.class),
                 claims.get("role", String.class),
                 claims.get("nickName", String.class),
-                claims.get("memberType", String.class)
+                claims.get("memberType", String.class),
+                claimsWithErrorCodeDTO.errorCode()
         );
     }
 

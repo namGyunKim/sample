@@ -44,7 +44,7 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
         ErrorCode errorCode = jwtInterceptorException.getErrorCode();
         // Event - Log
         sendLogEvent(jwtInterceptorException,httpServletRequest);
-        return createFailRestResponse(errorCode.getErrorResponse());
+        return createFailRestResponseWithJWT(errorCode.getErrorResponse());
     }
 
 }

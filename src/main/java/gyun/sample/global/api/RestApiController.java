@@ -26,6 +26,11 @@ public class RestApiController {
         return convertToResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, restApiResponse);
     }
 
+    public ResponseEntity<String> createFailRestResponseWithJWT(Object data) {
+        RestApiResponse restApiResponse = RestApiResponse.createResponse(false, data);
+        return convertToResponseEntity(HttpStatus.UNAUTHORIZED, restApiResponse);
+    }
+
     //    성공 응답
     public ResponseEntity<String> createRestResponse(Object data) {
         RestApiResponse restApiResponse = RestApiResponse.createResponse(true, data);

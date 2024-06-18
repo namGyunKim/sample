@@ -1,5 +1,6 @@
 package gyun.sample.global.interceptor;
 
+import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,21 +23,18 @@ public class JWTInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
+        TokenResponse tokenResponse;
 
-        try {
-            String uri = request.getRequestURI();
-//            /api/account/logout 으로 시작하는 로그아웃 페이지는 예외
-            if (uri.startsWith("/api/account/logout")) {
-                return true;
+        String authorization = request.getHeader("Authorization");
+        String bearer;
+        if (!StringUtils.isEmpty(authorization)) {
+            bearer = authorization.split(" ")[1];
+            tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
+            if (tokenResponse.errorCode() != null) {
+                final String errorCodeNumber = tokenResponse.getErrorCodeNumber();
+                response.sendRedirect("/api/account/jwt-error/" + errorCodeNumber);
+                return false;
             }
-            String authorization = request.getHeader("Authorization");
-            String bearer = "";
-            if (!StringUtils.isEmpty(authorization)) {
-                bearer = authorization.split(" ")[1];
-                jwtTokenProvider.getTokenResponse(bearer);
-            }
-        } catch (Exception e) {
-            response.sendRedirect("/api/account/jwt-error");
         }
         return true;
     }
