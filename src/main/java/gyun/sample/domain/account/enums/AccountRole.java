@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public enum AccountRole {
     SUPER_ADMIN("최고 관리자"),
     ADMIN("관리자"),
-    CUSTOMER("사용자"),
+    USER("사용자"),
     GUEST("손님");
     private final String value;
 

@@ -52,7 +52,7 @@ public class Member extends BaseTimeEntity {
     public Member(String socialKey, String nickName, MemberType memberType) {
         this.loginId = socialKey;
         this.nickName = nickName;
-        this.role = AccountRole.CUSTOMER;
+        this.role = AccountRole.USER;
         this.active = true;
         this.memberType = memberType;
     }

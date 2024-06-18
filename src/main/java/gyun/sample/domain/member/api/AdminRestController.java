@@ -46,4 +46,10 @@ public class AdminRestController {
         return restApiController.createRestResponse(response);
     }
 
+//    @Operation(summary = "관리자 목록")
+//    @GetMapping(value = "/list")
+//    public ResponseEntity<String> getAdminList() {
+//        return restApiController.createRestResponse(writeAdminService.getAdminList());
+//    }
+
 }

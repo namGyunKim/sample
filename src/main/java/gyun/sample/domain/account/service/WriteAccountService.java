@@ -8,6 +8,7 @@ import gyun.sample.domain.account.validator.AccountValidator;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.utils.JwtTokenProvider;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,13 @@ public class WriteAccountService extends AccountServiceUtil {
     public void jwtErrorException(String errorCode) {
         ErrorCode jwtErrorCode = ErrorCode.getByCode(errorCode);
         throw new JWTInterceptorException(jwtErrorCode);
+    }
+
+    // 인터셉터에서 터지는  에러
+    public void AccessException(String errorMessage) {
+        ErrorCode accessException = ErrorCode.ACCESS_DENIED;
+        System.out.println("여기옴?");
+        throw new GlobalException(accessException,errorMessage);
     }
 
     //    RefreshToken 제거

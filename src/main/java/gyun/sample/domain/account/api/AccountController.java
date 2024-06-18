@@ -36,6 +36,13 @@ public class AccountController {
      writeAccountService.jwtErrorException(errorCode);
     }
 
+    @Hidden
+    @Operation(summary = "권한 에러")
+    @GetMapping(value = "/access-denied/{errorMessage}")
+    public void accessError(@PathVariable String errorMessage) {
+        writeAccountService.AccessException(errorMessage);
+    }
+
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")
     public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest request,

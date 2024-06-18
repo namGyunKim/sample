@@ -1,6 +1,8 @@
 package gyun.sample.global.config.web;
 
+import gyun.sample.global.interceptor.AdminInterceptor;
 import gyun.sample.global.interceptor.JWTInterceptor;
+import gyun.sample.global.interceptor.SuperAdminInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
     private final JwtTokenProvider jwtTokenProvider;
     //    인터셉터
     private final JWTInterceptor jwtInterceptor;
+    private final AdminInterceptor adminInterceptor;
+    private final SuperAdminInterceptor superAdminInterceptor;
 
     // cors 설정
     @Override
@@ -57,7 +61,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout");
+                .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout","/api/account/access-denied/**")
+                .order(1);
+        registry.addInterceptor(superAdminInterceptor)
+                .addPathPatterns("/api/admin/create")
+                .order(2);
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/api/admin/**")
+                .order(3);
     }
 
     @Bean
