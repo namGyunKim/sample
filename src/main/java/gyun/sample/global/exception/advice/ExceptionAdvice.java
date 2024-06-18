@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.error.enums.ErrorCode;
-import gyun.sample.global.error.utils.ErrorUtil;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,12 +20,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(basePackages = "gyun.sample")
 public class ExceptionAdvice extends RestApiControllerAdvice {
 
-    // utils
-    private final ErrorUtil errorUtil;
-
-    public ExceptionAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher, ErrorUtil errorUtil) {
+    public ExceptionAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher) {
         super(objectMapper, applicationEventPublisher);
-        this.errorUtil = errorUtil;
     }
 
     // Global Exception Catch
