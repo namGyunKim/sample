@@ -1,8 +1,11 @@
 package gyun.sample.global.exception.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
+import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -17,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,10 +30,13 @@ import java.util.Map;
 @Slf4j
 @Aspect
 @Component
-public class BindingAdvice extends RestApiControllerAdvice{
+public class BindingAdvice extends RestApiControllerAdvice {
 
-    public BindingAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher) {
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public BindingAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher, JwtTokenProvider jwtTokenProvider) {
         super(objectMapper, applicationEventPublisher);
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Around("execution(* gyun.sample..*Controller.*(..))")
@@ -41,13 +48,15 @@ public class BindingAdvice extends RestApiControllerAdvice{
         String errorMessage = ErrorCode.REQUEST_BINDING_RESULT.getErrorMessage();
         Map<String, String> errorMap = new HashMap<>();
         Object[] args = joinPoint.getArgs(); // join point parameter
+
+        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
         for (Object arg : args) {
 //            바인딩 리절트가 존재하면
             if (arg instanceof BindingResult bindingResult) {
                 if (bindingResult.hasErrors()) {
                     populateErrorMap(bindingResult, errorMap);
                     BindingResultResponse response = new BindingResultResponse(false, type, method, errorCode, errorMessage, errorMap);
-                    sendLogEvent(response,request);
+                    sendLogEvent(response, currentAccountDTO, request);
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
                 }
             }
@@ -62,12 +71,24 @@ public class BindingAdvice extends RestApiControllerAdvice{
         }
     }
 
-    private String bindingPathCreate(Signature signature){
+    private String bindingPathCreate(Signature signature) {
         String declaringTypeName = signature.getDeclaringTypeName();
         String name = signature.getName();
-        String [] splitPath = declaringTypeName.split("\\.");
-        StringBuilder stringBuilder = new StringBuilder(splitPath[splitPath.length-1]);
+        String[] splitPath = declaringTypeName.split("\\.");
+        StringBuilder stringBuilder = new StringBuilder(splitPath[splitPath.length - 1]);
         stringBuilder.append(" ").append(name);
         return stringBuilder.toString();
+    }
+
+    private CurrentAccountDTO getTokenResponse(HttpServletRequest httpServletRequest) {
+        TokenResponse tokenResponse;
+        String authorization = httpServletRequest.getHeader("Authorization");
+        String bearer;
+        if (!StringUtils.isEmpty(authorization)) {
+            bearer = authorization.split(" ")[1];
+            tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
+            return new CurrentAccountDTO(tokenResponse);
+        }
+        return null;
     }
 }

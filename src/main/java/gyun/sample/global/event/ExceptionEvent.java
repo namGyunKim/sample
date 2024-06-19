@@ -52,9 +52,9 @@ public class ExceptionEvent {
     }
 
     // 예외 발생 시, 바인딩 리절트 에러 정보를 담는 이벤트 객체
-    public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response, HttpServletRequest httpServletRequest) {
+    public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response, CurrentAccountDTO currentAccountDTO, HttpServletRequest httpServletRequest) {
         GlobalException exception = new GlobalException(ErrorCode.REQUEST_BINDING_RESULT);
-        return createExceptionEvent(exception, ErrorCode.REQUEST_BINDING_RESULT, response.content().toString(), null, httpServletRequest);
+        return createExceptionEvent(exception, ErrorCode.REQUEST_BINDING_RESULT, response.content().toString(), currentAccountDTO, httpServletRequest);
     }
 
     // 예외 발생 시, 이벤트 로그 생성
@@ -68,7 +68,8 @@ public class ExceptionEvent {
 
         if (account != null) {
             stringBuilder.append("Account role : ").append(account.role()).append("\n")
-                    .append("Account Username : ").append(account.loginId()).append("\n");
+                    .append("Account ID : ").append(account.loginId()).append("\n")
+                    .append("Account Nickname : ").append(account.nickName()).append("\n");
         }
 
         if (this.errorCode != null) {

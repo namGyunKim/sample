@@ -32,7 +32,7 @@ public class RestApiControllerAdvice extends RestApiController {
     }
 
     // 컨트롤러를 거치기 전 바인딩 리절트 관련 이슈가 터지면 error 컨트롤러로 보내서 해당 Event - Log
-    protected void sendLogEvent(BindingResultResponse response,HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventBinding(response,httpServletRequest));
+    protected void sendLogEvent(BindingResultResponse response,CurrentAccountDTO currentAccountDTO,HttpServletRequest httpServletRequest) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventBinding(response,currentAccountDTO,httpServletRequest));
     }
 }
