@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(basePackages = "gyun.sample")
 public class ExceptionAdvice extends RestApiControllerAdvice {
 
+
+
+
     public ExceptionAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher) {
         super(objectMapper, applicationEventPublisher);
     }
@@ -35,10 +38,10 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
 
     // JWT Interceptor Exception Catch
     @ExceptionHandler(value = JWTInterceptorException.class)
-    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException,HttpServletRequest httpServletRequest) {
+    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException,@CurrentAccount CurrentAccountDTO account,HttpServletRequest httpServletRequest) {
         ErrorCode errorCode = jwtInterceptorException.getErrorCode();
         // Event - Log
-        sendLogEvent(jwtInterceptorException,httpServletRequest);
+        sendLogEvent(jwtInterceptorException,account,httpServletRequest);
         return createFailRestResponseWithJWT(errorCode.getErrorResponse());
     }
 
