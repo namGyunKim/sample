@@ -2,7 +2,6 @@ package gyun.sample.domain.member.repository.custom.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
@@ -10,6 +9,8 @@ import gyun.sample.domain.member.entity.QMember;
 import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
 import gyun.sample.domain.member.repository.custom.util.MemberRepositoryCustomUtil;
+import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,9 +41,15 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        JPAQuery<Member> total = jpaQueryFactory.selectFrom(member)
-                .where(builder);
+        Long total = jpaQueryFactory.select(member.id.count())
+                .from(member)
+                .where(builder)
+                .fetchOne();
 
-        return PageableExecutionUtils.getPage(content, pageable, total::fetchCount);
+        if (total == null) {
+            throw new GlobalException(ErrorCode.COUNT_FETCH_ERROR, "관리자 수 조회에 실패하였습니다.");
+        }
+
+        return PageableExecutionUtils.getPage(content, pageable, () -> total);
     }
 }
