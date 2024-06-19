@@ -22,13 +22,12 @@ public class GetAdminListValidator implements Validator {
         validateMemberRequest(request, errors);
     }
 
-
     private void validateMemberRequest(GetMemberListRequest request, Errors errors) {
-        if (!GlobalOrderEnums.checkAdminMember(request.order())) {
+        if (!GlobalOrderEnums.checkAdminMember(request.order()) && request.order() != null) {
             errors.rejectValue("order", "order.notAdmin", "관리자 정렬 기준이 아닙니다.");
         }
 
-        if (!GlobalFilterEnums.checkAdminMember(request.filter())) {
+        if (!GlobalFilterEnums.checkAdminMember(request.filter()) && request.filter() != null) {
             errors.rejectValue("filter", "filter.notAdmin", "관리자 필터 기준이 아닙니다.");
         }
     }

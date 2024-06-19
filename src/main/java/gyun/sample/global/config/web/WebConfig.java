@@ -1,5 +1,6 @@
 package gyun.sample.global.config.web;
 
+import gyun.sample.global.enums.converter.GenericEnumConverterFactory;
 import gyun.sample.global.interceptor.AdminInterceptor;
 import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.interceptor.SuperAdminInterceptor;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -31,6 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final JWTInterceptor jwtInterceptor;
     private final AdminInterceptor adminInterceptor;
     private final SuperAdminInterceptor superAdminInterceptor;
+    private final GenericEnumConverterFactory genericEnumConverterFactory;
 
     // cors 설정
     @Override
@@ -69,6 +72,12 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/api/admin/**")
                 .order(3);
+    }
+
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverterFactory(genericEnumConverterFactory);
     }
 
     @Bean

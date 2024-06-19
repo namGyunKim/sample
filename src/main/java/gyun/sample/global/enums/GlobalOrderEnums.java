@@ -20,7 +20,7 @@ public enum GlobalOrderEnums {
 
     //  요청값으로 Enum 매칭
     @JsonCreator
-    public static GlobalOrderEnums create(String requestValue) {
+    public GlobalOrderEnums create(String requestValue) {
         return Stream.of(values())
                 .filter(v -> v.name().equalsIgnoreCase(requestValue.toUpperCase()))
                 .findFirst()

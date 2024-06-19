@@ -21,7 +21,7 @@ public enum GlobalFilterEnums {
 
     //  요청값으로 Enum 매칭
     @JsonCreator
-    public static GlobalFilterEnums create(String requestValue) {
+    public GlobalFilterEnums create(String requestValue) {
         return Stream.of(values())
                 .filter(v -> v.name().equalsIgnoreCase(requestValue.toUpperCase()))
                 .findFirst()
