@@ -5,6 +5,7 @@ import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
+import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class ExceptionEvent {
     private String errorDetailMsg;
     private CurrentAccountDTO account;
     private LocalDateTime createdAt;
+    private String clientIp;
 
     // 예외 발생 시, 예외 정보를 담는 이벤트 객체 생성
     public static ExceptionEvent createExceptionEvent(Exception exception, ErrorCode errorCode,
@@ -31,9 +33,11 @@ public class ExceptionEvent {
         if (httpServletRequest != null) {
             exceptionEvent.setRequestPath(httpServletRequest.getRequestURL().toString());
             exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
+            exceptionEvent.setClientIp(UtilService.getClientIp(httpServletRequest));
         } else {
-            exceptionEvent.setRequestPath("No Request Path");
-            exceptionEvent.setRequestMethod("No Request Method");
+            exceptionEvent.setRequestPath("BindingResult 에서 HttpservletRequest를 가져오지 못했습니다.");
+            exceptionEvent.setRequestMethod("BindingResult 에서 HttpservletRequest를 가져오지 못했습니다.");
+            exceptionEvent.setClientIp("BindingResult 에서 HttpservletRequest를 가져오지 못했습니다.");
         }
         exceptionEvent.setErrorName(exception.getClass().getSimpleName());
         exceptionEvent.setErrorCode(errorCode);
@@ -65,7 +69,8 @@ public class ExceptionEvent {
         stringBuilder.append("\nlogStart=== === === === === === === === === === === === === === === === === === === === === === === === === === logStart\n")
                 .append("Exception Title : ").append(errorName).append("\n")
                 .append("Request Path : ").append(requestPath).append("\n")
-                .append("Request Method : ").append(requestMethod).append("\n");
+                .append("Request Method : ").append(requestMethod).append("\n")
+                .append("Client IP : ").append(clientIp).append("\n");
 
         if (account != null) {
             stringBuilder.append("Account role : ").append(account.role()).append("\n")
