@@ -1,14 +1,15 @@
 package gyun.sample.domain.member.service.read;
 
+import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
 import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface ReadMemberService {
 
     boolean existsByRole();
-    List<AllMemberResponse> getList();
+
+    Page<AllMemberResponse> getList(GetMemberListRequest getMemberListRequest);
 
 }

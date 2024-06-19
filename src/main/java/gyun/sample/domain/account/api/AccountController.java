@@ -53,7 +53,7 @@ public class AccountController {
 
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "로그아웃(Refresh Token Delete)")
-    @GetMapping(value = "/logout/{refreshToken}")
+    @PostMapping(value = "/logout/{refreshToken}")
     public ResponseEntity<String> logout(@PathVariable String refreshToken) {
 
         boolean response = writeAccountService.logout(refreshToken);
@@ -61,7 +61,7 @@ public class AccountController {
     }
 
     @Operation(summary = "리프레쉬 토큰으로 JWT 토큰 재발급")
-    @GetMapping(value = "/get-token-by-refresh/{refreshToken}")
+    @PostMapping(value = "/get-token-by-refresh/{refreshToken}")
     public ResponseEntity<String> getAccessToken(@PathVariable String refreshToken) {
         AccountLoginResponse response = writeAccountService.getJwtTokenByRefreshToken(refreshToken);
         return restApiController.createSuccessRestResponse(response);
