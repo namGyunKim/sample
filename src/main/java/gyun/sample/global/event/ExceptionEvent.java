@@ -47,6 +47,7 @@ public class ExceptionEvent {
         return createExceptionEvent(exception, exception.getErrorCode(), exception.getErrorDetailMessage(), account, httpServletRequest);
     }
 
+
     // 예외 발생 시, 로그인 데이터가 없는 예외 정보를 담는 이벤트 객체 (GUEST 계정)
     public static ExceptionEvent createExceptionEventWithJWT(JWTInterceptorException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
         return createExceptionEvent(exception, exception.getErrorCode(), exception.getErrorDetailMessage(), account, httpServletRequest);

@@ -44,7 +44,12 @@ public enum ErrorCode {
     // === OTHER (9000) ===
     JSON_PROCESS_FAIL("9001", "Json 파일을 처리하는데 실패했습니다."),
     CONSTRAINT_PROCESS_FAIL("9002", "정보가 서로 일치하지 않습니다."),
-
+    DATA_ACCESS_ERROR("9003", "데이터베이스 접근 에러"),
+    MAX_UPLOAD_SIZE_EXCEEDED("9004", "파일 업로드 크기 제한 초과"),
+    INVALID_INPUT_VALUE("9005", "입력값이 올바르지 않습니다."),
+    PAGE_NOT_EXIST("9006", "페이지를 찾을 수 없습니다."),
+    METHOD_NOT_SUPPORTED("9007", "지원하지 않는 메소드입니다."),
+    INVALID_ARGUMENT("9008", "잘못된 인자값입니다."),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

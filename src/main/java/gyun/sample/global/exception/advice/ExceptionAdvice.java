@@ -10,17 +10,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
+import java.nio.file.AccessDeniedException;
 
 
 // 예외 처리
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice(basePackages = "gyun.sample")
 public class ExceptionAdvice extends RestApiControllerAdvice {
-
-
 
 
     public ExceptionAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher) {
@@ -32,17 +37,43 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
     protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
         ErrorCode errorCode = commonException.getErrorCode();
         // Event - Log
-        sendLogEvent(commonException, account,httpServletRequest);
+        sendLogEvent(commonException, account, httpServletRequest);
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 
     // JWT Interceptor Exception Catch
     @ExceptionHandler(value = JWTInterceptorException.class)
-    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException,@CurrentAccount CurrentAccountDTO account,HttpServletRequest httpServletRequest) {
+    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
         ErrorCode errorCode = jwtInterceptorException.getErrorCode();
         // Event - Log
-        sendLogEvent(jwtInterceptorException,account,httpServletRequest);
+        sendLogEvent(jwtInterceptorException, account, httpServletRequest);
         return createFailRestResponseWithJWT(errorCode.getErrorResponse());
     }
 
+    @ExceptionHandler(value = Exception.class)
+    protected ResponseEntity<String> processException(Exception exception, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
+        ErrorCode errorCode;
+        if (exception instanceof DataAccessException) {
+            errorCode = ErrorCode.DATA_ACCESS_ERROR;
+        } else if (exception instanceof AccessDeniedException) {
+            errorCode = ErrorCode.ACCESS_DENIED;
+        } else if (exception instanceof MaxUploadSizeExceededException) {
+            errorCode = ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED;
+        } else if (exception instanceof MethodArgumentNotValidException) {
+            errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        } else if (exception instanceof NoHandlerFoundException) {
+            errorCode = ErrorCode.PAGE_NOT_EXIST;
+        } else if (exception instanceof HttpRequestMethodNotSupportedException) {
+            errorCode = ErrorCode.METHOD_NOT_SUPPORTED;
+        } else if (exception instanceof IllegalArgumentException) {
+            errorCode = ErrorCode.INVALID_ARGUMENT;
+        } else {
+            errorCode = ErrorCode.FAILED;
+        }
+
+        GlobalException globalException = new GlobalException(errorCode, exception);
+        // Event - Log
+        sendLogEvent(globalException, account, httpServletRequest);
+        return createFailRestResponseWithJWT(errorCode.getErrorResponse());
+    }
 }

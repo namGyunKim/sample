@@ -23,16 +23,17 @@ public class RestApiControllerAdvice extends RestApiController {
 
     // 컨트롤러를 거친 이후 Event - Log
     protected void sendLogEvent(GlobalException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(exception, account,httpServletRequest));
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(exception, account, httpServletRequest));
     }
 
     // 컨트롤러를 거치기 전 JWT 관련 이슈가 터지면 error 컨트롤러로 보내서 해당 Event - Log
-    protected void sendLogEvent(JWTInterceptorException exception,CurrentAccountDTO account,HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventWithJWT(exception,account,httpServletRequest));
+    protected void sendLogEvent(JWTInterceptorException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventWithJWT(exception, account, httpServletRequest));
     }
 
+
     // 컨트롤러를 거치기 전 바인딩 리절트 관련 이슈가 터지면 error 컨트롤러로 보내서 해당 Event - Log
-    protected void sendLogEvent(BindingResultResponse response,CurrentAccountDTO currentAccountDTO,HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventBinding(response,currentAccountDTO,httpServletRequest));
+    protected void sendLogEvent(BindingResultResponse response, CurrentAccountDTO currentAccountDTO, HttpServletRequest httpServletRequest) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventBinding(response, currentAccountDTO, httpServletRequest));
     }
 }
