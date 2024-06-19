@@ -30,15 +30,9 @@ public class ExceptionEvent {
                                                       String errorDetailMsg, CurrentAccountDTO account,
                                                       HttpServletRequest httpServletRequest) {
         ExceptionEvent exceptionEvent = new ExceptionEvent();
-        if (httpServletRequest != null) {
-            exceptionEvent.setRequestPath(httpServletRequest.getRequestURL().toString());
-            exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
-            exceptionEvent.setClientIp(UtilService.getClientIp(httpServletRequest));
-        } else {
-            exceptionEvent.setRequestPath("BindingResult 에서 HttpservletRequest를 가져오지 못했습니다.");
-            exceptionEvent.setRequestMethod("BindingResult 에서 HttpservletRequest를 가져오지 못했습니다.");
-            exceptionEvent.setClientIp("BindingResult 에서 HttpservletRequest를 가져오지 못했습니다.");
-        }
+        exceptionEvent.setRequestPath(httpServletRequest.getRequestURL().toString());
+        exceptionEvent.setRequestMethod(httpServletRequest.getMethod());
+        exceptionEvent.setClientIp(UtilService.getClientIp(httpServletRequest));
         exceptionEvent.setErrorName(exception.getClass().getSimpleName());
         exceptionEvent.setErrorCode(errorCode);
         exceptionEvent.setErrorDetailMsg(errorDetailMsg);
@@ -58,9 +52,9 @@ public class ExceptionEvent {
     }
 
     // 예외 발생 시, 바인딩 리절트 에러 정보를 담는 이벤트 객체
-    public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response) {
+    public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response, HttpServletRequest httpServletRequest) {
         GlobalException exception = new GlobalException(ErrorCode.REQUEST_BINDING_RESULT);
-        return createExceptionEvent(exception, ErrorCode.REQUEST_BINDING_RESULT, response.content().toString(), null, null);
+        return createExceptionEvent(exception, ErrorCode.REQUEST_BINDING_RESULT, response.content().toString(), null, httpServletRequest);
     }
 
     // 예외 발생 시, 이벤트 로그 생성
