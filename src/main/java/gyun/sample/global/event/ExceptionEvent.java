@@ -2,6 +2,7 @@ package gyun.sample.global.event;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.BindingException;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
@@ -53,7 +54,7 @@ public class ExceptionEvent {
 
     // 예외 발생 시, 바인딩 리절트 에러 정보를 담는 이벤트 객체
     public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response, CurrentAccountDTO currentAccountDTO, HttpServletRequest httpServletRequest) {
-        GlobalException exception = new GlobalException(ErrorCode.REQUEST_BINDING_RESULT);
+        BindingException exception = new BindingException(ErrorCode.REQUEST_BINDING_RESULT);
         return createExceptionEvent(exception, ErrorCode.REQUEST_BINDING_RESULT, response.content().toString(), currentAccountDTO, httpServletRequest);
     }
 
