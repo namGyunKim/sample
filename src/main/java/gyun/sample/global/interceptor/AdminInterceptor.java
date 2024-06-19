@@ -1,5 +1,6 @@
 package gyun.sample.global.interceptor;
 
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.global.utils.JwtTokenProvider;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +12,8 @@ public class AdminInterceptor extends AbstractRoleInterceptor {
     }
 
     @Override
-    protected String getRequiredRole() {
-        return "ADMIN";
+    protected boolean getRequiredRole(AccountRole accountRole) {
+        return accountRole == AccountRole.ADMIN || accountRole == AccountRole.SUPER_ADMIN;
     }
 
     @Override

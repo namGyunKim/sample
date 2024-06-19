@@ -60,7 +60,6 @@ public class WriteAccountService extends AccountServiceUtil {
     // 인터셉터에서 터지는  에러
     public void AccessException(String errorMessage) {
         ErrorCode accessException = ErrorCode.ACCESS_DENIED;
-        System.out.println("여기옴?");
         throw new GlobalException(accessException,errorMessage);
     }
 

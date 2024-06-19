@@ -18,19 +18,32 @@ public class InitService {
     //    service
     private final ReadMemberService readAdminService;
     private final WriteMemberService writeMemberService;
+
     //    서버 시작시 실행
     @PostConstruct
     public void init() {
-        saveMemberByRoleSuperAdmin();
+        createMemberByRoleSuperAdmin();
+        createMemberByRoleAdmin();
     }
 
 
     //    최고 관리자가 없을경우 생성
     @Transactional
-    public void saveMemberByRoleSuperAdmin() {
-        if (!readAdminService.existsByRole()) {
+    public void createMemberByRoleSuperAdmin() {
+        if (!readAdminService.existsByRole(AccountRole.SUPER_ADMIN)) {
             CreateMemberRequest request = new CreateMemberRequest("superAdmin", "최고관리자", "1234", AccountRole.SUPER_ADMIN, MemberType.GENERAL);
             writeMemberService.createMember(request);
+        }
+    }
+
+    //    관리자가 없을경우 관리자 100개 생성
+    @Transactional
+    public void createMemberByRoleAdmin() {
+        if (!readAdminService.existsByRole(AccountRole.ADMIN)) {
+            for (int i = 0; i < 100; i++) {
+                CreateMemberRequest request = new CreateMemberRequest("admin" + i, "관리자" + i, "1234", AccountRole.ADMIN, MemberType.GENERAL);
+                writeMemberService.createMember(request);
+            }
         }
     }
 

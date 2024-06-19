@@ -24,7 +24,6 @@ public class JWTInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         TokenResponse tokenResponse;
-
         String authorization = request.getHeader("Authorization");
         String bearer;
         if (!StringUtils.isEmpty(authorization)) {

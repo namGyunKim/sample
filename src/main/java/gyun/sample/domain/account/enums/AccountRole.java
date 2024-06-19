@@ -26,4 +26,12 @@ public enum AccountRole {
                 .findFirst()
                 .orElse(null);
     }
+
+    //    String 으로 name 을 받아서 반환
+    public static AccountRole getByName(String name) {
+        return Stream.of(values())
+                .filter(v -> v.name().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
 }

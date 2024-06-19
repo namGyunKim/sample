@@ -23,8 +23,8 @@ public class ReadAdminService extends BaseMemberService implements ReadMemberSer
     }
 
     @Override
-    public boolean existsByRole() {
-        return memberRepository.existsByRole(AccountRole.SUPER_ADMIN);
+    public boolean existsByRole(AccountRole accountRole) {
+        return memberRepository.existsByRole(accountRole);
     }
 
     @Override

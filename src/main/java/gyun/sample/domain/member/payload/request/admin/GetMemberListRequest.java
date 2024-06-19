@@ -12,6 +12,7 @@ public record GetMemberListRequest(
         int size,
         @NotNull(message = "정렬 기준을 선택해주세요.")
         GlobalOrderEnums order,
+        @Schema(description = "검색어", example = "관리자")
         String searchWord,
         @NotNull(message = "필터 기준을 선택해주세요.")
         GlobalFilterEnums filter) {
