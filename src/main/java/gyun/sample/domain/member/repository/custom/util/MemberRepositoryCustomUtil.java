@@ -4,7 +4,9 @@ package gyun.sample.domain.member.repository.custom.util;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.QMember;
+import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +19,25 @@ public class MemberRepositoryCustomUtil {
     protected final QMember member = QMember.member;
 
 
-    public OrderSpecifier<?> getOrderSpecifierWithAdminMember(GlobalOrderEnums order) {
+    public OrderSpecifier<?> getMemberListOrder(GlobalOrderEnums order) {
         return switch (order) {
             case CREATE_ASC -> new OrderSpecifier<>(Order.ASC, member.createdAt);
             case CREATE_DESC -> new OrderSpecifier<>(Order.DESC, member.createdAt);
         };
     }
 
-    public void addSearchConditionsWithAdminMember(BooleanBuilder builder, GlobalFilterEnums filter, String searchWord) {
+    public BooleanBuilder getMemberListFilter(GetMemberListRequest request, AccountRole accountRole) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(member.role.eq(accountRole));
+        final String searchWord = request.searchWord();
+        if (searchWord != null && !searchWord.isBlank()) {
+            addMemberListSearchConditions(builder, request.filter(), searchWord);
+        }
+
+        return builder;
+    }
+
+    private void addMemberListSearchConditions(BooleanBuilder builder, GlobalFilterEnums filter, String searchWord) {
         switch (filter) {
             case NICK_NAME -> builder.and(member.nickName.containsIgnoreCase(searchWord));
             case LOGIN_ID -> builder.and(member.loginId.containsIgnoreCase(searchWord));

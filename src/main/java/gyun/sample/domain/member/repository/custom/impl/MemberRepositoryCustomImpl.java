@@ -25,17 +25,13 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     private final QMember member = QMember.member;
 
     @Override
-    public Page<Member> getMemberList(GetMemberListRequest getMemberListRequest, AccountRole accountRole, Pageable pageable) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(member.role.eq(accountRole));
+    public Page<Member> getMemberList(GetMemberListRequest request, AccountRole accountRole, Pageable pageable) {
 
-        final String searchWord = getMemberListRequest.searchWord();
-        if (!searchWord.isBlank()) {
-            memberRepositoryCustomUtil.addSearchConditionsWithAdminMember(builder, getMemberListRequest.filter(), searchWord);
-        }
+//        조건 추가
+        BooleanBuilder builder = memberRepositoryCustomUtil.getMemberListFilter(request, accountRole);
 
         // 동적 정렬 추가
-        OrderSpecifier<?> orderSpecifier = memberRepositoryCustomUtil.getOrderSpecifierWithAdminMember(getMemberListRequest.order());
+        OrderSpecifier<?> orderSpecifier = memberRepositoryCustomUtil.getMemberListOrder(request.order());
 
         List<Member> content = jpaQueryFactory.selectFrom(member)
                 .where(builder)
