@@ -57,4 +57,9 @@ public class AdminRestController {
         return restApiController.createRestResponse(readAdminService.getList(getMemberListRequest));
     }
 
+    @Operation(summary = "관리자 상세")
+    @GetMapping(value = "/detail/{id}")
+    public ResponseEntity<String> getAdminDetail(@PathVariable long id) {
+        return restApiController.createRestResponse(readAdminService.getDetail(id));
+    }
 }

@@ -26,10 +26,10 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     private final QMember member = QMember.member;
 
     @Override
-    public Page<Member> getMemberList(GetMemberListRequest request, AccountRole accountRole, Pageable pageable) {
+    public Page<Member> getMemberList(GetMemberListRequest request, List<AccountRole> accountRoles, Pageable pageable) {
 
 //        조건 추가
-        BooleanBuilder builder = memberRepositoryCustomUtil.getMemberListFilter(request, accountRole);
+        BooleanBuilder builder = memberRepositoryCustomUtil.getMemberListFilter(request, accountRoles);
 
         // 동적 정렬 추가
         OrderSpecifier<?> orderSpecifier = memberRepositoryCustomUtil.getMemberListOrder(request.order());

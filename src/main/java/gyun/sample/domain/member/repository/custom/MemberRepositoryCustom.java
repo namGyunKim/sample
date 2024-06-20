@@ -6,7 +6,9 @@ import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface MemberRepositoryCustom {
 
-    Page<Member> getMemberList(GetMemberListRequest getMemberListRequest, AccountRole accountRole, Pageable pageable);
+    Page<Member> getMemberList(GetMemberListRequest getMemberListRequest, List<AccountRole> accountRoles, Pageable pageable);
 }
