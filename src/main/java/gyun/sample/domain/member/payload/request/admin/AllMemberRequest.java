@@ -1,5 +1,6 @@
 package gyun.sample.domain.member.payload.request.admin;
 
+import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,5 +19,7 @@ public record AllMemberRequest(
         @Schema(description = "검색어", example = "관리자")
         String searchWord,
         @NotNull(message = "필터 기준을 선택해주세요.")
-        GlobalFilterEnums filter) {
+        GlobalFilterEnums filter,
+        @NotNull(message = "활성화 여부를 선택해주세요.")
+        GlobalActiveEnums active) {
 }

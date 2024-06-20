@@ -8,6 +8,7 @@ import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
@@ -40,7 +41,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (!member.isActive()) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        if (member.getActive() != GlobalActiveEnums.ACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.update(updateMemberRequest);
 
         if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
@@ -53,7 +54,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     public GlobalInactiveResponse inactiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (!member.isActive()) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        if (member.getActive() != GlobalActiveEnums.ACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
         return new GlobalInactiveResponse(member.getId());

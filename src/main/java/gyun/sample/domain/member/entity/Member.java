@@ -6,8 +6,8 @@ import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,8 +25,8 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String nickName;                                   //  닉네임
     private String password;                               //  유저 비밀번호
-    @NotNull
-    private boolean active;                                 //  활성
+    @Enumerated(EnumType.STRING)
+    private GlobalActiveEnums active;                                 //  활성
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
 
@@ -40,13 +40,13 @@ public class Member extends BaseTimeEntity {
         this.nickName = request.nickName();
         this.password = request.password();
         this.role = request.role();
-        this.active = true;
+        this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = request.memberType();
     }
 
     //    멤버 비활성화
     public void deactivate() {
-        this.active = false;
+        this.active = GlobalActiveEnums.INACTIVE;
     }
 
     //    소셜 회원가입
@@ -54,7 +54,7 @@ public class Member extends BaseTimeEntity {
         this.loginId = socialKey;
         this.nickName = nickName;
         this.role = AccountRole.USER;
-        this.active = true;
+        this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = memberType;
     }
 
@@ -67,6 +67,6 @@ public class Member extends BaseTimeEntity {
     }
 
     public void inactive() {
-        this.active = false;
+        this.active = GlobalActiveEnums.INACTIVE;
     }
 }
