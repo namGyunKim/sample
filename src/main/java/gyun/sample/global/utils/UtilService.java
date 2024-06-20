@@ -54,7 +54,7 @@ public class UtilService {
         Set<BeanDefinition> components = provider.findCandidateComponents("gyun.sample");
         for (BeanDefinition component : components) {
             // 제외할 경로 필터링
-            if (component.getBeanClassName().startsWith("gyun.sample.global.exception") || component.getBeanClassName().startsWith("gyun.sample.global.error")) {
+            if (Objects.requireNonNull(component.getBeanClassName()).startsWith("gyun.sample.global.exception") || component.getBeanClassName().startsWith("gyun.sample.global.error")) {
                 continue;
             }
 
