@@ -5,6 +5,7 @@ import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -59,5 +60,9 @@ public class Member extends BaseTimeEntity {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void update(UpdateMemberRequest updateMemberRequest) {
+        this.nickName = updateMemberRequest.nickName();
     }
 }

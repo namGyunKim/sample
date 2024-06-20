@@ -1,9 +1,10 @@
-package gyun.sample.global.exception.advice;
+package gyun.sample.global.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.advice.RestApiControllerAdvice;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;

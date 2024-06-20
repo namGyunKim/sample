@@ -3,7 +3,7 @@ package gyun.sample.domain.member.service.read;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
+import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
 import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
 import gyun.sample.domain.member.payload.response.admin.DetailMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -32,7 +32,7 @@ public class ReadAdminService extends BaseMemberService implements ReadMemberSer
     }
 
     @Override
-    public Page<AllMemberResponse> getList(GetMemberListRequest request) {
+    public Page<AllMemberResponse> getList(AllMemberRequest request) {
         Pageable pageable = PageRequest.of(request.page() - 1, request.size());
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Page<Member> memberList = memberRepository.getMemberList(request, roles, pageable);

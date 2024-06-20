@@ -6,7 +6,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.QMember;
-import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
+import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class MemberRepositoryCustomUtil {
         };
     }
 
-    public BooleanBuilder getMemberListFilter(GetMemberListRequest request, List<AccountRole> accountRoles) {
+    public BooleanBuilder getMemberListFilter(AllMemberRequest request, List<AccountRole> accountRoles) {
         BooleanBuilder builder = new BooleanBuilder();
 //        builder.and(member.role.in(accountRoles));
         builder.and(member.active.isTrue());

@@ -6,7 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.entity.QMember;
-import gyun.sample.domain.member.payload.request.admin.GetMemberListRequest;
+import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
 import gyun.sample.domain.member.repository.custom.util.MemberRepositoryCustomUtil;
 import gyun.sample.global.error.enums.ErrorCode;
@@ -26,7 +26,7 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     private final QMember member = QMember.member;
 
     @Override
-    public Page<Member> getMemberList(GetMemberListRequest request, List<AccountRole> accountRoles, Pageable pageable) {
+    public Page<Member> getMemberList(AllMemberRequest request, List<AccountRole> accountRoles, Pageable pageable) {
 
 //        조건 추가
         BooleanBuilder builder = memberRepositoryCustomUtil.getMemberListFilter(request, accountRoles);

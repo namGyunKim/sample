@@ -1,14 +1,22 @@
 package gyun.sample.domain.member.service.write;
 
 
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
+import gyun.sample.global.payload.response.GlobalUpdateResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Transactional
@@ -25,5 +33,17 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));
         return new GlobalCreateResponse(member.getId());
+    }
+
+    @Override
+    public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
+        List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
+        Member member = memberRepository.findByLoginIdAndRoleInAndActive(loginId, roles, true).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        member.update(updateMemberRequest);
+
+        if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
+            member.updatePassword(passwordEncoder.encode(updateMemberRequest.password()));
+        }
+        return new GlobalUpdateResponse(member.getId());
     }
 }

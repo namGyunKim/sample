@@ -23,8 +23,10 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     boolean existsByLoginId(String loginId);
 
     boolean existsByNickName(String nickName);
+    boolean existsByNickNameAndLoginIdNot(String nickName,String LoginId);
 
     boolean existsByRole(AccountRole role);
 
     Optional<Member> findByIdAndRoleInAndActive(long id, List<AccountRole> accountRoles, boolean active);
+    Optional<Member> findByLoginIdAndRoleInAndActive(String loginId, List<AccountRole> accountRoles, boolean active);
 }
