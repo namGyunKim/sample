@@ -40,13 +40,12 @@ public class WriteAccountService extends AccountServiceUtil {
     }
 
 
-
     //    리프레시 토큰으로 토큰 재발급
     public AccountLoginResponse getJwtTokenByRefreshToken(String oldRefreshToken) {
-        Member member = findLoginIdByRefreshToken(oldRefreshToken);
+        final String loginId = jwtTokenProvider.deleteToken(oldRefreshToken);
+        Member member = findByLoginId(loginId);
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String newRefreshToken = jwtTokenProvider.createRefreshToken(member);
-        jwtTokenProvider.deleteToken(oldRefreshToken);
         return new AccountLoginResponse(accessToken, newRefreshToken);
     }
 
@@ -60,12 +59,12 @@ public class WriteAccountService extends AccountServiceUtil {
     // 인터셉터에서 터지는  에러
     public void AccessException(String errorMessage) {
         ErrorCode accessException = ErrorCode.ACCESS_DENIED;
-        throw new GlobalException(accessException,errorMessage);
+        throw new GlobalException(accessException, errorMessage);
     }
 
     //    RefreshToken 제거
-    public boolean logout(String refreshToken) {
-        refreshTokenRepository.delete(refreshToken);
+    public boolean logout(String loginId) {
+        refreshTokenRepository.deleteWithLoginId(loginId);
         return true;
     }
 

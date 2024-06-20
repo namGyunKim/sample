@@ -22,7 +22,7 @@ public enum ErrorCode {
     NOT_MATCH_PASSWORD("1005", "비밀번호가 일치하지 않습니다."),
     JWT_UNKNOWN_ERROR("1006", "JWT 토큰 에러"),
     JWT_SIGNATURE_ERROR("1007", "JWT 시그니처 에러(시크릿 키)"),
-
+    REFRESH_TOKEN_NOT_FOUND("1008", "리프레시 토큰을 찾을 수 없습니다."),
     // === MEMBER (1100) ===
     ALREADY_REGISTERED_MEMBER_BY_LOGIN_ID("1101", "이미 등록된 아이디입니다."),
     NOT_EXIST_MEMBER("1102", "존재하지 않는 회원입니다."),
@@ -51,6 +51,7 @@ public enum ErrorCode {
     PAGE_NOT_EXIST("9006", "페이지를 찾을 수 없습니다."),
     METHOD_NOT_SUPPORTED("9007", "지원하지 않는 메소드입니다."),
     INVALID_ARGUMENT("9008", "잘못된 인자값입니다."),
+
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

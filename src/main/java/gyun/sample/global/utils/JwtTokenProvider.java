@@ -120,7 +120,7 @@ public class JwtTokenProvider {
     }
 
     // 리프레쉬 토큰 제거
-    public void deleteToken(String refreshToken) {
-        refreshTokenRepository.delete(refreshToken);
+    public String deleteToken(String refreshToken) {
+        return refreshTokenRepository.deleteWithRefreshToken(refreshToken);
     }
 }

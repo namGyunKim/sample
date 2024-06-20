@@ -53,10 +53,10 @@ public class AccountController {
 
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "로그아웃(Refresh Token Delete)")
-    @PostMapping(value = "/logout/{refreshToken}")
-    public ResponseEntity<String> logout(@PathVariable String refreshToken) {
+    @PostMapping(value = "/logout")
+    public ResponseEntity<String> logout(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
-        boolean response = writeAccountService.logout(refreshToken);
+        boolean response = writeAccountService.logout(currentAccountDTO.loginId());
         return restApiController.createSuccessRestResponse(response);
     }
 
