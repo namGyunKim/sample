@@ -23,7 +23,6 @@ public class RefreshTokenRepository {
     public void save(String refreshToken, String loginId, long refreshExpirationTime) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         valueOperations.set(loginId, refreshToken);
-        System.out.println("savedRefreshToken = " + refreshToken);
         redisTemplate.expire(loginId, refreshExpirationTime, TimeUnit.SECONDS);
     }
 
