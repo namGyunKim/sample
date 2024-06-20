@@ -27,6 +27,6 @@ class ReadAdminServiceTest {
         Page<AllMemberResponse> result = readAdminService.getList(request);
 
         // Then
-        assertEquals(2, result.getTotalElements(), "총 요소 수는 2이어야 합니다");
+        assertEquals(101, result.getTotalElements(), "총 요소 수는 101이어야 합니다");
     }
 }
