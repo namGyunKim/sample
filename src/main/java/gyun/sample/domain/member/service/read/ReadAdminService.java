@@ -2,6 +2,7 @@ package gyun.sample.domain.member.service.read;
 
 
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
 import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
@@ -22,8 +23,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReadAdminService extends BaseMemberService implements ReadMemberService {
 
-    public ReadAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository) {
-        super(passwordEncoder, memberRepository);
+    public ReadAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
+        super(passwordEncoder, memberRepository, refreshTokenRepository);
     }
 
     @Override

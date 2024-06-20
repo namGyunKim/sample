@@ -65,4 +65,8 @@ public class Member extends BaseTimeEntity {
     public void update(UpdateMemberRequest updateMemberRequest) {
         this.nickName = updateMemberRequest.nickName();
     }
+
+    public void inactive() {
+        this.active = false;
+    }
 }

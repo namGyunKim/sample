@@ -13,6 +13,7 @@ import gyun.sample.domain.member.validator.UpdateAdminValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
+import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -77,7 +78,14 @@ public class AdminRestController {
     @PutMapping(value = "/update")
     public ResponseEntity<String> updateAdmin(@Valid @RequestBody UpdateMemberRequest updateMemberRequest, BindingResult bindingResult,
                                               @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        GlobalUpdateResponse response = writeAdminService.updateMember(updateMemberRequest,currentAccountDTO.loginId());
+        GlobalUpdateResponse response = writeAdminService.updateMember(updateMemberRequest, currentAccountDTO.loginId());
+        return restApiController.createRestResponse(response);
+    }
+
+    @Operation(summary = "관리자 비활성화")
+    @PatchMapping(value = "/inactive")
+    public ResponseEntity<String> inactiveAdmin(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
+        GlobalInactiveResponse response = writeAdminService.inactiveMember(currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 }
