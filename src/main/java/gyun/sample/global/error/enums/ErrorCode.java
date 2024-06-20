@@ -51,7 +51,7 @@ public enum ErrorCode {
     PAGE_NOT_EXIST("9006", "페이지를 찾을 수 없습니다."),
     METHOD_NOT_SUPPORTED("9007", "지원하지 않는 메소드입니다."),
     INVALID_ARGUMENT("9008", "잘못된 인자값입니다."),
-
+    REFLECTION_ERROR("9009", "리플렉션 에러"),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

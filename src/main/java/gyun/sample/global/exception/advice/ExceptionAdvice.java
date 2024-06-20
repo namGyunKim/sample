@@ -24,7 +24,7 @@ import java.nio.file.AccessDeniedException;
 
 // 예외 처리
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice(basePackages = "gyun.sample")
+@RestControllerAdvice
 public class ExceptionAdvice extends RestApiControllerAdvice {
 
 

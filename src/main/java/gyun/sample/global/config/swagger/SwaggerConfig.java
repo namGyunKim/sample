@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 // Swagger 설정
 
@@ -25,7 +24,7 @@ public class SwaggerConfig {
 
     @Bean
     public GroupedOpenApi openApi() {
-        String[] paths = {"/api/**"};
+        String[] paths = {"/api/**","/enums"};
         return GroupedOpenApi.builder()
                 .group("api v1")
                 .pathsToMatch(paths)

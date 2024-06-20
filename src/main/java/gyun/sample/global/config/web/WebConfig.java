@@ -70,7 +70,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/admin/create")
                 .order(2);
         registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/api/admin/**")
+                .addPathPatterns("/api/admin/**","/enums")
                 .order(3);
     }
 
