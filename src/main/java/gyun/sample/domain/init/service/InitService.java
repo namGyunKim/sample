@@ -40,7 +40,7 @@ public class InitService {
     @Transactional
     public void createMemberByRoleAdmin() {
         if (!readAdminService.existsByRole(AccountRole.ADMIN)) {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 1; i <= 100; i++) {
                 CreateMemberRequest request = new CreateMemberRequest("admin" + i, "관리자" + i, "1234", AccountRole.ADMIN, MemberType.GENERAL);
                 writeMemberService.createMember(request);
             }
