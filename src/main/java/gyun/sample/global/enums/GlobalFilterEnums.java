@@ -28,8 +28,8 @@ public enum GlobalFilterEnums {
                 .orElse(null);
     }
 
-    public static boolean checkAdminMember(GlobalFilterEnums order) {
+    public static boolean checkAdminMember(GlobalFilterEnums enums) {
         List<GlobalFilterEnums> allowedValues = Arrays.asList(ALL, NICK_NAME, LOGIN_ID);
-        return allowedValues.contains(order);
+        return allowedValues.contains(enums);
     }
 }

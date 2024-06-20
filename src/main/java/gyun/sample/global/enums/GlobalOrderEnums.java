@@ -27,8 +27,8 @@ public enum GlobalOrderEnums {
                 .orElse(null);
     }
 
-    public static boolean checkAdminMember(GlobalOrderEnums order) {
+    public static boolean checkAdminMember(GlobalOrderEnums enums) {
         List<GlobalOrderEnums> allowedValues = Arrays.asList(CREATE_ASC, CREATE_DESC);
-        return allowedValues.contains(order);
+        return allowedValues.contains(enums);
     }
 }

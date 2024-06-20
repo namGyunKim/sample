@@ -1,6 +1,7 @@
 package gyun.sample.domain.member.validator;
 
 import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,10 @@ public class AllAdminValidator implements Validator {
 
         if (!GlobalFilterEnums.checkAdminMember(request.filter()) && request.filter() != null) {
             errors.rejectValue("filter", "filter.notAdmin", "관리자 필터 기준이 아닙니다.");
+        }
+
+        if (!GlobalActiveEnums.checkMember(request.active()) && request.active() != null) {
+            errors.rejectValue("active", "active.notMember", "회원 상태가 아닙니다.");
         }
     }
 }
