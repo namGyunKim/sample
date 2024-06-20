@@ -29,7 +29,7 @@ public class KakaoService {
     private String clientSecret;
 
 
-    //    code 받는 api 지만 redirect 문제가 있어서 get 방식으로 주소창에 쳐서 처리함
+    //    code 받는 api 지만
     public String getCode() {
         try {
             return kakaoAuthClient.getCode("code", clientId, redirectUri);
@@ -80,9 +80,9 @@ public class KakaoService {
     }
 
     //    토큰으로 회원탈퇴 처리
-    public void unlink(String accessToken,MemberType memberType) {
+    public void unlink(String accessToken, MemberType memberType) {
         try {
-            if (!memberType.equals(MemberType.GENERAL)){
+            if (!memberType.equals(MemberType.GENERAL)) {
                 kakaoApiClient.unlink(accessToken);
             }
         } catch (Exception e) {
@@ -90,4 +90,8 @@ public class KakaoService {
         }
     }
 
+    public void login() {
+        String code = getCode();
+        System.out.println("code = " + code);
+    }
 }

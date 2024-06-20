@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "KakaoController", description = "카카오 로그인 관련 api")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(value = "/social/kakao")
+@RequestMapping(value = "/api/social/kakao")
 public class KakaoController {
 
     private final KakaoService kakaoService;
@@ -49,7 +49,14 @@ public class KakaoController {
 
     @Operation(summary = "로그아웃 api access token 및 refresh token 만료")
     @GetMapping(value = "/logout")
-    public ResponseEntity<String> logout(@RequestParam("access_token") String accessToken)  {
+    public ResponseEntity<String> logout(@RequestParam("access_token") String accessToken) {
         return restApiController.createRestResponse(kakaoService.logout(accessToken));
+    }
+
+    @Operation(summary = "카카오 로그인")
+    @GetMapping(value = "/login")
+    public ResponseEntity<String> login() {
+        kakaoService.login();
+        return restApiController.createRestResponse("aa");
     }
 }

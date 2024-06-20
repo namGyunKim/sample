@@ -64,7 +64,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout","/api/account/access-denied/**")
+                .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout","/api/account/access-denied/**","/social/kakao/**")
                 .order(1);
         registry.addInterceptor(superAdminInterceptor)
                 .addPathPatterns("/api/admin/create")
