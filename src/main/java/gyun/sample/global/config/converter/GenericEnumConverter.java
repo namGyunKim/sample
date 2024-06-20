@@ -1,4 +1,4 @@
-package gyun.sample.global.enums.converter;
+package gyun.sample.global.config.converter;
 
 import org.springframework.core.convert.converter.Converter;
 

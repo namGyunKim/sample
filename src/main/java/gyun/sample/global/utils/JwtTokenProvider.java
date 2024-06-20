@@ -39,7 +39,7 @@ public class JwtTokenProvider {
     public String createAccessToken(Member member) {
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.ACCESS.name());
-        Date expireDate = new Date(now.getTime() + accessExpirationTime * 1000);
+        Date expireDate = getExpireDate(TokenType.ACCESS);
 
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
@@ -59,7 +59,7 @@ public class JwtTokenProvider {
     public String createRefreshToken(Member member) {
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
-        Date expireDate = new Date(now.getTime() + refreshExpirationTime * 1000);
+        Date expireDate = getExpireDate(TokenType.REFRESH);
 
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
@@ -75,6 +75,12 @@ public class JwtTokenProvider {
 
         refreshTokenRepository.save(refreshToken, member.getLoginId(), refreshExpirationTime);
         return refreshToken;
+    }
+
+    private Date getExpireDate(TokenType tokenType) {
+        Date now = new Date();
+        final long expirationTime = tokenType == TokenType.ACCESS ? accessExpirationTime : refreshExpirationTime;
+        return new Date(now.getTime() + expirationTime * 1000 * 60 * 60);
     }
 
     /**
@@ -94,7 +100,7 @@ public class JwtTokenProvider {
         } catch (JwtException e) {
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_INVALID);
         } catch (Exception e) {
-            log.error("JWT 토큰 에러 {}", e.getMessage(),e);
+            log.error("JWT 토큰 에러 {}", e.getMessage(), e);
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_UNKNOWN_ERROR);
         }
     }

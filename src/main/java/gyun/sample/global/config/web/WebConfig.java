@@ -1,6 +1,6 @@
 package gyun.sample.global.config.web;
 
-import gyun.sample.global.enums.converter.GenericEnumConverterFactory;
+import gyun.sample.global.config.converter.GenericEnumConverterFactory;
 import gyun.sample.global.interceptor.AdminInterceptor;
 import gyun.sample.global.interceptor.JWTInterceptor;
 import gyun.sample.global.interceptor.SuperAdminInterceptor;
