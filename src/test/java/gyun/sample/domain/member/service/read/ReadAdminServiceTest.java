@@ -2,6 +2,7 @@ package gyun.sample.domain.member.service.read;
 
 import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
 import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class ReadAdminServiceTest {
     @Test
     void getList() {
         // Given
-        AllMemberRequest request = new AllMemberRequest(1, 10, GlobalOrderEnums.CREATE_DESC, "", GlobalFilterEnums.ALL);
+        AllMemberRequest request = new AllMemberRequest(1, 10, GlobalOrderEnums.CREATE_DESC, "", GlobalFilterEnums.ALL, GlobalActiveEnums.ALL);
 
         // When
         Page<AllMemberResponse> result = readAdminService.getList(request);
