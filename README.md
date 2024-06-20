@@ -1,5 +1,7 @@
 # sample
-리그오브레전드 전적검색 사이트를 만들어볼 예정
+
+스웨거 경로
+http://localhost:8080/swagger-ui/index.html#
 
 RestApi 프로젝트
 
