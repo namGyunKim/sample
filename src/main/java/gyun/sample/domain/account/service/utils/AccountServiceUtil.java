@@ -39,7 +39,7 @@ public class AccountServiceUtil {
 
     //    로그인 아이디와 권한으로 멤버 조회 및 활성 여부 검증
     public Member findByLoginIdAndRole(String loginId, AccountRole role) {
-        Member member = memberRepository.findByLoginIdAndRoleAndActive(loginId, role,true)
+        Member member = memberRepository.findByLoginIdAndRole(loginId, role)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
 
         if (!member.isActive()) {

@@ -9,6 +9,8 @@ import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
 import gyun.sample.domain.member.payload.response.admin.DetailMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.GlobalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +45,8 @@ public class ReadAdminService extends BaseMemberService implements ReadMemberSer
     @Override
     public DetailMemberResponse getDetail(long id) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByIdAndRoleInAndActive(id, roles, true).orElseThrow();
+        Member member = memberRepository.findByIdAndRoleIn(id, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        if (!member.isActive()) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         return new DetailMemberResponse(member);
     }
 }

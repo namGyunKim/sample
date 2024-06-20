@@ -19,7 +19,8 @@ public class ReadAccountService extends BaseAccountService {
     }
 
     public LoginMemberResponse getLoginData(CurrentAccountDTO request) {
-        Member byLoginIdAndRole = memberRepository.findByLoginIdAndRoleAndActive(request.loginId(), request.role(),true).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member byLoginIdAndRole = memberRepository.findByLoginIdAndRole(request.loginId(), request.role()).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        if (!byLoginIdAndRole.isActive()) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         return new LoginMemberResponse(byLoginIdAndRole);
     }
 

@@ -39,7 +39,8 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     @Override
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByLoginIdAndRoleInAndActive(loginId, roles, true).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        if (!member.isActive()) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.update(updateMemberRequest);
 
         if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
@@ -51,7 +52,8 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     @Override
     public GlobalInactiveResponse inactiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByLoginIdAndRoleInAndActive(loginId, roles, true).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        if (!member.isActive()) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
         return new GlobalInactiveResponse(member.getId());
