@@ -19,14 +19,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
-public class ReadAdminService extends BaseMemberService implements ReadMemberService {
+public class ReadUserService extends BaseMemberService implements ReadMemberService {
 
-    public ReadAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
+    public ReadUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
         super(passwordEncoder, memberRepository, refreshTokenRepository);
     }
 
@@ -38,15 +37,14 @@ public class ReadAdminService extends BaseMemberService implements ReadMemberSer
     @Override
     public Page<AllMemberResponse> getList(AllMemberRequest request) {
         Pageable pageable = PageRequest.of(request.page() - 1, request.size());
-        List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
+        List<AccountRole> roles = List.of(AccountRole.USER);
         Page<Member> memberList = memberRepository.getMemberList(request, roles, pageable);
         return memberList.map(AllMemberResponse::new);
     }
 
     @Override
     public DetailMemberResponse getDetail(long id) {
-        List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByIdAndRoleIn(id, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByIdAndRole(id, AccountRole.USER).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
         if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         return new DetailMemberResponse(member);
     }

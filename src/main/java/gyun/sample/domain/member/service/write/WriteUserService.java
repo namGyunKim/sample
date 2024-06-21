@@ -18,14 +18,11 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Service
 @Transactional
-public class WriteAdminService extends BaseMemberService implements WriteMemberService {
+public class WriteUserService extends BaseMemberService implements WriteMemberService {
 
-    public WriteAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
+    public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
         super(passwordEncoder, memberRepository, refreshTokenRepository);
     }
 
@@ -39,8 +36,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
 
     @Override
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
-        List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByLoginIdAndRole(loginId, AccountRole.USER).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
         if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.update(updateMemberRequest);
 
@@ -52,8 +48,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
 
     @Override
     public GlobalInactiveResponse inactiveMember(String loginId) {
-        List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByLoginIdAndRole(loginId, AccountRole.USER).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
         if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
