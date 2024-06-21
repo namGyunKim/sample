@@ -5,6 +5,7 @@ import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
+import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
@@ -21,6 +22,8 @@ public class AccountServiceUtil {
 
     //    utils
     protected final JwtTokenProvider jwtTokenProvider;
+
+    protected final SocialServiceAdapter socialServiceAdapter;
 
 
     //    로그인 아이디로 멤버 조회 및 활성 여부 검증

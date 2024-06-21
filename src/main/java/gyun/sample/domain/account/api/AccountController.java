@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AccountController", description = "계정 관련 기능 api")
 @RestController
-@RequestMapping(value = "/api/account",headers = "X-API-VERSION=1")
+@RequestMapping(value = "/api/account", headers = "X-API-VERSION=1")
 @RequiredArgsConstructor
 public class AccountController {
     //    utils
@@ -33,7 +33,7 @@ public class AccountController {
     @Operation(summary = "JWT 에러")
     @GetMapping(value = "/jwt-error/{errorCode}")
     public void jwtError(@PathVariable String errorCode) {
-     writeAccountService.jwtErrorException(errorCode);
+        writeAccountService.jwtErrorException(errorCode);
     }
 
     @Hidden
@@ -56,7 +56,8 @@ public class AccountController {
     @PostMapping(value = "/logout")
     public ResponseEntity<String> logout(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
-        boolean response = writeAccountService.logout(currentAccountDTO.loginId());
+        boolean response = writeAccountService.logout(currentAccountDTO);
+
         return restApiController.createSuccessRestResponse(response);
     }
 

@@ -1,11 +1,14 @@
 package gyun.sample.domain.account.service;
 
+import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.service.utils.AccountServiceUtil;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
+import gyun.sample.domain.social.SocialServiceAdapter;
+import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
@@ -17,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class WriteAccountService extends AccountServiceUtil {
 
-    public WriteAccountService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider) {
-        super(memberRepository, refreshTokenRepository, jwtTokenProvider);
+    public WriteAccountService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider, SocialServiceAdapter socialServiceAdapter) {
+        super(memberRepository, refreshTokenRepository, jwtTokenProvider, socialServiceAdapter);
     }
 
     //    로그인
@@ -29,14 +32,6 @@ public class WriteAccountService extends AccountServiceUtil {
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
         return new AccountLoginResponse(accessToken, refreshToken);
     }
-
-    // 소셜 계정 로그인
-    public AccountLoginResponse login(Member member) {
-        String accessToken = jwtTokenProvider.createAccessToken(member);
-        String refreshToken = jwtTokenProvider.createRefreshToken(member);
-        return new AccountLoginResponse(accessToken, refreshToken);
-    }
-
 
     //    리프레시 토큰으로 토큰 재발급
     public AccountLoginResponse getJwtTokenByRefreshToken(String oldRefreshToken) {
@@ -61,8 +56,14 @@ public class WriteAccountService extends AccountServiceUtil {
     }
 
     //    RefreshToken 제거
-    public boolean logout(String loginId) {
-        refreshTokenRepository.deleteWithLoginId(loginId);
+    @Transactional
+    public boolean logout(CurrentAccountDTO currentAccountDTO) {
+        refreshTokenRepository.deleteWithLoginId(currentAccountDTO.loginId());
+        if (currentAccountDTO.memberType().checkSocialType()) {
+            Member member = findByLoginId(currentAccountDTO.loginId());
+            SocialService socialService = socialServiceAdapter.getService(member.getMemberType());
+            socialService.logout(member.getSocialToken());
+        }
         return true;
     }
 

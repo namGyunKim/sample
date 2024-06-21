@@ -32,6 +32,7 @@ public enum MemberType {
     MemberType(String value) {
         this.value = value;
     }
+
     //  요청값으로 Enum 매칭
     @JsonCreator
     public static MemberType create(String requestValue) {
@@ -40,4 +41,9 @@ public enum MemberType {
                 .findFirst()
                 .orElse(null);
     }
+
+    public boolean checkSocialType() {
+        return this == KAKAO || this == NAVER || this == GOOGLE || this == FACEBOOK || this == APPLE;
+    }
+
 }

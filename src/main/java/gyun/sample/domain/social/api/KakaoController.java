@@ -33,17 +33,4 @@ public class KakaoController {
         AccountLoginResponse response = kakaoService.login(code);
         return restApiController.createRestResponse(response);
     }
-
-    @Operation(summary = "로그아웃")
-    @GetMapping("/logout")
-    public ResponseEntity<String> logout(String accessToken) {
-        return restApiController.createSuccessRestResponse(kakaoService.logout(accessToken));
-    }
-
-//    언링크
-    @Operation(summary = "회원탈퇴")
-    @GetMapping("/unlink")
-    public ResponseEntity<String> unlink(String accessToken) {
-        return restApiController.createSuccessRestResponse(kakaoService.unlink(accessToken));
-    }
 }
