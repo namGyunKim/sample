@@ -4,6 +4,7 @@ package gyun.sample.domain.member.service.write;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -58,5 +59,10 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
         return new GlobalInactiveResponse(member.getId());
+    }
+
+    @Override
+    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName) {
+        return null;
     }
 }

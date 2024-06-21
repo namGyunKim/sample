@@ -1,25 +1,40 @@
 package gyun.sample.domain.social.serviece;
 
+import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.account.payload.response.AccountLoginResponse;
+import gyun.sample.domain.account.service.WriteAccountService;
+import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
+import gyun.sample.domain.member.service.read.ReadMemberService;
+import gyun.sample.domain.member.service.write.WriteMemberService;
 import gyun.sample.domain.social.api.KakaoApiClient;
 import gyun.sample.domain.social.api.KakaoAuthClient;
 import gyun.sample.domain.social.payload.request.KakaoInfoRequest;
 import gyun.sample.domain.social.payload.request.KakaoTokenRequest;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
+import java.util.Map;
+
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-public class KakaoService {
+@Transactional(readOnly = true)
+public class KakaoService extends BaseSocialService implements SocialService<KakaoTokenRequest, AccountLoginResponse, KakaoInfoRequest, AccountLoginResponse> {
 
     private final KakaoAuthClient kakaoAuthClient;
     private final KakaoApiClient kakaoApiClient;
+
+    public KakaoService(ReadMemberService readUserService, WriteMemberService writeUserService, WriteAccountService writeAccountService, KakaoAuthClient kakaoAuthClient, KakaoApiClient kakaoApiClient) {
+        super(readUserService, writeUserService, writeAccountService);
+        this.kakaoAuthClient = kakaoAuthClient;
+        this.kakaoApiClient = kakaoApiClient;
+    }
 
     @Value("${social.kakao.clientId}")
     private String clientId;
@@ -28,17 +43,8 @@ public class KakaoService {
     @Value("${social.kakao.secretKey}")
     private String clientSecret;
 
-
-    //    code 받는 api 지만
-    public String getCode() {
-        try {
-            return kakaoAuthClient.getCode("code", clientId, redirectUri);
-        } catch (Exception e) {
-            throw new GlobalException(ErrorCode.KAKAO_API_GET_CODE_ERROR);
-        }
-    }
-
     //    토큰 받는 api
+    @Override
     public KakaoTokenRequest getTokenByCode(String code) {
         try {
             return kakaoAuthClient.getToken("authorization_code", code, redirectUri, clientId, clientSecret);
@@ -49,28 +55,22 @@ public class KakaoService {
 
 
     //    토큰으로 정보 가입 및 로그인 처리
-//    @Transactional
-//    public AccountLoginResponse saveOrLoginByToken(String accessToken) {
-//        try {
-//            KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
-//            Map<String, Object> properties = request.getProperties();
-//            String nickName = (String) properties.get("nickname");
-////        가입 여부 확인
-//            Optional<Member> member = customerService.findByLoginIdAndActive(request.getId(), true);
-//            if (member.isEmpty()) {
-////            가입되어 있지 않다면 회원가입
-//                Member saveMember = new Member(request.getId(), nickName, MemberType.KAKAO);
-//                customerService.saveMember(saveMember);
-//                return customerService.login(saveMember);
-//            } else {
-//                return customerService.login(member.get());
-//            }
-//        } catch (Exception e) {
-//            throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR);
-//        }
-//    }
+    @Transactional
+    @Override
+    public AccountLoginResponse createOrLoginByToken(String accessToken) {
+        try {
+            KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
+            Map<String, Object> properties = request.getProperties();
+            String nickName = (String) properties.get("nickname");
+            Member member = writeUserService.getWithSocial("kakao" + request.getId(), AccountRole.USER, GlobalActiveEnums.ACTIVE, MemberType.KAKAO, nickName);
+            return writeAccountService.login(member);
+        } catch (Exception e) {
+            throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR, e);
+        }
+    }
 
     //    토큰으로 로그아웃 처리
+    @Override
     public KakaoInfoRequest logout(String accessToken) {
         try {
             return kakaoApiClient.logout(accessToken);
@@ -80,6 +80,7 @@ public class KakaoService {
     }
 
     //    토큰으로 회원탈퇴 처리
+    @Override
     public void unlink(String accessToken, MemberType memberType) {
         try {
             if (!memberType.equals(MemberType.GENERAL)) {
@@ -90,8 +91,8 @@ public class KakaoService {
         }
     }
 
-    public void login() {
-        String code = getCode();
-        System.out.println("code = " + code);
+    public AccountLoginResponse login(String code) {
+        KakaoTokenRequest tokenByCode = getTokenByCode(code);
+        return createOrLoginByToken(tokenByCode.getAccessToken());
     }
 }

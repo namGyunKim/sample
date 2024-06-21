@@ -17,7 +17,7 @@ public class InitService {
 
     //    service
     private final ReadMemberService readAdminService;
-    private final WriteMemberService writeMemberService;
+    private final WriteMemberService writeAdminService;
 
     //    서버 시작시 실행
     @PostConstruct
@@ -32,7 +32,7 @@ public class InitService {
     public void createMemberByRoleSuperAdmin() {
         if (!readAdminService.existsByRole(AccountRole.SUPER_ADMIN)) {
             CreateMemberRequest request = new CreateMemberRequest("superAdmin", "최고관리자", "1234", AccountRole.SUPER_ADMIN, MemberType.GENERAL);
-            writeMemberService.createMember(request);
+            writeAdminService.createMember(request);
         }
     }
 
@@ -42,7 +42,7 @@ public class InitService {
         if (!readAdminService.existsByRole(AccountRole.ADMIN)) {
             for (int i = 1; i <= 100; i++) {
                 CreateMemberRequest request = new CreateMemberRequest("admin" + i, "관리자" + i, "1234", AccountRole.ADMIN, MemberType.GENERAL);
-                writeMemberService.createMember(request);
+                writeAdminService.createMember(request);
             }
         }
     }

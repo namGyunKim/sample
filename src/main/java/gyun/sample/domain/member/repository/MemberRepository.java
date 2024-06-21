@@ -2,7 +2,9 @@ package gyun.sample.domain.member.repository;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     Optional<Member> findByLoginId(String loginId);
 
     Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role);
+    Optional<Member> findByLoginIdAndRoleAndActiveAndMemberType(String loginId, AccountRole role, GlobalActiveEnums active, MemberType memberType);
 
     boolean existsByLoginId(String loginId);
 
