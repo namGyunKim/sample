@@ -45,9 +45,9 @@ public class AccountController {
 
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")
-    public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest request,
+    public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest accountLoginRequest,
                                         BindingResult bindingResult) {
-        AccountLoginResponse response = writeAccountService.login(request);
+        AccountLoginResponse response = writeAccountService.login(accountLoginRequest);
         return restApiController.createRestResponse(response);
     }
 

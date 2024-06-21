@@ -4,7 +4,6 @@ import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.account.service.utils.AccountServiceUtil;
-import gyun.sample.domain.account.validator.AccountValidator;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.error.enums.ErrorCode;
@@ -18,15 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class WriteAccountService extends AccountServiceUtil {
 
-    public WriteAccountService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, AccountValidator accountValidator, JwtTokenProvider jwtTokenProvider) {
-        super(memberRepository, refreshTokenRepository, accountValidator, jwtTokenProvider);
+    public WriteAccountService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider) {
+        super(memberRepository, refreshTokenRepository, jwtTokenProvider);
     }
 
     //    로그인
 //        JWT 는 @InitBinder 에서 처리하기 적합하지 않아서 Service 에서 처리
     public AccountLoginResponse login(AccountLoginRequest request) {
         Member member = findByLoginIdAndRole(request.loginId(), request.role());
-        accountValidator.login(member, request.password(), request.role());
         String accessToken = jwtTokenProvider.createAccessToken(member);
         String refreshToken = jwtTokenProvider.createRefreshToken(member);
         return new AccountLoginResponse(accessToken, refreshToken);

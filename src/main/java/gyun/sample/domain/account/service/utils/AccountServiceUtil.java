@@ -3,7 +3,6 @@ package gyun.sample.domain.account.service.utils;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
-import gyun.sample.domain.account.validator.AccountValidator;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.enums.GlobalActiveEnums;
@@ -19,9 +18,6 @@ public class AccountServiceUtil {
     //    repository
     protected final MemberRepository memberRepository;
     protected final RefreshTokenRepository refreshTokenRepository;
-
-    //    validator
-    protected final AccountValidator accountValidator;
 
     //    utils
     protected final JwtTokenProvider jwtTokenProvider;
