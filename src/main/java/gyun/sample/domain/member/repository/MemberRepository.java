@@ -17,7 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     Optional<Member> findByLoginId(String loginId);
 
     Optional<Member> findByLoginIdAndRole(String loginId, AccountRole role);
-    Optional<Member> findByLoginIdAndRoleAndActiveAndMemberType(String loginId, AccountRole role, GlobalActiveEnums active, MemberType memberType);
+    Optional<Member> findBySocialKeyAndRoleAndActiveAndMemberType(String socialKey, AccountRole role, GlobalActiveEnums active, MemberType memberType);
 
     boolean existsByLoginId(String loginId);
 

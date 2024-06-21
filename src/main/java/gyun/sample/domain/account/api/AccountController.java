@@ -31,14 +31,14 @@ public class AccountController {
 
     @Hidden
     @Operation(summary = "JWT 에러")
-    @GetMapping(value = "/jwt-error/{errorCode}")
+    @RequestMapping(value = "/jwt-error/{errorCode}")
     public void jwtError(@PathVariable String errorCode) {
         writeAccountService.jwtErrorException(errorCode);
     }
 
     @Hidden
     @Operation(summary = "권한 에러")
-    @GetMapping(value = "/access-denied/{errorMessage}")
+    @RequestMapping(value = "/access-denied/{errorMessage}")
     public void accessError(@PathVariable String errorMessage) {
         writeAccountService.AccessException(errorMessage);
     }

@@ -37,6 +37,8 @@ public class Member extends BaseTimeEntity {
     @Column(columnDefinition = "text")
     private String socialToken;                        //  소셜 토큰
 
+    private String socialKey;                        //  소셜 키
+
     //    최고 관리자 리퀘스트로 생성
     public Member(CreateMemberRequest request) {
         this.loginId = request.loginId();
@@ -53,12 +55,13 @@ public class Member extends BaseTimeEntity {
     }
 
     //    소셜 회원가입
-    public Member(String socialKey, String nickName, MemberType memberType) {
-        this.loginId = socialKey;
+    public Member(String loginId, String nickName, MemberType memberType,String socialKey) {
+        this.loginId = loginId;
         this.nickName = nickName;
         this.role = AccountRole.USER;
         this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = memberType;
+        this.socialKey = socialKey;
     }
 
     public void updatePassword(String password) {

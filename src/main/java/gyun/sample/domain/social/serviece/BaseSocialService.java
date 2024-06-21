@@ -19,12 +19,12 @@ public class BaseSocialService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     @Transactional
-    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName, String accessToken) {
+    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName, String accessToken,String socialKey) {
         // 가입 여부 확인
-        Member member = memberRepository.findByLoginIdAndRoleAndActiveAndMemberType(
-                loginId, accountRole, active, memberType).orElseGet(() -> {
+        Member member = memberRepository.findBySocialKeyAndRoleAndActiveAndMemberType(
+                socialKey, accountRole, active, memberType).orElseGet(() -> {
             // 회원이 존재하지 않을 경우 회원가입 처리
-            Member newMember = new Member(loginId, nickName, memberType);
+            Member newMember = new Member(loginId, nickName, memberType,socialKey);
             newMember.updateAccessToken(accessToken);
             return memberRepository.save(newMember);
         });

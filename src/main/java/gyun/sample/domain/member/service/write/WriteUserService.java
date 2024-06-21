@@ -8,13 +8,14 @@ import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.domain.social.SocialServiceAdapter;
+import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,8 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class WriteUserService extends BaseMemberService implements WriteMemberService {
 
-    private final EntityManager entityManager;
-
-    public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, EntityManager entityManager) {
-        super(passwordEncoder, memberRepository, refreshTokenRepository);
-        this.entityManager = entityManager;
+    public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
+        super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
     }
 
     @Override
@@ -56,6 +54,10 @@ public class WriteUserService extends BaseMemberService implements WriteMemberSe
         if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
+        if (member.getMemberType().checkSocialType()) {
+            SocialService socialService = socialServiceAdapter.getService(member.getMemberType());
+            socialService.unlink(member.getSocialToken());
+        }
         return new GlobalInactiveResponse(member.getId());
     }
 }

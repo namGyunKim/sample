@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
@@ -57,10 +58,11 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
     @Override
     public AccountLoginResponse createOrLoginByToken(String accessToken) {
         try {
+            String uuid = UUID.randomUUID().toString();
             KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
             Map<String, Object> properties = request.getProperties();
             String nickName = (String) properties.get("nickname");
-            Member member = super.getWithSocial("kakao" + request.getId(), AccountRole.USER, GlobalActiveEnums.ACTIVE, MemberType.KAKAO, nickName, accessToken);
+            Member member = super.getWithSocial(uuid + MemberType.KAKAO + request.getId(), AccountRole.USER, GlobalActiveEnums.ACTIVE, MemberType.KAKAO, uuid + MemberType.KAKAO + nickName, accessToken, request.getId());
             return super.login(member);
         } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR, e);

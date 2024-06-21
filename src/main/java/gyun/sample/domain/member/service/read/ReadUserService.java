@@ -9,6 +9,7 @@ import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
 import gyun.sample.domain.member.payload.response.admin.DetailMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
@@ -25,8 +26,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReadUserService extends BaseMemberService implements ReadMemberService {
 
-    public ReadUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
-        super(passwordEncoder, memberRepository, refreshTokenRepository);
+    public ReadUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
+        super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
     }
 
     @Override

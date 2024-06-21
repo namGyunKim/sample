@@ -8,6 +8,8 @@ import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.domain.social.SocialServiceAdapter;
+import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
@@ -25,8 +27,8 @@ import java.util.List;
 @Transactional
 public class WriteAdminService extends BaseMemberService implements WriteMemberService {
 
-    public WriteAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
-        super(passwordEncoder, memberRepository, refreshTokenRepository);
+    public WriteAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
+        super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
     }
 
     @Override
@@ -57,6 +59,12 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
         if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
+
+        if (member.getMemberType().checkSocialType()) {
+            SocialService socialService = socialServiceAdapter.getService(member.getMemberType());
+            socialService.unlink(member.getSocialToken());
+        }
+
         return new GlobalInactiveResponse(member.getId());
     }
 }
