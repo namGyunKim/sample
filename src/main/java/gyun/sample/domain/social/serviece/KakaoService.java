@@ -17,14 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
 
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-@Transactional(readOnly = true)
 public class KakaoService extends BaseSocialService implements SocialService<KakaoTokenRequest, AccountLoginResponse, KakaoInfoRequest, AccountLoginResponse> {
 
     private final KakaoAuthClient kakaoAuthClient;
@@ -81,7 +79,7 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
         return (String) properties.get("nickname");
     }
 
-    private Member createOrFetchMember(String uuid, KakaoInfoRequest request, String nickName, String accessToken) {
+    public Member createOrFetchMember(String uuid, KakaoInfoRequest request, String nickName, String accessToken) {
         String loginId = uuid + MemberType.KAKAO + request.getId();
         String memberNickName = uuid + MemberType.KAKAO + nickName;
         return super.getWithSocial(
