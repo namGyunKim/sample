@@ -58,15 +58,41 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
     @Override
     public AccountLoginResponse createOrLoginByToken(String accessToken) {
         try {
-            String uuid = UUID.randomUUID().toString();
-            KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
-            Map<String, Object> properties = request.getProperties();
-            String nickName = (String) properties.get("nickname");
-            Member member = super.getWithSocial(uuid + MemberType.KAKAO + request.getId(), AccountRole.USER, GlobalActiveEnums.ACTIVE, MemberType.KAKAO, uuid + MemberType.KAKAO + nickName, accessToken, request.getId());
+            KakaoInfoRequest request = fetchKakaoInfo(accessToken);
+            String uuid = generateUUID();
+            String nickName = getNickName(request);
+            Member member = createOrFetchMember(uuid, request, nickName, accessToken);
             return super.login(member);
         } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR, e);
         }
+    }
+
+    private KakaoInfoRequest fetchKakaoInfo(String accessToken) {
+        return kakaoApiClient.getInformation(accessToken);
+    }
+
+    private String generateUUID() {
+        return UUID.randomUUID().toString();
+    }
+
+    private String getNickName(KakaoInfoRequest request) {
+        Map<String, Object> properties = request.getProperties();
+        return (String) properties.get("nickname");
+    }
+
+    private Member createOrFetchMember(String uuid, KakaoInfoRequest request, String nickName, String accessToken) {
+        String loginId = uuid + MemberType.KAKAO + request.getId();
+        String memberNickName = uuid + MemberType.KAKAO + nickName;
+        return super.getWithSocial(
+                loginId,
+                AccountRole.USER,
+                GlobalActiveEnums.ACTIVE,
+                MemberType.KAKAO,
+                memberNickName,
+                accessToken,
+                request.getId()
+        );
     }
 
     //    토큰으로 로그아웃 처리
