@@ -25,11 +25,25 @@ public class KakaoController {
     public void addCustomHeader(HttpServletResponse response) {
         response.addHeader("X-Header-1", "YourHeaderValue");
     }
+
     //     https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST API KEY}&redirect_uri=http://localhost:8080/api/social/kakao/redirect
     @Operation(summary = "카카오에 code 요청하고 redirect 받는 api")
     @GetMapping("/redirect")
     public ResponseEntity<String> test(@RequestParam("code") String code) {
         AccountLoginResponse response = kakaoService.login(code);
         return restApiController.createRestResponse(response);
+    }
+
+    @Operation(summary = "로그아웃")
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout(String accessToken) {
+        return restApiController.createSuccessRestResponse(kakaoService.logout(accessToken));
+    }
+
+//    언링크
+    @Operation(summary = "회원탈퇴")
+    @GetMapping("/unlink")
+    public ResponseEntity<String> unlink(String accessToken) {
+        return restApiController.createSuccessRestResponse(kakaoService.unlink(accessToken));
     }
 }

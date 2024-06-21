@@ -18,13 +18,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-@Transactional(readOnly = true)
 public class KakaoService extends BaseSocialService implements SocialService<KakaoTokenRequest, AccountLoginResponse, KakaoInfoRequest, AccountLoginResponse> {
 
     private final KakaoAuthClient kakaoAuthClient;
@@ -55,14 +53,13 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
 
 
     //    토큰으로 정보 가입 및 로그인 처리
-    @Transactional
     @Override
     public AccountLoginResponse createOrLoginByToken(String accessToken) {
         try {
             KakaoInfoRequest request = kakaoApiClient.getInformation(accessToken);
             Map<String, Object> properties = request.getProperties();
             String nickName = (String) properties.get("nickname");
-            Member member = writeUserService.getWithSocial("kakao" + request.getId(), AccountRole.USER, GlobalActiveEnums.ACTIVE, MemberType.KAKAO, nickName);
+            Member member = writeUserService.getWithSocial("kakao" + request.getId(), AccountRole.USER, GlobalActiveEnums.ACTIVE, MemberType.KAKAO, nickName, accessToken);
             return writeAccountService.login(member);
         } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR, e);
@@ -73,24 +70,26 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
     @Override
     public KakaoInfoRequest logout(String accessToken) {
         try {
-            return kakaoApiClient.logout(accessToken);
+            return kakaoApiClient.logout("Bearer " + accessToken);
         } catch (Exception e) {
-            throw new GlobalException(ErrorCode.KAKAO_API_LOGOUT_ERROR);
+//            throw new GlobalException(ErrorCode.KAKAO_API_LOGOUT_ERROR, e);
+            return null;
         }
     }
 
     //    토큰으로 회원탈퇴 처리
     @Override
-    public void unlink(String accessToken, MemberType memberType) {
+    public KakaoInfoRequest unlink(String accessToken) {
         try {
-            if (!memberType.equals(MemberType.GENERAL)) {
-                kakaoApiClient.unlink(accessToken);
-            }
+            return kakaoApiClient.unlink("Bearer " + accessToken);
         } catch (Exception e) {
-            throw new GlobalException(ErrorCode.KAKAO_API_UNLINK_ERROR);
+//            throw new GlobalException(ErrorCode.KAKAO_API_UNLINK_ERROR,e);
         }
+        return null;
     }
 
+
+    @Override
     public AccountLoginResponse login(String code) {
         KakaoTokenRequest tokenByCode = getTokenByCode(code);
         return createOrLoginByToken(tokenByCode.getAccessToken());

@@ -62,7 +62,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     }
 
     @Override
-    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName) {
+    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName,String accessToken) {
         return null;
     }
 }

@@ -20,5 +20,5 @@ public interface WriteMemberService {
 
     GlobalInactiveResponse inactiveMember(String loginId);
 
-    Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName);
+    Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName,String accessToken);
 }

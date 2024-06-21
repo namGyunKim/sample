@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "KakaoClient", url = "https://kauth.kakao.com/oauth")
+@FeignClient(name = "KakaoAuthClient", url = "https://kauth.kakao.com/oauth")
 public interface KakaoAuthClient {
 
 

@@ -34,6 +34,9 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private MemberType memberType;                          //  유저 타입
 
+    @Column(columnDefinition = "text")
+    private String socialToken;                        //  소셜 토큰
+
     //    최고 관리자 리퀘스트로 생성
     public Member(CreateMemberRequest request) {
         this.loginId = request.loginId();
@@ -68,5 +71,9 @@ public class Member extends BaseTimeEntity {
 
     public void inactive() {
         this.active = GlobalActiveEnums.INACTIVE;
+    }
+
+    public void updateAccessToken(String accessToken) {
+        this.socialToken = accessToken;
     }
 }

@@ -15,18 +15,20 @@ import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @Transactional
 public class WriteUserService extends BaseMemberService implements WriteMemberService {
 
-    public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository) {
+    private final EntityManager entityManager;
+
+    public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, EntityManager entityManager) {
         super(passwordEncoder, memberRepository, refreshTokenRepository);
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -59,15 +61,22 @@ public class WriteUserService extends BaseMemberService implements WriteMemberSe
     }
 
     @Override
-    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName) {
+    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName, String accessToken) {
         // 가입 여부 확인
-        Optional<Member> optionalMember = memberRepository.findByLoginIdAndRoleAndActiveAndMemberType(
-                loginId, accountRole, active, memberType);
-
-        return optionalMember.orElseGet(() -> {
+        Member member = memberRepository.findByLoginIdAndRoleAndActiveAndMemberType(
+                loginId, accountRole, active, memberType).orElseGet(() -> {
             // 회원이 존재하지 않을 경우 회원가입 처리
-            Member saveMember = new Member(loginId, nickName, memberType);
-            return memberRepository.save(saveMember);
+            Member newMember = new Member(loginId, nickName, memberType);
+            newMember.updateAccessToken(accessToken);
+            if (entityManager.contains(newMember)) {
+                System.out.println("The member entity is managed by the persistence context.");
+            } else {
+                System.out.println("The member entity is NOT managed by the persistence context.");
+            }
+            return memberRepository.save(newMember);
         });
+
+        member.updateAccessToken(accessToken);
+        return member;
     }
 }

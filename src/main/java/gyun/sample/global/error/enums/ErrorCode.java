@@ -58,7 +58,6 @@ public enum ErrorCode {
             Arrays.stream(values()).collect(Collectors.toMap(ErrorCode::getCode, e -> e));
     private final String code;
     private final String errorMessage;
-
     ErrorCode(String code, String msg) {
         this.code = code;
         this.errorMessage = msg;
