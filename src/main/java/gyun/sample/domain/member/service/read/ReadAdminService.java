@@ -14,7 +14,6 @@ import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static gyun.sample.global.utils.UtilService.getPageable;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,14 +32,10 @@ public class ReadAdminService extends BaseMemberService implements ReadMemberSer
         super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
     }
 
-    @Override
-    public boolean existsByRole(AccountRole accountRole) {
-        return memberRepository.existsByRole(accountRole);
-    }
 
     @Override
     public Page<AllMemberResponse> getList(AllMemberRequest request) {
-        Pageable pageable = PageRequest.of(request.page() - 1, request.size());
+        Pageable pageable = getPageable(request.page(), request.size());
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Page<Member> memberList = memberRepository.getMemberList(request, roles, pageable);
         return memberList.map(AllMemberResponse::new);

@@ -41,6 +41,7 @@ public class AccountController {
         writeAccountService.AccessException(errorMessage);
     }
 
+//    todo : 비밀번호 체크 추가필요
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")
     public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest accountLoginRequest,

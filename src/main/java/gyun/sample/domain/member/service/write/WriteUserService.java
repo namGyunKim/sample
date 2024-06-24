@@ -10,9 +10,6 @@ import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.BaseMemberService;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.domain.social.serviece.SocialService;
-import gyun.sample.global.enums.GlobalActiveEnums;
-import gyun.sample.global.exception.GlobalException;
-import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
@@ -38,8 +35,7 @@ public class WriteUserService extends BaseMemberService implements WriteMemberSe
 
     @Override
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
-        Member member = memberRepository.findByLoginIdAndRole(loginId, AccountRole.USER).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        Member member = getByLoginIdAndRole(loginId, AccountRole.USER);
         member.update(updateMemberRequest);
 
         if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
@@ -50,8 +46,7 @@ public class WriteUserService extends BaseMemberService implements WriteMemberSe
 
     @Override
     public GlobalInactiveResponse inactiveMember(String loginId) {
-        Member member = memberRepository.findByLoginIdAndRole(loginId, AccountRole.USER).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        Member member = getByLoginIdAndRole(loginId, AccountRole.USER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
         if (member.getMemberType().checkSocialType()) {
