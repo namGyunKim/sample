@@ -14,6 +14,7 @@ import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +23,14 @@ import java.util.List;
 
 @Service
 @Transactional
-public class WriteAdminService extends ReadAdminService implements WriteMemberService {
+@RequiredArgsConstructor
+public class WriteAdminService implements WriteMemberService {
 
-    public WriteAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
-        super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final SocialServiceAdapter socialServiceAdapter;
+    private final ReadAdminService readAdminService;
 
     @Override
     @Transactional
@@ -41,7 +45,7 @@ public class WriteAdminService extends ReadAdminService implements WriteMemberSe
     @Transactional
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = getByLoginIdAndRoles(loginId, roles);
+        Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
         member.update(updateMemberRequest);
 
         if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
@@ -54,7 +58,7 @@ public class WriteAdminService extends ReadAdminService implements WriteMemberSe
     @Transactional
     public GlobalInactiveResponse inactiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = getByLoginIdAndRoles(loginId, roles);
+        Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
 

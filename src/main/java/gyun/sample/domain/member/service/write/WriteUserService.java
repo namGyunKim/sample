@@ -14,16 +14,20 @@ import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class WriteUserService extends ReadUserService implements WriteMemberService {
+@RequiredArgsConstructor
+public class WriteUserService implements WriteMemberService {
 
-    public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
-        super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final SocialServiceAdapter socialServiceAdapter;
+    private final ReadUserService readUserService;
 
     @Override
     @Transactional
@@ -37,7 +41,7 @@ public class WriteUserService extends ReadUserService implements WriteMemberServ
     @Override
     @Transactional
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
-        Member member = getByLoginIdAndRole(loginId, AccountRole.USER);
+        Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
         member.update(updateMemberRequest);
 
         if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
@@ -49,7 +53,7 @@ public class WriteUserService extends ReadUserService implements WriteMemberServ
     @Override
     @Transactional
     public GlobalInactiveResponse inactiveMember(String loginId) {
-        Member member = getByLoginIdAndRole(loginId, AccountRole.USER);
+        Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
         member.inactive();
         refreshTokenRepository.deleteWithLoginId(loginId);
         if (member.getMemberType().checkSocialType()) {
