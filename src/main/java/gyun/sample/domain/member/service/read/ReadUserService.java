@@ -4,9 +4,9 @@ package gyun.sample.domain.member.service.read;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
-import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
-import gyun.sample.domain.member.payload.response.admin.DetailMemberResponse;
+import gyun.sample.domain.member.payload.request.AllMemberRequest;
+import gyun.sample.domain.member.payload.response.AllMemberResponse;
+import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.global.enums.GlobalActiveEnums;
@@ -49,7 +49,7 @@ public class ReadUserService implements ReadMemberService {
     @Override
     public DetailMemberResponse getDetail(long id) {
         Member member = memberRepository.findByIdAndRole(id, AccountRole.USER).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        validationMember(member);
         return new DetailMemberResponse(member);
     }
 

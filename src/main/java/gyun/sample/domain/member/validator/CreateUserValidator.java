@@ -9,7 +9,7 @@ import org.springframework.validation.Validator;
 
 @Component
 @RequiredArgsConstructor
-public class CreateAdminValidator implements Validator {
+public class CreateUserValidator implements Validator {
 
     private final MemberRepository memberRepository;
 

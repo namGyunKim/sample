@@ -7,9 +7,9 @@ import gyun.sample.domain.member.payload.request.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
-import gyun.sample.domain.member.validator.AllAdminValidator;
-import gyun.sample.domain.member.validator.CreateAdminValidator;
-import gyun.sample.domain.member.validator.UpdateAdminValidator;
+import gyun.sample.domain.member.validator.AllUserValidator;
+import gyun.sample.domain.member.validator.CreateUserValidator;
+import gyun.sample.domain.member.validator.UpdateUserValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
@@ -25,67 +25,67 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "AdminRestController", description = "관리자 api")
+@Tag(name = "UserRestController", description = "유저 api")
 @RestController
-@RequestMapping(value = "/api/admin", headers = "X-API-VERSION=1")
+@RequestMapping(value = "/api/user", headers = "X-API-VERSION=1")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
-public class AdminRestController {
+public class UserRestController {
 
     private final RestApiController restApiController;
-    private final WriteMemberService writeAdminService;
-    private final ReadMemberService readAdminService;
-    private final CreateAdminValidator createAdminValidator;
-    private final AllAdminValidator allAdminValidator;
-    private final UpdateAdminValidator updateAdminValidator;
+    private final WriteMemberService writeUserService;
+    private final ReadMemberService readUserService;
+    private final CreateUserValidator createUserValidator;
+    private final AllUserValidator allUserValidator;
+    private final UpdateUserValidator updateUserValidator;
 
 
     @InitBinder(value = "createMemberRequest")
     public void initBinder(WebDataBinder dataBinder) {
-        dataBinder.addValidators(createAdminValidator);
+        dataBinder.addValidators(createUserValidator);
     }
 
     @InitBinder(value = "allMemberRequest")
     public void initBinder2(WebDataBinder dataBinder) {
-        dataBinder.addValidators(allAdminValidator);
+        dataBinder.addValidators(allUserValidator);
     }
 
     @InitBinder(value = "updateMemberRequest")
     public void initBinder3(WebDataBinder dataBinder) {
-        dataBinder.addValidators(updateAdminValidator);
+        dataBinder.addValidators(updateUserValidator);
     }
 
-    @Operation(summary = "관리자 생성")
+    @Operation(summary = "유저 생성")
     @PostMapping(value = "/create")
-    public ResponseEntity<String> createAdmin(@Valid @RequestBody CreateMemberRequest createMemberRequest, BindingResult bindingResult) {
-        GlobalCreateResponse response = writeAdminService.createMember(createMemberRequest);
+    public ResponseEntity<String> createUser(@Valid @RequestBody CreateMemberRequest createMemberRequest, BindingResult bindingResult) {
+        GlobalCreateResponse response = writeUserService.createMember(createMemberRequest);
         return restApiController.createRestResponse(response);
     }
 
-    @Operation(summary = "관리자 목록")
+    @Operation(summary = "유저 목록")
     @GetMapping(value = "/list")
-    public ResponseEntity<String> getAdminList(@Valid AllMemberRequest allMemberRequest, BindingResult bindingResult) {
-        return restApiController.createRestResponse(readAdminService.getList(allMemberRequest));
+    public ResponseEntity<String> getUserList(@Valid AllMemberRequest allMemberRequest, BindingResult bindingResult) {
+        return restApiController.createRestResponse(readUserService.getList(allMemberRequest));
     }
 
-    @Operation(summary = "관리자 상세")
+    @Operation(summary = "유저 상세")
     @GetMapping(value = "/detail/{id}")
-    public ResponseEntity<String> getAdminDetail(@PathVariable long id) {
-        return restApiController.createRestResponse(readAdminService.getDetail(id));
+    public ResponseEntity<String> getUserDetail(@PathVariable long id) {
+        return restApiController.createRestResponse(readUserService.getDetail(id));
     }
 
-    @Operation(summary = "관리자 수정")
+    @Operation(summary = "유저 수정")
     @PutMapping(value = "/update")
-    public ResponseEntity<String> updateAdmin(@Valid @RequestBody UpdateMemberRequest updateMemberRequest, BindingResult bindingResult,
+    public ResponseEntity<String> updateUser(@Valid @RequestBody UpdateMemberRequest updateMemberRequest, BindingResult bindingResult,
                                               @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        GlobalUpdateResponse response = writeAdminService.updateMember(updateMemberRequest, currentAccountDTO.loginId());
+        GlobalUpdateResponse response = writeUserService.updateMember(updateMemberRequest, currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 
-    @Operation(summary = "관리자 비활성화")
+    @Operation(summary = "유저 비활성화")
     @PatchMapping(value = "/inactive")
-    public ResponseEntity<String> inactiveAdmin(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        GlobalInactiveResponse response = writeAdminService.inactiveMember(currentAccountDTO.loginId());
+    public ResponseEntity<String> inactiveUser(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
+        GlobalInactiveResponse response = writeUserService.inactiveMember(currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 }

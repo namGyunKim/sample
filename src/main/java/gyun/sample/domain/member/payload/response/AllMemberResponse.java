@@ -1,4 +1,4 @@
-package gyun.sample.domain.member.payload.response.admin;
+package gyun.sample.domain.member.payload.response;
 
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.dto.AllMemberProfileDTO;

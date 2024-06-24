@@ -13,17 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UpdateAdminValidator implements Validator {
+public class UpdateUserValidator implements Validator {
 
     private final MemberRepository memberRepository;
     private final HttpServletRequest httpServletRequest;
     private final JwtTokenProvider jwtTokenProvider;
-    private final ReadMemberService readAdminService;
+    private final ReadMemberService readUserService;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -45,7 +43,6 @@ public class UpdateAdminValidator implements Validator {
             errors.rejectValue("nickName", "nickName.duplicate", "이미 등록된 닉네임입니다.");
         }
 
-        List<AccountRole> roles = List.of(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        readAdminService.getByLoginIdAndRoles(tokenResponse.loginId(), roles);
+        readUserService.getByLoginIdAndRole(tokenResponse.loginId(), AccountRole.USER);
     }
 }

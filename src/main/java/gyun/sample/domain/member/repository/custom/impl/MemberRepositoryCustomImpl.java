@@ -6,7 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.entity.QMember;
-import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
+import gyun.sample.domain.member.payload.request.AllMemberRequest;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
 import gyun.sample.domain.member.repository.custom.util.MemberRepositoryCustomUtil;
 import gyun.sample.global.exception.GlobalException;

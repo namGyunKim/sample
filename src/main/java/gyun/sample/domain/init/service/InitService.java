@@ -2,7 +2,7 @@ package gyun.sample.domain.init.service;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberRequest;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
 import jakarta.annotation.PostConstruct;

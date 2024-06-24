@@ -2,9 +2,9 @@ package gyun.sample.domain.member.service.read;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
-import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
-import gyun.sample.domain.member.payload.response.admin.DetailMemberResponse;
+import gyun.sample.domain.member.payload.request.AllMemberRequest;
+import gyun.sample.domain.member.payload.response.AllMemberResponse;
+import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 

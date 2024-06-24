@@ -1,7 +1,7 @@
 package gyun.sample.domain.member.service.read;
 
-import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
-import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
+import gyun.sample.domain.member.payload.request.AllMemberRequest;
+import gyun.sample.domain.member.payload.response.AllMemberResponse;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;

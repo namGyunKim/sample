@@ -4,8 +4,8 @@ package gyun.sample.domain.member.service.write;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
-import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadAdminService;
 import gyun.sample.domain.social.SocialServiceAdapter;
@@ -35,6 +35,7 @@ public class WriteAdminService implements WriteMemberService {
     @Override
     @Transactional
     public GlobalCreateResponse createMember(CreateMemberRequest request) {
+        request.generatedWithUser();
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));

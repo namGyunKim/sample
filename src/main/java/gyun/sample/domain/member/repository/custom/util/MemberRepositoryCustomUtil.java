@@ -6,7 +6,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.QMember;
-import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
+import gyun.sample.domain.member.payload.request.AllMemberRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;

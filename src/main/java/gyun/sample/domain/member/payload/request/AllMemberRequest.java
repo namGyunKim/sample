@@ -1,4 +1,4 @@
-package gyun.sample.domain.member.payload.request.admin;
+package gyun.sample.domain.member.payload.request;
 
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;

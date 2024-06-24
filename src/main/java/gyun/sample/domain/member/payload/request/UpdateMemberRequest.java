@@ -1,4 +1,4 @@
-package gyun.sample.domain.member.payload.request.admin;
+package gyun.sample.domain.member.payload.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

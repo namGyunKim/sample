@@ -1,4 +1,4 @@
-package gyun.sample.domain.member.payload.request.admin;
+package gyun.sample.domain.member.payload.request;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
@@ -22,4 +22,8 @@ public record CreateMemberRequest(
         @NotNull(message = "멤버 타입을 선택해주세요.")
         @Schema(description = "멤버 타입", example = "GENERAL")
         MemberType memberType) {
+
+    public CreateMemberRequest generatedWithUser() {
+        return new CreateMemberRequest(loginId, nickName, password, AccountRole.USER, MemberType.GENERAL);
+    }
 }

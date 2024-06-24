@@ -9,7 +9,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-public class AllAdminValidator implements Validator {
+public class AllUserValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
