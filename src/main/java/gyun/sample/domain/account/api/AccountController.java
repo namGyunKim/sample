@@ -5,6 +5,7 @@ import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.payload.response.LoginMemberResponse;
 import gyun.sample.domain.account.service.WriteAccountService;
+import gyun.sample.domain.account.validator.LoginAccountValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AccountController", description = "계정 관련 기능 api")
@@ -26,6 +28,13 @@ public class AccountController {
     private final RestApiController restApiController;
     //    service
     private final WriteAccountService writeAccountService;
+
+    private final LoginAccountValidator loginAccountValidator;
+
+    @InitBinder("accountLoginRequest")
+    public void initBinder(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(loginAccountValidator);
+    }
 
     @Hidden
     @Operation(summary = "JWT 에러")
@@ -41,7 +50,6 @@ public class AccountController {
         writeAccountService.AccessException(errorMessage);
     }
 
-//    todo : 비밀번호 체크 추가필요
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")
     public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest accountLoginRequest,
