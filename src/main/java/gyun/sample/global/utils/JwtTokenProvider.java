@@ -7,7 +7,7 @@ import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.enums.ErrorCode;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

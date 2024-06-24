@@ -1,10 +1,10 @@
 package gyun.sample.global.event;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.BindingException;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
+import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
 import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;

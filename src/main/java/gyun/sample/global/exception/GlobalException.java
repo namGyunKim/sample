@@ -1,6 +1,6 @@
 package gyun.sample.global.exception;
 
-import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.enums.ErrorCode;
 import lombok.Getter;
 
 import java.io.PrintWriter;

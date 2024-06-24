@@ -1,7 +1,7 @@
 package gyun.sample.global.utils;
 
-import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

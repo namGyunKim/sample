@@ -1,4 +1,4 @@
-package gyun.sample.global.error.enums;
+package gyun.sample.global.exception.enums;
 
 import gyun.sample.global.exception.payload.response.ErrorResult;
 import lombok.Getter;

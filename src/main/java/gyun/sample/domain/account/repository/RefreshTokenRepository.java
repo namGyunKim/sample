@@ -1,7 +1,7 @@
 package gyun.sample.domain.account.repository;
 
-import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.JWTInterceptorException;
+import gyun.sample.global.exception.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;

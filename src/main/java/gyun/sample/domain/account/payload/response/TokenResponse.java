@@ -1,6 +1,6 @@
 package gyun.sample.domain.account.payload.response;
 
-import gyun.sample.global.error.enums.ErrorCode;
+import gyun.sample.global.exception.enums.ErrorCode;
 
 public record TokenResponse(
         String loginId,         //로그인 아이디

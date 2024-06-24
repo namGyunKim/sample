@@ -3,8 +3,8 @@ package gyun.sample.global.aop;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.advice.RestApiControllerAdvice;
+import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,9 +76,7 @@ public class BindingAdvice extends RestApiControllerAdvice {
         String declaringTypeName = signature.getDeclaringTypeName();
         String name = signature.getName();
         String[] splitPath = declaringTypeName.split("\\.");
-        StringBuilder stringBuilder = new StringBuilder(splitPath[splitPath.length - 1]);
-        stringBuilder.append(" ").append(name);
-        return stringBuilder.toString();
+        return splitPath[splitPath.length - 1] + " " + name;
     }
 
     private CurrentAccountDTO getTokenResponse(HttpServletRequest httpServletRequest) {

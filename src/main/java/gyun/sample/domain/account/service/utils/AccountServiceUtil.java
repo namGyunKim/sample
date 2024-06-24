@@ -7,8 +7,8 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.global.enums.GlobalActiveEnums;
-import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 

@@ -6,8 +6,8 @@ import gyun.sample.domain.account.payload.response.LoginMemberResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.enums.GlobalActiveEnums;
-import gyun.sample.global.error.enums.ErrorCode;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.enums.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
