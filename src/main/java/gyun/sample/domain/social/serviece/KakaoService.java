@@ -11,6 +11,7 @@ import gyun.sample.domain.social.payload.request.KakaoInfoRequest;
 import gyun.sample.domain.social.payload.request.KakaoTokenRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -100,8 +101,8 @@ public class KakaoService implements SocialService<KakaoTokenRequest, AccountLog
         try {
             return kakaoApiClient.logout("Bearer " + accessToken);
         } catch (Exception e) {
-//            throw new GlobalException(ErrorCode.KAKAO_API_LOGOUT_ERROR, e);
-            return null;
+            ErrorCode errorCode = ErrorCode.KAKAO_API_LOGOUT_ERROR;
+            throw new SocialException(errorCode, errorCode.getErrorMessage() + "     " + e.getMessage());
         }
     }
 
@@ -111,9 +112,9 @@ public class KakaoService implements SocialService<KakaoTokenRequest, AccountLog
         try {
             return kakaoApiClient.unlink("Bearer " + accessToken);
         } catch (Exception e) {
-//            throw new GlobalException(ErrorCode.KAKAO_API_UNLINK_ERROR,e);
+            ErrorCode errorCode = ErrorCode.KAKAO_API_UNLINK_ERROR;
+            throw new SocialException(errorCode, errorCode.getErrorMessage() + "     " + e.getMessage());
         }
-        return null;
     }
 
 

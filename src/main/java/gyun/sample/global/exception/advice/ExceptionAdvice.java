@@ -5,6 +5,7 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
+import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
@@ -48,6 +49,15 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
         // Event - Log
         sendLogEvent(jwtInterceptorException, account, httpServletRequest);
         return createFailRestResponseWithJWT(errorCode.getErrorResponse());
+    }
+
+    // Social Exception Catch
+    @ExceptionHandler(value = SocialException.class)
+    protected ResponseEntity<String> processSocialException(SocialException socialException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
+        ErrorCode errorCode = socialException.getErrorCode();
+        // Event - Log
+        sendLogEvent(socialException, account, httpServletRequest);
+        return createFailRestResponse(errorCode.getErrorResponseWithSocial(socialException.getErrorDetailMessage()));
     }
 
     @ExceptionHandler(value = Exception.class)

@@ -6,7 +6,6 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public interface SocialService<T,R,U,V> {
@@ -16,7 +15,6 @@ public interface SocialService<T,R,U,V> {
     U unlink(String accessToken);
     AccountLoginResponse login(String code);
 
-    @Transactional
     Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName, String accessToken, String socialKey);
 
     // 소셜 계정 로그인

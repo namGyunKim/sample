@@ -71,6 +71,10 @@ public enum ErrorCode {
         return new ErrorResult(code, errorMessage);
     }
 
+    public ErrorResult getErrorResponseWithSocial(String detailMessage) {
+        return new ErrorResult(code, detailMessage);
+    }
+
     public Map<String, String> getErrorMap() {
         return new HashMap<>() {{
             put("code", code);

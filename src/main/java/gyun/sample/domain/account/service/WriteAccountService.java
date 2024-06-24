@@ -50,7 +50,7 @@ public class WriteAccountService extends ReadAccountService {
 
     //    RefreshToken 제거
     public boolean logout(CurrentAccountDTO currentAccountDTO) {
-        refreshTokenRepository.deleteWithLoginId(currentAccountDTO.loginId());
+//        refreshTokenRepository.deleteWithLoginId(currentAccountDTO.loginId());
         if (currentAccountDTO.memberType().checkSocialType()) {
             Member member = findByLoginId(currentAccountDTO.loginId());
             SocialService socialService = socialServiceAdapter.getService(member.getMemberType());

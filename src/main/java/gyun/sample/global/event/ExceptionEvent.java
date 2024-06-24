@@ -4,6 +4,7 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.global.exception.BindingException;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
+import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
 import gyun.sample.global.utils.UtilService;
@@ -57,6 +58,10 @@ public class ExceptionEvent {
     public static ExceptionEvent createExceptionEventBinding(BindingResultResponse response, CurrentAccountDTO currentAccountDTO, HttpServletRequest httpServletRequest) {
         BindingException exception = new BindingException(ErrorCode.REQUEST_BINDING_RESULT);
         return createExceptionEvent(exception, ErrorCode.REQUEST_BINDING_RESULT, response.content().toString(), currentAccountDTO, httpServletRequest);
+    }
+
+    public static ExceptionEvent createExceptionEventWithSocial(SocialException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
+        return createExceptionEvent(exception, exception.getErrorCode(), exception.getErrorDetailMessage(), account, httpServletRequest);
     }
 
     // 예외 발생 시, 이벤트 로그 생성
