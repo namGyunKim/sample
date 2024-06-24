@@ -4,7 +4,6 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.payload.response.LoginMemberResponse;
-import gyun.sample.domain.account.service.ReadAccountService;
 import gyun.sample.domain.account.service.WriteAccountService;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
@@ -27,7 +26,6 @@ public class AccountController {
     private final RestApiController restApiController;
     //    service
     private final WriteAccountService writeAccountService;
-    private final ReadAccountService readAccountService;
 
     @Hidden
     @Operation(summary = "JWT 에러")
@@ -72,7 +70,7 @@ public class AccountController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping(value = "/get-login-data")
     public ResponseEntity<String> loginData(@CurrentAccount CurrentAccountDTO request) {
-        LoginMemberResponse response = readAccountService.getLoginData(request);
+        LoginMemberResponse response = writeAccountService.getLoginData(request);
         return restApiController.createSuccessRestResponse(response);
     }
 

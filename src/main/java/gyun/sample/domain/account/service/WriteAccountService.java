@@ -4,28 +4,33 @@ import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
-import gyun.sample.domain.account.service.utils.AccountServiceUtil;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.domain.social.serviece.SocialService;
-import gyun.sample.global.exception.GlobalException;
-import gyun.sample.global.exception.JWTInterceptorException;
-import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.utils.JwtTokenProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
-public class WriteAccountService extends AccountServiceUtil {
+@Transactional
+public class WriteAccountService extends ReadAccountService {
+
+    public final RefreshTokenRepository refreshTokenRepository;
+
+    //    utils
+    public final JwtTokenProvider jwtTokenProvider;
+
+    public final SocialServiceAdapter socialServiceAdapter;
 
     public WriteAccountService(MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, JwtTokenProvider jwtTokenProvider, SocialServiceAdapter socialServiceAdapter) {
-        super(memberRepository, refreshTokenRepository, jwtTokenProvider, socialServiceAdapter);
+        super(memberRepository);
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.socialServiceAdapter = socialServiceAdapter;
     }
 
     //    로그인
-//        JWT 는 @InitBinder 에서 처리하기 적합하지 않아서 Service 에서 처리
     public AccountLoginResponse login(AccountLoginRequest request) {
         Member member = findByLoginIdAndRole(request.loginId(), request.role());
         String accessToken = jwtTokenProvider.createAccessToken(member);
@@ -43,20 +48,7 @@ public class WriteAccountService extends AccountServiceUtil {
     }
 
 
-    // 인터셉터에서 터지는 JWT 토큰 에러
-    public void jwtErrorException(String errorCode) {
-        ErrorCode jwtErrorCode = ErrorCode.getByCode(errorCode);
-        throw new JWTInterceptorException(jwtErrorCode);
-    }
-
-    // 인터셉터에서 터지는  에러
-    public void AccessException(String errorMessage) {
-        ErrorCode accessException = ErrorCode.ACCESS_DENIED;
-        throw new GlobalException(accessException, errorMessage);
-    }
-
     //    RefreshToken 제거
-    @Transactional
     public boolean logout(CurrentAccountDTO currentAccountDTO) {
         refreshTokenRepository.deleteWithLoginId(currentAccountDTO.loginId());
         if (currentAccountDTO.memberType().checkSocialType()) {
