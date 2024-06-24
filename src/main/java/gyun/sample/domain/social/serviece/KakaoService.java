@@ -13,26 +13,27 @@ import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.utils.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
 
 @Service
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-public class KakaoService extends BaseSocialService implements SocialService<KakaoTokenRequest, AccountLoginResponse, KakaoInfoRequest, AccountLoginResponse> {
+@RequiredArgsConstructor
+@Transactional
+public class KakaoService implements SocialService<KakaoTokenRequest, AccountLoginResponse, KakaoInfoRequest, AccountLoginResponse> {
 
     private final KakaoAuthClient kakaoAuthClient;
     private final KakaoApiClient kakaoApiClient;
+    private final MemberRepository memberRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public KakaoService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider, KakaoAuthClient kakaoAuthClient, KakaoApiClient kakaoApiClient) {
-        super(memberRepository, jwtTokenProvider);
-        this.kakaoAuthClient = kakaoAuthClient;
-        this.kakaoApiClient = kakaoApiClient;
-    }
 
     @Value("${social.kakao.clientId}")
     private String clientId;
@@ -60,7 +61,7 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
             String uuid = generateUUID();
             String nickName = getNickName(request);
             Member member = createOrFetchMember(uuid, request, nickName, accessToken);
-            return super.login(member);
+            return login(member);
         } catch (Exception e) {
             throw new GlobalException(ErrorCode.KAKAO_API_GET_INFORMATION_ERROR, e);
         }
@@ -82,7 +83,7 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
     public Member createOrFetchMember(String uuid, KakaoInfoRequest request, String nickName, String accessToken) {
         String loginId = uuid + MemberType.KAKAO + request.getId();
         String memberNickName = uuid + MemberType.KAKAO + nickName;
-        return super.getWithSocial(
+        return getWithSocial(
                 loginId,
                 AccountRole.USER,
                 GlobalActiveEnums.ACTIVE,
@@ -120,5 +121,27 @@ public class KakaoService extends BaseSocialService implements SocialService<Kak
     public AccountLoginResponse login(String code) {
         KakaoTokenRequest tokenByCode = getTokenByCode(code);
         return createOrLoginByToken(tokenByCode.getAccessToken());
+    }
+
+    @Override
+    public Member getWithSocial(String loginId, AccountRole accountRole, GlobalActiveEnums active, MemberType memberType, String nickName, String accessToken, String socialKey) {
+        // 가입 여부 확인
+        Member member = memberRepository.findBySocialKeyAndRoleAndActiveAndMemberType(
+                socialKey, accountRole, active, memberType).orElseGet(() -> {
+            // 회원이 존재하지 않을 경우 회원가입 처리
+            Member newMember = new Member(loginId, nickName, memberType, socialKey);
+            newMember.updateAccessToken(accessToken);
+            return memberRepository.save(newMember);
+        });
+        member.updateAccessToken(accessToken);
+        return member;
+    }
+
+    // 소셜 계정 로그인
+    @Override
+    public AccountLoginResponse login(Member member) {
+        String accessToken = jwtTokenProvider.createAccessToken(member);
+        String refreshToken = jwtTokenProvider.createRefreshToken(member);
+        return new AccountLoginResponse(accessToken, refreshToken);
     }
 }
