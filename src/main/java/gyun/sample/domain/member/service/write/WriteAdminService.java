@@ -7,7 +7,7 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.domain.member.service.read.ReadAdminService;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
@@ -22,13 +22,14 @@ import java.util.List;
 
 @Service
 @Transactional
-public class WriteAdminService extends BaseMemberService implements WriteMemberService {
+public class WriteAdminService extends ReadAdminService implements WriteMemberService {
 
     public WriteAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
         super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
     }
 
     @Override
+    @Transactional
     public GlobalCreateResponse createMember(CreateMemberRequest request) {
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
@@ -37,6 +38,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     }
 
     @Override
+    @Transactional
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = getByLoginIdAndRoles(loginId, roles);
@@ -49,6 +51,7 @@ public class WriteAdminService extends BaseMemberService implements WriteMemberS
     }
 
     @Override
+    @Transactional
     public GlobalInactiveResponse inactiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = getByLoginIdAndRoles(loginId, roles);

@@ -7,7 +7,7 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.admin.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.admin.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.member.service.BaseMemberService;
+import gyun.sample.domain.member.service.read.ReadUserService;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
@@ -19,13 +19,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class WriteUserService extends BaseMemberService implements WriteMemberService {
+public class WriteUserService extends ReadUserService implements WriteMemberService {
 
     public WriteUserService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
         super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
     }
 
     @Override
+    @Transactional
     public GlobalCreateResponse createMember(CreateMemberRequest request) {
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
@@ -34,6 +35,7 @@ public class WriteUserService extends BaseMemberService implements WriteMemberSe
     }
 
     @Override
+    @Transactional
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         Member member = getByLoginIdAndRole(loginId, AccountRole.USER);
         member.update(updateMemberRequest);
@@ -45,6 +47,7 @@ public class WriteUserService extends BaseMemberService implements WriteMemberSe
     }
 
     @Override
+    @Transactional
     public GlobalInactiveResponse inactiveMember(String loginId) {
         Member member = getByLoginIdAndRole(loginId, AccountRole.USER);
         member.inactive();

@@ -8,11 +8,11 @@ import gyun.sample.domain.member.payload.request.admin.AllMemberRequest;
 import gyun.sample.domain.member.payload.response.admin.AllMemberResponse;
 import gyun.sample.domain.member.payload.response.admin.DetailMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.member.service.BaseMemberService;
 import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,13 +25,19 @@ import java.util.List;
 import static gyun.sample.global.utils.UtilService.getPageable;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ReadAdminService extends BaseMemberService implements ReadMemberService {
+public class ReadAdminService implements ReadMemberService {
 
-    public ReadAdminService(PasswordEncoder passwordEncoder, MemberRepository memberRepository, RefreshTokenRepository refreshTokenRepository, SocialServiceAdapter socialServiceAdapter) {
-        super(passwordEncoder, memberRepository, refreshTokenRepository, socialServiceAdapter);
+    protected final PasswordEncoder passwordEncoder;
+    protected final MemberRepository memberRepository;
+    protected final RefreshTokenRepository refreshTokenRepository;
+    protected final SocialServiceAdapter socialServiceAdapter;
+
+    @Override
+    public boolean existsByRole(AccountRole accountRole) {
+        return memberRepository.existsByRole(accountRole);
     }
-
 
     @Override
     public Page<AllMemberResponse> getList(AllMemberRequest request) {
@@ -47,5 +53,23 @@ public class ReadAdminService extends BaseMemberService implements ReadMemberSer
         Member member = memberRepository.findByIdAndRoleIn(id, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
         if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         return new DetailMemberResponse(member);
+    }
+
+    @Override
+    public Member getByLoginIdAndRoles(String loginId, List<AccountRole> roles) {
+        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        validationMember(member);
+        return member;
+    }
+
+    @Override
+    public Member getByLoginIdAndRole(String loginId, AccountRole role) {
+        Member member = memberRepository.findByLoginIdAndRole(loginId, role).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        validationMember(member);
+        return member;
+    }
+
+    private void validationMember(Member member) {
+        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
     }
 }
