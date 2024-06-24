@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LogEventListener {
 
+//    RestApiControllerAdvice 에서 이벤트 발행하게 되면 사용됨
     @Async
     @EventListener
     public void onExceptionEvent(ExceptionEvent exceptionEvent) {
