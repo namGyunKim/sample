@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team Arena Chat</title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chat { width: 50%; margin: 0 auto; }
+        #conversation { border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
+        #message { width: 80%; padding: 10px; }
+        button { padding: 10px; }
+    </style>
+</head>
+<body>
+<div id="chat">
+    <div id="conversation"></div>
+    <input type="text" id="message" placeholder="Type your message here..." onkeypress="handleKeyPress(event)" />
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script type="text/javascript">
+    let stompClient = null;
+    let username = "User" + Math.floor(Math.random() * 1000); // 임시 사용자 이름
+
+    function connect() {
+        let socket = new SockJS('/websocket');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/public', function (messageOutput) {
+                showMessage(JSON.parse(messageOutput.body));
+            });
+            stompClient.send("/app/chat.addUser", {}, JSON.stringify({ sender: username, content: '채팅방 참여', chatRoomId: 'public' }));
+        }, function (error) {
+            console.error('Connection error: ' + error);
+        });
+    }
+
+    function sendMessage() {
+        let messageContent = document.getElementById('message').value;
+        if (messageContent && stompClient) {
+            let chatMessage = {
+                sender: username,
+                content: messageContent,
+                chatRoomId: 'public'
+            };
+            console.log("Sending message: ", chatMessage); // 메시지 전송 전 로그
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+            document.getElementById('message').value = '';
+        }
+    }
+
+    function showMessage(message) {
+        console.log("Received message: ", message); // 수신한 메시지 로그
+        let conversation = document.getElementById('conversation');
+        let messageElement = document.createElement('p');
+        messageElement.appendChild(document.createTextNode(message.sender + ": " + message.content));
+        conversation.appendChild(messageElement);
+        conversation.scrollTop = conversation.scrollHeight;
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    window.onload = function () {
+        connect();
+    }
+</script>
+</body>
+</html>

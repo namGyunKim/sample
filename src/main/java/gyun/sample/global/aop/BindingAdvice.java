@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thymeleaf.util.StringUtils;
@@ -42,6 +43,14 @@ public class BindingAdvice extends RestApiControllerAdvice {
 
     @Around("execution(* gyun.sample..*Controller.*(..))")
     public Object validationHandler(ProceedingJoinPoint joinPoint) throws Throwable {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+
+        // RequestAttributes가 null인 경우 WebSocket에서 발생한 요청임으로 무시
+        if (requestAttributes == null) {
+            return joinPoint.proceed();
+        }
+
+
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String type = bindingPathCreate(joinPoint.getSignature());
         String method = "Not Found";

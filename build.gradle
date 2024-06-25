@@ -35,6 +35,9 @@ dependencies {
     implementation "io.github.openfeign:feign-jackson"
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+    // WebSocket and STOMP
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     // Querydsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
