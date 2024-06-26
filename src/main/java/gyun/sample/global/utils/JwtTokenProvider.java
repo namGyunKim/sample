@@ -9,6 +9,7 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.global.exception.enums.ErrorCode;
 import io.jsonwebtoken.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -128,5 +129,14 @@ public class JwtTokenProvider {
     // 리프레쉬 토큰 제거
     public String deleteToken(String refreshToken) {
         return refreshTokenRepository.deleteWithRefreshToken(refreshToken);
+    }
+
+    public TokenResponse getTokenResponse(HttpServletRequest httpServletRequest){
+        try {
+            String bearer = httpServletRequest.getHeader("Authorization").split(" ")[1];
+            return getTokenResponse(bearer);
+        }catch (Exception e){
+            return new TokenResponse("guest", AccountRole.GUEST.name(), "guest", MemberType.GUEST.name(), ErrorCode.JWT_INVALID);
+        }
     }
 }

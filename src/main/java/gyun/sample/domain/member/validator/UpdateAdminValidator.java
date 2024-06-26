@@ -39,8 +39,7 @@ public class UpdateAdminValidator implements Validator {
 
 
     private void validateMemberRequest(UpdateMemberRequest request, Errors errors) {
-        String bearer = httpServletRequest.getHeader("Authorization").split(" ")[1];
-        TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
+        TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
         if (memberRepository.existsByNickNameAndLoginIdNot(request.nickName(), tokenResponse.loginId())) {
             errors.rejectValue("nickName", "nickName.duplicate", "이미 등록된 닉네임입니다.");
         }
