@@ -45,6 +45,7 @@ public class ControllerLoggingAspect {
         String koreanTime = UtilService.getKoreanTime();
         String username = getUsername(request);
         String sessionId = request.getSession().getId(); // 세션 ID 추가
+        String loginId = getLoginId(request); // 로그인 ID 추가 (로그인 사용자만 해당
 
         String requestKey = generateRequestKey(clientIp, sessionId, requestUri, httpMethod); // 세션 ID 포함
         if (processedRequests.putIfAbsent(requestKey, true) != null) {
@@ -54,7 +55,7 @@ public class ControllerLoggingAspect {
         long startTime = System.currentTimeMillis();
         Object result;
         try {
-            logRequestDetails(uniqueRequestId, clientIp, requestUri, httpMethod, koreanTime, username, joinPoint); // 파라미터 로그 추가
+            logRequestDetails(uniqueRequestId, clientIp, requestUri, httpMethod, koreanTime, loginId, username, joinPoint); // 파라미터 로그 추가
             result = joinPoint.proceed();
         } finally {
             long timeTaken = System.currentTimeMillis() - startTime;
@@ -74,12 +75,17 @@ public class ControllerLoggingAspect {
         return currentAccountDTO != null ? currentAccountDTO.nickName() : "비로그인 사용자";
     }
 
+    private String getLoginId(HttpServletRequest request) {
+        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
+        return currentAccountDTO != null ? currentAccountDTO.loginId() : "비로그인 사용자";
+    }
+
     private void logRequestDetails(String uniqueRequestId, String clientIp, String requestUri,
-                                   String httpMethod, String koreanTime, String username, ProceedingJoinPoint joinPoint) {
+                                   String httpMethod, String koreanTime, String loginId, String username, ProceedingJoinPoint joinPoint) {
         log.info("[{}] ================================ TOP ==================================\t\t[{}]", uniqueRequestId, uniqueRequestId);
         log.info("[{}] 요청 시간:\t\t{}", uniqueRequestId, koreanTime);
         log.info("[{}] 리퀘스트 URI:\t{}", uniqueRequestId, requestUri);
-        log.info("[{}] 클라이언트 IP:\t{} 로그인 계정 : {}", uniqueRequestId, clientIp, username);
+        log.info("[{}] 클라이언트 IP:\t{} 계정 아이디 : {} 계정 닉네임 : {} ", uniqueRequestId, clientIp, loginId, username);
         log.info("[{}] HTTP 메서드:\t\t{}", uniqueRequestId, httpMethod);
         logRequestParameters(uniqueRequestId, joinPoint); // 파라미터 로그 추가
     }
