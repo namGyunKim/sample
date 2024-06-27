@@ -36,6 +36,13 @@ public class ControllerLoggingAspect {
     @Around("controllerMethods()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
 
+
+        if (RequestContextHolder.getRequestAttributes() == null) {
+            // 요청이 없는 경우 다른 방식으로 로그를 처리하거나 예외를 던질 수 있습니다.
+            return joinPoint.proceed();
+        }
+
+
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String requestUri = request.getRequestURI();
 
