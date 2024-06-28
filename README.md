@@ -37,3 +37,6 @@ https://blog.naver.com/skarbs01/223210430457
 카카오 로그인의 경우 OpenFeign을 이용하여 카카오 공식문서를 보고 구현하였습니다.
 
 https://blog.naver.com/skarbs01/223213988052
+
+
+/ 경로에 소켓을 이용한 기본적인 익명채팅 기능 구현
