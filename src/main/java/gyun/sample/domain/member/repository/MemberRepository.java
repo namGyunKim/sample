@@ -2,6 +2,7 @@ package gyun.sample.domain.member.repository;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,5 @@ public interface MemberRepository extends JpaRepository<Member, String >, Member
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Member> findByLoginIdAndActive(String loginId, boolean active);
 
+    Optional<Member> findBySocialKeyAndRoleAndActiveAndMemberType(String socialKey, AccountRole accountRole, boolean isActive, MemberType memberType);
 }

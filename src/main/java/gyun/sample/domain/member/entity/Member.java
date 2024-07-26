@@ -37,6 +37,12 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
 
+    @Column(columnDefinition = "text")
+    private String socialToken;                        //  소셜 토큰
+
+    private String socialKey;                        //  소셜 키
+
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Board> boardList = new ArrayList<>(); //  유저 주소
 
@@ -83,11 +89,17 @@ public class Member extends BaseTimeEntity {
     }
 
 //    소셜 회원가입
-    public Member(String socialKey, String nickName,MemberType memberType) {
-        this.loginId = socialKey;
+    public Member(String loginId, String nickName,MemberType memberType,String socialKey) {
+        this.loginId = loginId;
         this.nickName = nickName;
         this.role = AccountRole.CUSTOMER;
         this.active = true;
         this.memberType = memberType;
+        this.socialKey = socialKey;
     }
+
+    public void updateAccessToken(String accessToken) {
+        this.socialToken = accessToken;
+    }
+
 }

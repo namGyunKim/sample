@@ -76,18 +76,18 @@ public class CustomerRestController {
     @PostMapping(value = "/deactivate-customer-for-self")
     public ResponseEntity<String> deactivateCustomerForSelf(@CurrentAccount CurrentAccountDTO account,
                                                             @RequestParam(required = false) String accessToken) {
-        kakaoService.unlink(accessToken, account.memberType());
+        kakaoService.unlink(accessToken);
         customerService.deactivateCustomerForSelf(account, accessToken);
         return restApiController.createSuccessRestResponse("회원탈퇴가 완료되었습니다.");
     }
 
     // TODO: 2023/09/18 추가적인 필터 검색 조건 작업 필정
     @Operation(summary = "관리자를 위한 고객 목록 최신순 조회")
-    @PostMapping(value = "/list-for-admin",consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+    @PostMapping(value = "/list-for-admin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> listForAdmin(@CurrentAccount CurrentAccountDTO account,
-                                       @Valid @ModelAttribute SearchCustomerForAdminRequest request,
-                                       BindingResult bindingResult) {
+                                               @Valid @ModelAttribute SearchCustomerForAdminRequest request,
+                                               BindingResult bindingResult) {
         Page<SearchCustomerForAdminResponse> response = customerService.listForAdmin(account, request);
         return restApiController.createRestResponse(response);
     }
