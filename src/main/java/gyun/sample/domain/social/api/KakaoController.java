@@ -29,7 +29,7 @@ public class KakaoController {
     //     https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST API KEY}&redirect_uri=http://localhost:8080/api/social/kakao/redirect
     @Operation(summary = "카카오에 code 요청하고 redirect 받는 api")
     @GetMapping("/redirect")
-    public ResponseEntity<String> test(@RequestParam("code") String code) {
+    public ResponseEntity<String> kakaoRedirect(@RequestParam("code") String code) {
         AccountLoginResponse response = kakaoService.login(code);
         return restApiController.createRestResponse(response);
     }
