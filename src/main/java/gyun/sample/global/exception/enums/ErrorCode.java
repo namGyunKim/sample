@@ -52,6 +52,8 @@ public enum ErrorCode {
     METHOD_NOT_SUPPORTED("9007", "지원하지 않는 메소드입니다."),
     INVALID_ARGUMENT("9008", "잘못된 인자값입니다."),
     REFLECTION_ERROR("9009", "리플렉션 에러"),
+    FILE_UPLOAD_ERROR("9010", "파일 업로드 에러"),
+    FILE_NOT_FOUND("9011", "파일을 찾을 수 없습니다."),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =
