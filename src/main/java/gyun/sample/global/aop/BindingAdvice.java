@@ -3,6 +3,7 @@ package gyun.sample.global.aop;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.TokenResponse;
+import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.exception.advice.RestApiControllerAdvice;
 import gyun.sample.global.exception.enums.ErrorCode;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
@@ -14,8 +15,6 @@ import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -35,10 +34,12 @@ import java.util.Map;
 public class BindingAdvice extends RestApiControllerAdvice {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RestApiController restApiController;
 
-    public BindingAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher, JwtTokenProvider jwtTokenProvider) {
+    public BindingAdvice(ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher, JwtTokenProvider jwtTokenProvider, RestApiController restApiController) {
         super(objectMapper, applicationEventPublisher);
         this.jwtTokenProvider = jwtTokenProvider;
+        this.restApiController = restApiController;
     }
 
     @Around("execution(* gyun.sample..*Controller.*(..))")
@@ -67,7 +68,7 @@ public class BindingAdvice extends RestApiControllerAdvice {
                     populateErrorMap(bindingResult, errorMap);
                     BindingResultResponse response = new BindingResultResponse(false, type, method, errorCode, errorMessage, errorMap);
                     sendLogEvent(response, currentAccountDTO, request);
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                    return restApiController.createFailRestResponse(response);
                 }
             }
         }
