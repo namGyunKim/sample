@@ -51,10 +51,9 @@ public class BindingAdvice extends RestApiControllerAdvice {
             return joinPoint.proceed();
         }
 
-
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         String type = bindingPathCreate(joinPoint.getSignature());
-        String method = "Not Found";
+        String method = joinPoint.getSignature().getName();
         String errorCode = ErrorCode.REQUEST_BINDING_RESULT.getCode();
         String errorMessage = ErrorCode.REQUEST_BINDING_RESULT.getErrorMessage();
         Map<String, String> errorMap = new HashMap<>();
@@ -62,11 +61,11 @@ public class BindingAdvice extends RestApiControllerAdvice {
 
         CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
         for (Object arg : args) {
-//            바인딩 리절트가 존재하면
+            // 바인딩 리절트가 존재하면
             if (arg instanceof BindingResult bindingResult) {
                 if (bindingResult.hasErrors()) {
                     populateErrorMap(bindingResult, errorMap);
-                    BindingResultResponse response = new BindingResultResponse(false, type, method, errorCode, errorMessage, errorMap);
+                    BindingResultResponse response = new BindingResultResponse(type, method, errorCode, errorMessage, errorMap);
                     sendLogEvent(response, currentAccountDTO, request);
                     return restApiController.createFailRestResponse(response);
                 }
