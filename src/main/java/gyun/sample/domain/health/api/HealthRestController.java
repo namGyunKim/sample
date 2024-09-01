@@ -28,7 +28,7 @@ public class HealthRestController {
     }
 
     @Operation(summary = "모든 이넘 조회")
-    @GetMapping(value = "/enums",headers = "X-API-VERSION=1")
+    @GetMapping(value = "/enums")
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<String> allEnums() {
         Map<String, List<Map<String, Object>>> allEnums = UtilService.getAllEnums();

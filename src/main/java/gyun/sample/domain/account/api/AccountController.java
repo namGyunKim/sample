@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AccountController", description = "계정 관련 기능 api")
 @RestController
-@RequestMapping(value = "/api/account", headers = "X-API-VERSION=1")
+@RequestMapping(value = "/api/account")
 @RequiredArgsConstructor
 public class AccountController {
     //    utils

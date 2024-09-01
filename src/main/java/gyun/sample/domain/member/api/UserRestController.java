@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "UserRestController", description = "유저 api")
 @RestController
-@RequestMapping(value = "/api/user", headers = "X-API-VERSION=1")
+@RequestMapping(value = "/api/user")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
 public class UserRestController {
