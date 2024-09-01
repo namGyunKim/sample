@@ -6,6 +6,7 @@ import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.CreateMemberRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
+import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,6 +30,11 @@ public class Member extends BaseTimeEntity {
     private GlobalActiveEnums active;                                 //  활성
     @Enumerated(EnumType.STRING)
     private AccountRole role;                               //  유저 권한
+
+    private String profileImage;                          //  프로필 이미지
+
+    @Enumerated(EnumType.STRING)
+    private UploadDirect profileDirect;                          //  프로필 경로
 
 
     @Enumerated(EnumType.STRING)
@@ -55,13 +61,18 @@ public class Member extends BaseTimeEntity {
     }
 
     //    소셜 회원가입
-    public Member(String loginId, String nickName, MemberType memberType,String socialKey) {
+    public Member(String loginId, String nickName, MemberType memberType, String socialKey) {
         this.loginId = loginId;
         this.nickName = nickName;
         this.role = AccountRole.USER;
         this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = memberType;
         this.socialKey = socialKey;
+    }
+
+    public void updateProfileImage(String profileImage, UploadDirect profileDirect) {
+        this.profileImage = profileImage;
+        this.profileDirect = profileDirect;
     }
 
     public void updatePassword(String password) {

@@ -1,12 +1,10 @@
 package gyun.sample.global.utils;
 
 import gyun.sample.domain.account.dto.ClaimsWithErrorCodeDTO;
-import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.enums.TokenType;
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.global.exception.enums.ErrorCode;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +40,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(TokenType.ACCESS.name());
         Date expireDate = getExpireDate(TokenType.ACCESS);
 
+        claims.put("id", member.getId());
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
         claims.put("nickName", member.getNickName());
@@ -62,6 +61,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
         Date expireDate = getExpireDate(TokenType.REFRESH);
 
+        claims.put("id", member.getId());
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
         claims.put("nickName", member.getNickName());
@@ -114,10 +114,11 @@ public class JwtTokenProvider {
 
         // Claims 객체가 null인 경우 처리
         if (claims == null) {
-            return new TokenResponse("guest", AccountRole.GUEST.name(), "guest", MemberType.GUEST.name(), claimsWithErrorCodeDTO.errorCode());
+            return TokenResponse.generatedGuest(claimsWithErrorCodeDTO.errorCode());
         }
 
         return new TokenResponse(
+                claims.get("id", Long.class),
                 claims.get("loginId", String.class),
                 claims.get("role", String.class),
                 claims.get("nickName", String.class),
@@ -136,7 +137,7 @@ public class JwtTokenProvider {
             String bearer = httpServletRequest.getHeader("Authorization").split(" ")[1];
             return getTokenResponse(bearer);
         }catch (Exception e){
-            return new TokenResponse("guest", AccountRole.GUEST.name(), "guest", MemberType.GUEST.name(), ErrorCode.JWT_INVALID);
+            return TokenResponse.generatedGuest(ErrorCode.JWT_INVALID);
         }
     }
 }

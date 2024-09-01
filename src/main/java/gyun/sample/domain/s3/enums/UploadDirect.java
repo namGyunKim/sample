@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum UploadDirect {
-    PROFILE("profile"),
-    CUSTOM_GAME("custom_game");
+    MEMBER_PROFILE("member_profile"),
+    ;
 
     private final String value;
 

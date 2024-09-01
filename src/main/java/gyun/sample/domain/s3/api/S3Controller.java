@@ -1,11 +1,14 @@
 package gyun.sample.domain.s3.api;
 
+import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.s3.S3Service;
 import gyun.sample.domain.s3.enums.UploadDirect;
+import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,12 +30,14 @@ public class S3Controller {
 
     @Operation(summary = "파일 업로드", description = "지정된 디렉토리에 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<String> uploadFile(
             @RequestParam MultipartFile file,
-            @RequestParam UploadDirect directory) {
+            @RequestParam UploadDirect directory,
+            @CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
         try {
-            String etag = s3Service.uploadFileWithDisposition(directory, file);
+            String etag = s3Service.uploadFileWithDisposition(directory, file, currentAccountDTO.id());
             return restApiController.createSuccessRestResponse(etag);
         } catch (IOException e) {
             throw new GlobalException(ErrorCode.FILE_UPLOAD_ERROR);

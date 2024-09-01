@@ -54,6 +54,9 @@ public enum ErrorCode {
     REFLECTION_ERROR("9009", "리플렉션 에러"),
     FILE_UPLOAD_ERROR("9010", "파일 업로드 에러"),
     FILE_NOT_FOUND("9011", "파일을 찾을 수 없습니다."),
+    INVALID_FILE_FORMAT("9012", "잘못된 파일 형식입니다."),
+    FILE_DOWNLOAD_ERROR("9013", "파일 다운로드 에러"),
+    FILE_TOO_LARGE("9014", "파일 크기가 너무 큽니다."),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

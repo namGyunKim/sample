@@ -1,9 +1,7 @@
 package gyun.sample.global.resolver;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +42,7 @@ public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
         String authorization= httpServletRequest.getHeader("Authorization");
         String bearer = "";
         if(StringUtils.isEmpty(authorization)){
-            return new CurrentAccountDTO(GUEST, GUEST, AccountRole.GUEST, MemberType.GENERAL);
+            return CurrentAccountDTO.generatedGuest();
         }else{
             bearer = authorization.split(" ")[1];
             TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
