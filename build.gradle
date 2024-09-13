@@ -7,6 +7,16 @@ plugins {
 group = 'com.smaple'
 version = '0.0.1'
 
+// bootJar 태스크 커스터마이징
+bootJar {
+    archiveFileName.set('app.jar') // 생성될 JAR 파일 이름을 'app.jar'로 설정
+}
+
+// 기본 jar 태스크 비활성화 (선택 사항)
+jar {
+    enabled = false
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
