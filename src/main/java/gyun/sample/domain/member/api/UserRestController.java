@@ -58,6 +58,7 @@ public class UserRestController {
     @Operation(summary = "유저 생성")
     @PostMapping(value = "/create")
     public ResponseEntity<String> createUser(@Valid @RequestBody CreateMemberRequest createMemberRequest, BindingResult bindingResult) {
+
         GlobalCreateResponse response = writeUserService.createMember(createMemberRequest);
         return restApiController.createRestResponse(response);
     }

@@ -9,7 +9,7 @@ h2 와 redis 가 설치되어 있어야 합니다
 자바 17  및 스프링부트 3.0.5 버전 사용
 
 스웨거 경로
-http://localhost:8080/swagger-ui/index.html#
+http://localhost:8090/swagger-ui/index.html#
 
 RestApi 프로젝트
 

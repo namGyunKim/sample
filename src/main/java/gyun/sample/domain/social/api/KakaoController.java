@@ -26,7 +26,7 @@ public class KakaoController {
         response.addHeader("X-Header-1", "YourHeaderValue");
     }
 
-    //     https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST API KEY}&redirect_uri=http://localhost:8080/api/social/kakao/redirect
+    //     https://kauth.kakao.com/oauth/authorize?response_type=code&client_id={REST API KEY}&redirect_uri=http://localhost:8090/api/social/kakao/redirect
     @Operation(summary = "카카오에 code 요청하고 redirect 받는 api")
     @GetMapping("/redirect")
     public ResponseEntity<String> kakaoRedirect(@RequestParam("code") String code) {
