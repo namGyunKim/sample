@@ -37,22 +37,22 @@ public class InitService {
         }
     }
 
-    //    관리자가 없을경우 관리자 50개 생성
+    //    관리자가 없을경우 관리자 10개 생성
     @Transactional
     public void createMemberByRoleAdmin() {
         if (!readAdminService.existsByRole(AccountRole.ADMIN)) {
-            for (int i = 1; i <= 100; i++) {
+            for (int i = 1; i <= 10; i++) {
                 CreateMemberRequest request = new CreateMemberRequest("admin" + i, "관리자" + i, "1234", AccountRole.ADMIN, MemberType.GENERAL);
                 writeAdminService.createMember(request);
             }
         }
     }
 
-    //    유저가 없을경우 관리자 50개 생성
+    //    유저가 없을경우 관리자 10개 생성
     @Transactional
     public void createMemberByRoleUser() {
         if (!readAdminService.existsByRole(AccountRole.USER)) {
-            for (int i = 1; i <= 50; i++) {
+            for (int i = 1; i <= 10; i++) {
                 CreateMemberRequest request = new CreateMemberRequest("user" + i, "유저이름" + i, "1234", AccountRole.USER, MemberType.GENERAL);
                 writeAdminService.createMember(request);
             }
