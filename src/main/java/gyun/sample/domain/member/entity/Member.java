@@ -43,8 +43,8 @@ public class Member extends BaseTimeEntity {
     private AccountRole role;
 
     @Enumerated(EnumType.STRING)
-    @Comment("프로필 경로")
-    private UploadDirect profileDirect;
+    @Comment("이미지 경로")
+    final private UploadDirect imageDirect = UploadDirect.MEMBER_PROFILE;
 
 
     @Enumerated(EnumType.STRING)
@@ -80,10 +80,6 @@ public class Member extends BaseTimeEntity {
         this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = memberType;
         this.socialKey = socialKey;
-    }
-
-    public void updateProfileImage(UploadDirect profileDirect) {
-        this.profileDirect = profileDirect;
     }
 
     public void updatePassword(String password) {

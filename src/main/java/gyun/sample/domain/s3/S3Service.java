@@ -1,9 +1,7 @@
 package gyun.sample.domain.s3;
 
-import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.s3.enums.UploadDirect;
-import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import jakarta.annotation.PostConstruct;
@@ -71,6 +69,7 @@ public class S3Service {
 
         validationFile(file);
 
+//        여기서 엔티티id 에대한 벨리데이션까지 완료
         long entityId = getEntityId(memberId, uploadDirect);
 
 
@@ -85,8 +84,6 @@ public class S3Service {
         // RequestBody.fromInputStream()를 사용하여 MultipartFile의 InputStream을 전달
         s3Client.putObject(putObjectRequest,
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-//        이미지를 처리하는 로직
-        processImage(entityId, uploadDirect);
 
         // key 값을 반환하여 호출자가 이 key로 파일을 식별할 수 있도록 함
         return key;
@@ -136,22 +133,6 @@ public class S3Service {
         }
     }
 
-    public void processImage(long entityId, UploadDirect uploadDirect) {
-        if (uploadDirect == UploadDirect.MEMBER_PROFILE) {
-            updateProfileImage(entityId, uploadDirect);
-        }
-    }
-
-    public void updateProfileImage(long memberId, UploadDirect uploadDirect) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (member.getActive() != GlobalActiveEnums.ACTIVE) {
-            throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
-        }
-
-        member.updateProfileImage(uploadDirect);
-    }
-
     private void validationFile(MultipartFile file) {
         // 확장자 체크
         String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
@@ -169,8 +150,7 @@ public class S3Service {
         if (uploadDirect == UploadDirect.MEMBER_PROFILE) {
             return memberRepository.findById(memberId)
                     .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER)).getId();
-        }
-        throw new GlobalException(ErrorCode.NOT_EXIST_ENTITY);
+        } else throw new GlobalException(ErrorCode.NOT_EXIST_ENTITY);
     }
 
 }
