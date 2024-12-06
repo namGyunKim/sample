@@ -66,35 +66,34 @@ public class S3Service {
         }
     }
 
+    //    샘플이라  로그인한 계정 프로필로 가정
     public String uploadFileWithDisposition(UploadDirect uploadDirect, MultipartFile file, long memberId) throws IOException {
 
-        validation(file);
+        validationFile(file);
 
         long entityId = getEntityId(memberId, uploadDirect);
 
-        // 현재 날짜로 파일 이름 생성
-        String newFilename = uploadDirect.getValue() + "_" + entityId + getFileExtension(file.getOriginalFilename());
 
-        final String key = generatedKey(newFilename, uploadDirect); // 폴더명 + 새로운 파일명 설정
+        final String key = generatedKey(entityId, uploadDirect); // 폴더명 + 새로운 파일명 설정
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
-                .contentDisposition("attachment; filename=\"" + newFilename + "\"")
+                .contentDisposition("attachment; filename=\"" + entityId + "\"")
                 .build();
 
         // RequestBody.fromInputStream()를 사용하여 MultipartFile의 InputStream을 전달
         s3Client.putObject(putObjectRequest,
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 //        이미지를 처리하는 로직
-        processImage(entityId, newFilename, uploadDirect);
+        processImage(entityId, uploadDirect);
 
         // key 값을 반환하여 호출자가 이 key로 파일을 식별할 수 있도록 함
         return key;
     }
 
-    public void deleteFile(String fileName, UploadDirect uploadDirect) {
-        final String key = generatedKey(fileName, uploadDirect);
+    public void deleteFile(long entityId, UploadDirect uploadDirect) {
+        final String key = generatedKey(entityId, uploadDirect);
 
         if (!doesObjectExist(key)) {
             throw new GlobalException(ErrorCode.FILE_NOT_FOUND);
@@ -110,8 +109,8 @@ public class S3Service {
     }
 
 
-    public String getFileUrl(String fileName, UploadDirect uploadDirect) {
-        final String key = generatedKey(fileName, uploadDirect);
+    public String getFileUrl(long entityId, UploadDirect uploadDirect) {
+        final String key = generatedKey(entityId, uploadDirect);
 
 
         if (!doesObjectExist(key)) {
@@ -121,8 +120,8 @@ public class S3Service {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, key);
     }
 
-    private String generatedKey(String fileName, UploadDirect uploadDirect) {
-        return uploadDirect.getValue() + "/" + fileName;
+    private String generatedKey(long entityId, UploadDirect uploadDirect) {
+        return uploadDirect.getValue() + "/" + entityId;
     }
 
     private boolean doesObjectExist(String key) {
@@ -137,23 +136,23 @@ public class S3Service {
         }
     }
 
-    public void processImage(long entityId, String fileName, UploadDirect uploadDirect) {
+    public void processImage(long entityId, UploadDirect uploadDirect) {
         if (uploadDirect == UploadDirect.MEMBER_PROFILE) {
-            updateProfileImage(entityId, fileName, uploadDirect);
+            updateProfileImage(entityId, uploadDirect);
         }
     }
 
-    public void updateProfileImage(long memberId, String fileName, UploadDirect uploadDirect) {
+    public void updateProfileImage(long memberId, UploadDirect uploadDirect) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
         if (member.getActive() != GlobalActiveEnums.ACTIVE) {
             throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
         }
 
-        member.updateProfileImage(fileName, uploadDirect);
+        member.updateProfileImage(uploadDirect);
     }
 
-    private void validation(MultipartFile file) {
+    private void validationFile(MultipartFile file) {
         // 확장자 체크
         String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
@@ -168,9 +167,10 @@ public class S3Service {
 
     public long getEntityId(long memberId, UploadDirect uploadDirect) {
         if (uploadDirect == UploadDirect.MEMBER_PROFILE) {
-            return memberId;
+            return memberRepository.findById(memberId)
+                    .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER)).getId();
         }
-        return 0;
+        throw new GlobalException(ErrorCode.NOT_EXIST_ENTITY);
     }
 
 }

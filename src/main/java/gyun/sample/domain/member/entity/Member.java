@@ -12,6 +12,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Comment;
 
 @Entity
 @Getter
@@ -20,33 +21,41 @@ public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    private long id;                                     //  유저 아이디 및 소셜키
+    @Comment("유저 아이디")
+    private long id;
     @Column(unique = true, updatable = false)
-    private String loginId;                                //  유저 로그인 아이디
+    @Comment("유저 로그인 아이디")
+    private String loginId;
     @Column(unique = true)
-    private String nickName;                                   //  닉네임
-    private String password;                               //  유저 비밀번호
-    private String countryCode;                             //  유저 국가코드
-    private String phoneNumber;                             //  유저 전화번호
+    @Comment("유저 닉네임")
+    private String nickName;
+    @Comment("유저 비밀번호")
+    private String password;
+    @Comment("유저 국가코드")
+    private String countryCode;
+    @Comment("유저 전화번호")
+    private String phoneNumber;
     @Enumerated(EnumType.STRING)
-    private GlobalActiveEnums active;                                 //  활성
+    @Comment("유저 활성")
+    private GlobalActiveEnums active;
     @Enumerated(EnumType.STRING)
-
-    private AccountRole role;                               //  유저 권한
-
-    private String profileImage;                          //  프로필 이미지
-
-    @Enumerated(EnumType.STRING)
-    private UploadDirect profileDirect;                          //  프로필 경로
-
+    @Comment("유저 권한")
+    private AccountRole role;
 
     @Enumerated(EnumType.STRING)
-    private MemberType memberType;                          //  유저 타입
+    @Comment("프로필 경로")
+    private UploadDirect profileDirect;
+
+
+    @Enumerated(EnumType.STRING)
+    @Comment("유저 타입")
+    private MemberType memberType;
 
     @Column(columnDefinition = "text")
-    private String socialToken;                        //  소셜 토큰
-
-    private String socialKey;                        //  소셜 키
+    @Comment("소셜 토큰")
+    private String socialToken;
+    @Comment("소셜 키")
+    private String socialKey;
 
     //    최고 관리자 리퀘스트로 생성
     public Member(CreateMemberRequest request) {
@@ -73,8 +82,7 @@ public class Member extends BaseTimeEntity {
         this.socialKey = socialKey;
     }
 
-    public void updateProfileImage(String profileImage, UploadDirect profileDirect) {
-        this.profileImage = profileImage;
+    public void updateProfileImage(UploadDirect profileDirect) {
         this.profileDirect = profileDirect;
     }
 

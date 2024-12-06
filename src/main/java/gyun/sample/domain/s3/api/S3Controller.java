@@ -28,6 +28,7 @@ public class S3Controller {
     private final S3Service s3Service;
     private final RestApiController restApiController;
 
+
     @Operation(summary = "파일 업로드", description = "지정된 디렉토리에 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     @SecurityRequirement(name = "Bearer Authentication")
@@ -46,16 +47,16 @@ public class S3Controller {
 
     @Operation(summary = "파일 삭제", description = "지정된 파일을 삭제합니다.")
     @PostMapping(value = "/delete")
-    public ResponseEntity<String> deleteFile(@RequestParam String fileName,
+    public ResponseEntity<String> deleteFile(@RequestParam long entityId,
                                              @RequestParam UploadDirect uploadDirect) {
-        s3Service.deleteFile(fileName, uploadDirect);
-        return restApiController.createSuccessRestResponse(fileName);
+        s3Service.deleteFile(entityId, uploadDirect);
+        return restApiController.createSuccessRestResponse(entityId);
     }
 
     @Operation(summary = "파일 url을가져옴", description = "지정된 파일의 url을 가져옵니다.")
     @PostMapping(value = "/url")
-    public ResponseEntity<String> getFileUrl(@RequestParam String fileName,
+    public ResponseEntity<String> getFileUrl(@RequestParam long entityId,
                                              @RequestParam UploadDirect uploadDirect) {
-        return restApiController.createSuccessRestResponse(s3Service.getFileUrl(fileName, uploadDirect));
+        return restApiController.createSuccessRestResponse(s3Service.getFileUrl(entityId, uploadDirect));
     }
 }
