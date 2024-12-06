@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
 public class AllMemberResponse {
 
     private AllMemberProfileDTO profile;
+    private AllMemberProfileDTO profile2;
+
 
     public AllMemberResponse(Member member) {
         this.profile = new AllMemberProfileDTO(member);
+        this.profile2 = new AllMemberProfileDTO(member);
     }
 }

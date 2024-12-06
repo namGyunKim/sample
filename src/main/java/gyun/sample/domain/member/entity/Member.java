@@ -26,9 +26,12 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true)
     private String nickName;                                   //  닉네임
     private String password;                               //  유저 비밀번호
+    private String countryCode;                             //  유저 국가코드
+    private String phoneNumber;                             //  유저 전화번호
     @Enumerated(EnumType.STRING)
     private GlobalActiveEnums active;                                 //  활성
     @Enumerated(EnumType.STRING)
+
     private AccountRole role;                               //  유저 권한
 
     private String profileImage;                          //  프로필 이미지

@@ -31,4 +31,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     Optional<Member> findByIdAndRole(long id, AccountRole accountRole);
 
     Optional<Member> findByLoginIdAndRoleIn(String loginId, List<AccountRole> accountRoles);
+
+    Optional<Member> findByPhoneNumberAndCountryCodeAndActive(String phoneNumber, String countryCode, GlobalActiveEnums active);
+
+    boolean existsByLoginIdAndPhoneNumberAndCountryCodeAndActive(String loginId, String phoneNumber, String countryCode, GlobalActiveEnums active);
+
 }

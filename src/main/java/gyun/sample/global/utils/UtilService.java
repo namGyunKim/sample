@@ -99,4 +99,9 @@ public class UtilService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분");
         return localDateTime.format(formatter);
     }
+
+public static String removeNonDigits(String input) {
+    // 정규 표현식을 사용하여 숫자 이외의 모든 문자를 빈 문자열로 대체
+    return input.replaceAll("[^0-9]", "");
+}
 }

@@ -57,6 +57,7 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT("9012", "잘못된 파일 형식입니다."),
     FILE_DOWNLOAD_ERROR("9013", "파일 다운로드 에러"),
     FILE_TOO_LARGE("9014", "파일 크기가 너무 큽니다."),
+    INVALID_VERIFICATION_CODE("9015", "인증 코드가 일치하지 않습니다."),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

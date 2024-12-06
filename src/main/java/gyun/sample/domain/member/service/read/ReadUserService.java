@@ -43,6 +43,7 @@ public class ReadUserService implements ReadMemberService {
         Pageable pageable = getPageable(request.page(), request.size());
         List<AccountRole> roles = List.of(AccountRole.USER);
         Page<Member> memberList = memberRepository.getMemberList(request, roles, pageable);
+
         return memberList.map(AllMemberResponse::new);
     }
 
