@@ -30,6 +30,7 @@ public enum ErrorCode {
     PASSWORD_INVALID("1104", "비밀번호는 8~15자리의 영문, 숫자, 특수문자 조합이어야 합니다."),
     ALREADY_REGISTERED_MEMBER_BY_NICK_NAME("1105", "이미 등록된 닉네임입니다."),
     COUNT_FETCH_ERROR("1106", "개수 수 조회에 실패하였습니다."),
+    NOT_ACTIVE_MEMBER("1107", "활성화 되지 않은 계정입니다."),
 
     // === SOCIAL (1200) ===
     KAKAO_API_GET_CODE_ERROR("1201", "카카오 API Get Code Error"),
@@ -59,6 +60,7 @@ public enum ErrorCode {
     FILE_TOO_LARGE("9014", "파일 크기가 너무 큽니다."),
     INVALID_VERIFICATION_CODE("9015", "인증 코드가 일치하지 않습니다."),
     NOT_EXIST_ENTITY("9016", "존재하지 않는 엔티티입니다."),
+    UPLOAD_FAILED("9017", "파일 업로드에 실패하였습니다."),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

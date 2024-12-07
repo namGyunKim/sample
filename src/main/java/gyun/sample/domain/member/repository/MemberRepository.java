@@ -36,4 +36,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     boolean existsByLoginIdAndPhoneNumberAndCountryCodeAndActive(String loginId, String phoneNumber, String countryCode, GlobalActiveEnums active);
 
+    Optional<Member> findByIdAndActive(long id, GlobalActiveEnums active);
+
 }

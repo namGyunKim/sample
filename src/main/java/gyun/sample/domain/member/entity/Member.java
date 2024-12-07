@@ -46,6 +46,9 @@ public class Member extends BaseTimeEntity {
     @Comment("이미지 경로")
     final private UploadDirect imageDirect = UploadDirect.MEMBER_PROFILE;
 
+    @Comment("이미지 확장자")
+    private String imageExtension;
+
 
     @Enumerated(EnumType.STRING)
     @Comment("유저 타입")
@@ -96,5 +99,9 @@ public class Member extends BaseTimeEntity {
 
     public void updateAccessToken(String accessToken) {
         this.socialToken = accessToken;
+    }
+
+    public void updateProfileExtension(String extension) {
+        this.imageExtension = extension;
     }
 }
