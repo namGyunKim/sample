@@ -34,6 +34,9 @@ public class SmsService {
     @Value("${sms.secret}")
     private String apiSecret;
 
+    @Value("${sms.from}")
+    private String from;
+
     private final SMSRepository smsRepository;
 
     private DefaultMessageService messageService;
@@ -65,7 +68,8 @@ public class SmsService {
             Message message = new Message();
             // 발신번호 및 수신번호는 반드시 01012345678 형태로 입력되어야 합니다.
             log.info("Sending SMS to: {}", formattedPhoneNumber);
-            message.setFrom("01076057751");
+            log.info("from: {}", from);
+            message.setFrom(from);
             message.setCountry(formattedCountryCode);
             message.setTo(formattedPhoneNumber);
             message.setText(content);
