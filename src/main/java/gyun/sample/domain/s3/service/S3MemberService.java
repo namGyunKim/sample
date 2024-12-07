@@ -1,4 +1,4 @@
-package gyun.sample.domain.s3;
+package gyun.sample.domain.s3.service;
 
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -19,14 +19,13 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class S3Service {
+public class S3MemberService implements S3Service {
 
     private final S3Client s3Client;
 
@@ -45,6 +44,8 @@ public class S3Service {
     private String localBucketName;
     @Value("${spring.profiles.active}")
     private String activeProfile;
+
+    private final UploadDirect uploadDirect = UploadDirect.MEMBER_PROFILE;
 
     //    확장자 추출
     public static String getFileExtension(String filename) {
@@ -67,19 +68,19 @@ public class S3Service {
         }
     }
 
-    //    샘플이라  로그인한 계정 프로필로 가정
-    public String uploadFileWithDisposition(UploadDirect uploadDirect, MultipartFile file, long memberId) throws IOException {
+    @Override
+    public String upload(MultipartFile file, long memberId) {
         // 파일 검증 (확장자, 용량)
         validationFile(file);
 
         // 엔티티 유효성 확인 후 엔티티 ID 가져오기
-        long entityId = getEntityId(memberId, uploadDirect);
+        long entityId = getEntityId(memberId);
 
         // 파일 확장자 추출
         String fileExtension = getFileExtension(file.getOriginalFilename());
 
         // S3 업로드 키 생성
-        final String key = generatedKeyWithUpload(entityId, uploadDirect, fileExtension);
+        final String key = generatedKeyWithUpload(entityId, fileExtension);
 
         // S3에 업로드할 요청 객체 생성 (Content-Disposition 설정 포함)
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -89,7 +90,7 @@ public class S3Service {
                 .build();
 
         // 기존 파일 삭제 (존재하지 않아도 예외 없이 통과)
-        deleteFile(entityId, uploadDirect);
+        deleteFile(entityId);
 
         // S3 업로드 시도
         try {
@@ -104,15 +105,15 @@ public class S3Service {
         }
 
         // 업로드 성공 시 DB에 확장자 정보 업데이트
-        saveExtension(entityId, uploadDirect, fileExtension);
+        saveExtension(entityId, fileExtension);
 
         // 업로드 성공 후 key 반환
         return key;
     }
 
-
-    public void deleteFile(long entityId, UploadDirect uploadDirect) {
-        final String key = generatedKey(entityId, uploadDirect);
+    @Override
+    public void deleteFile(long entityId) {
+        final String key = generatedKey(entityId);
 
 
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
@@ -123,9 +124,9 @@ public class S3Service {
         s3Client.deleteObject(deleteObjectRequest);
     }
 
-
-    public String getFileUrl(long entityId, UploadDirect uploadDirect) {
-        final String key = generatedKey(entityId, uploadDirect);
+    @Override
+    public String getFileUrl(long entityId) {
+        final String key = generatedKey(entityId);
 
 
         if (!doesObjectExist(key)) {
@@ -136,22 +137,18 @@ public class S3Service {
     }
 
     //    업로드할때 파일명을 생성하는 메서드
-    private String generatedKeyWithUpload(long entityId, UploadDirect uploadDirect, String fileExtension) {
+    private String generatedKeyWithUpload(long entityId, String fileExtension) {
         return uploadDirect.getValue() + "/" + entityId + fileExtension;
     }
 
     //    업로드가 아닌 경우 파일명을 생성하는 메서드
 // 업로드가 아닌 경우 파일명을 생성하는 메서드
-    public String generatedKey(long entityId, UploadDirect uploadDirect) {
-        String extension = switch (uploadDirect) {
-            case MEMBER_PROFILE -> memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
-                    .map(Member::getImageExtension)
-                    .orElseThrow(() -> new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER));
-            default -> "";
-        };
-
-        // 여기서 generatedKey를 호출해야 합니다.
-        return generatedKeyWithUpload(entityId, uploadDirect, extension);
+    public String generatedKey(long entityId) {
+        String extension =
+                memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
+                        .map(Member::getImageExtension)
+                        .orElseThrow(() -> new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER));
+        return generatedKeyWithUpload(entityId, extension);
     }
 
 
@@ -180,20 +177,16 @@ public class S3Service {
         }
     }
 
-    public long getEntityId(long memberId, UploadDirect uploadDirect) {
-        if (uploadDirect == UploadDirect.MEMBER_PROFILE) {
-            return memberRepository.findById(memberId)
-                    .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER)).getId();
-        } else throw new GlobalException(ErrorCode.NOT_EXIST_ENTITY);
+    public long getEntityId(long memberId) {
+        return memberRepository.findByIdAndActive(memberId, GlobalActiveEnums.ACTIVE)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER)).getId();
     }
 
-    public void saveExtension(long entityId, UploadDirect uploadDirect, String extension) {
+    public void saveExtension(long entityId, String extension) {
         // 확장자 저장
-        if (uploadDirect == UploadDirect.MEMBER_PROFILE) {
-            Member member = memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
-                    .orElseThrow(() -> new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER));
-            member.updateProfileExtension(extension);
-        }
+        Member member = memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
+                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER));
+        member.updateProfileExtension(extension);
     }
 
 
