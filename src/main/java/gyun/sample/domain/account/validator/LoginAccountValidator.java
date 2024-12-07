@@ -3,6 +3,7 @@ package gyun.sample.domain.account.validator;
 import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
+import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,9 @@ public class LoginAccountValidator implements Validator {
     private void validateMemberRequest(AccountLoginRequest request, Errors errors) {
         Member member = memberRepository.findByLoginIdAndRole(request.loginId(), request.role())
                 .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        if (member.getActive() != GlobalActiveEnums.ACTIVE) {
+            throw new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER);
+        }
         validatePassword(request.password(), member.getPassword());
     }
 
