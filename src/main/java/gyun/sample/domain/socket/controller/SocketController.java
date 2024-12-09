@@ -32,8 +32,9 @@ public class SocketController {
     private final RestApiController restApiController;
 
     @PostMapping("/login/send-message")
-    @Operation(summary = "메시지 전송,close is message -> CLOSE_SOCKET (3-7)")
-//    @MessageMapping("/sendMessage/{roomId}/{memberId}")
+    @Operation(summary = "메시지 전송 간단 샘플")
+//    클라이언트에서 /app/hello로 메시지를 보내면 sendMessage 함수가 실행됨 WebSocketConfig.java 참고
+//    @MessageMapping("/hello")
 //    sendMessage 함수에서 메시지 보내서 SendTo 주석 처리
 //    @SendTo("/topic/public/{roomId}")
     public ResponseEntity<String> sendMessage(@Valid @RequestBody SendMessageRequest sendMessageRequest, BindingResult bindingResult,
