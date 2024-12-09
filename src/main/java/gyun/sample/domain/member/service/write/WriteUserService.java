@@ -4,7 +4,7 @@ package gyun.sample.domain.member.service.write;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadUserService;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WriteUserService implements WriteMemberService {
+public class WriteUserService implements WriteMemberService<CreateMemberUserRequest> {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
@@ -30,8 +30,7 @@ public class WriteUserService implements WriteMemberService {
     private final ReadUserService readUserService;
 
     @Override
-    @Transactional
-    public GlobalCreateResponse createMember(CreateMemberRequest request) {
+    public GlobalCreateResponse createMember(CreateMemberUserRequest request) {
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));
@@ -39,7 +38,6 @@ public class WriteUserService implements WriteMemberService {
     }
 
     @Override
-    @Transactional
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
         member.update(updateMemberRequest);
@@ -51,10 +49,9 @@ public class WriteUserService implements WriteMemberService {
     }
 
     @Override
-    @Transactional
     public GlobalInactiveResponse inactiveMember(String loginId) {
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
-        member.inactive();
+        member.deActive();
         refreshTokenRepository.deleteWithLoginId(loginId);
         if (member.getMemberType().checkSocialType()) {
             SocialService socialService = socialServiceAdapter.getService(member.getMemberType());

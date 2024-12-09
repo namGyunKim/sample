@@ -4,7 +4,8 @@ package gyun.sample.domain.member.entity;
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.domain.member.payload.request.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
 import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
@@ -61,7 +62,7 @@ public class Member extends BaseTimeEntity {
     private String socialKey;
 
     //    최고 관리자 리퀘스트로 생성
-    public Member(CreateMemberRequest request) {
+    public Member(CreateMemberAdminRequest request) {
         this.loginId = request.loginId();
         this.nickName = request.nickName();
         this.password = request.password();
@@ -70,10 +71,16 @@ public class Member extends BaseTimeEntity {
         this.memberType = request.memberType();
     }
 
-    //    멤버 비활성화
-    public void deactivate() {
-        this.active = GlobalActiveEnums.INACTIVE;
+    //    일반 유저 리퀘스트로 생성
+    public Member(CreateMemberUserRequest request) {
+        this.loginId = request.loginId();
+        this.nickName = request.nickName();
+        this.password = request.password();
+        this.role = AccountRole.USER;
+        this.active = GlobalActiveEnums.ACTIVE;
+        this.memberType = request.memberType();
     }
+
 
     //    소셜 회원가입
     public Member(String loginId, String nickName, MemberType memberType, String socialKey) {
@@ -93,7 +100,7 @@ public class Member extends BaseTimeEntity {
         this.nickName = updateMemberRequest.nickName();
     }
 
-    public void inactive() {
+    public void deActive() {
         this.active = GlobalActiveEnums.INACTIVE;
     }
 

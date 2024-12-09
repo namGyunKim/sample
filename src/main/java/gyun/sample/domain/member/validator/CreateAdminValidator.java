@@ -1,6 +1,6 @@
 package gyun.sample.domain.member.validator;
 
-import gyun.sample.domain.member.payload.request.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,18 +15,18 @@ public class CreateAdminValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return CreateMemberRequest.class.isAssignableFrom(clazz);
+        return CreateMemberAdminRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
         // CreateMemberRequest 검증
-        CreateMemberRequest request = (CreateMemberRequest) target;
+        CreateMemberAdminRequest request = (CreateMemberAdminRequest) target;
         validateMemberRequest(request, errors);
     }
 
 
-    private void validateMemberRequest(CreateMemberRequest request, Errors errors) {
+    private void validateMemberRequest(CreateMemberAdminRequest request, Errors errors) {
         if (memberRepository.existsByLoginId(request.loginId())) {
             errors.rejectValue("loginId", "loginId.duplicate", "이미 등록된 로그인 아이디입니다.");
         }

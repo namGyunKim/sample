@@ -4,7 +4,7 @@ package gyun.sample.domain.member.service.write;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.CreateMemberRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadAdminService;
@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WriteAdminService implements WriteMemberService {
+public class WriteAdminService implements WriteMemberService<CreateMemberAdminRequest> {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
@@ -33,8 +33,7 @@ public class WriteAdminService implements WriteMemberService {
     private final ReadAdminService readAdminService;
 
     @Override
-    @Transactional
-    public GlobalCreateResponse createMember(CreateMemberRequest request) {
+    public GlobalCreateResponse createMember(CreateMemberAdminRequest request) {
         request.generatedWithUser();
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
@@ -43,7 +42,6 @@ public class WriteAdminService implements WriteMemberService {
     }
 
     @Override
-    @Transactional
     public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
@@ -56,11 +54,10 @@ public class WriteAdminService implements WriteMemberService {
     }
 
     @Override
-    @Transactional
     public GlobalInactiveResponse inactiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
-        member.inactive();
+        member.deActive();
         refreshTokenRepository.deleteWithLoginId(loginId);
 
         if (member.getMemberType().checkSocialType()) {
