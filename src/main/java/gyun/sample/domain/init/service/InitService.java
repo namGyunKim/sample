@@ -18,8 +18,8 @@ public class InitService {
 
     //    service
     private final ReadMemberService readAdminService;
-    private final WriteMemberService writeAdminService;
-    private final WriteMemberService writeUserService;
+    private final WriteMemberService<CreateMemberAdminRequest> writeAdminService;
+    private final WriteMemberService<CreateMemberUserRequest> writeUserService;
 
     //    서버 시작시 실행
     @PostConstruct

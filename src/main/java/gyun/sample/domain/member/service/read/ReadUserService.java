@@ -2,20 +2,17 @@ package gyun.sample.domain.member.service.read;
 
 
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.AllMemberRequest;
 import gyun.sample.domain.member.payload.response.AllMemberResponse;
 import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.social.SocialServiceAdapter;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +25,7 @@ import static gyun.sample.global.utils.UtilService.getPageable;
 @RequiredArgsConstructor
 public class ReadUserService implements ReadMemberService {
 
-    protected final PasswordEncoder passwordEncoder;
     protected final MemberRepository memberRepository;
-    protected final RefreshTokenRepository refreshTokenRepository;
-    protected final SocialServiceAdapter socialServiceAdapter;
 
     @Override
     public boolean existsByRole(AccountRole accountRole) {

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserRestController {
 
     private final RestApiController restApiController;
-    private final WriteMemberService writeUserService;
+    private final WriteMemberService<CreateMemberUserRequest> writeUserService;
     private final ReadMemberService readUserService;
     private final CreateUserValidator createUserValidator;
     private final AllUserValidator allUserValidator;

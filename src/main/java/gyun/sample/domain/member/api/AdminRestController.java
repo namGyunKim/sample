@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminRestController {
 
     private final RestApiController restApiController;
-    private final WriteMemberService writeAdminService;
+    private final WriteMemberService<CreateMemberAdminRequest> writeAdminService;
     private final ReadMemberService readAdminService;
     private final CreateAdminValidator createAdminValidator;
     private final AllAdminValidator allAdminValidator;
