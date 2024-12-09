@@ -3,7 +3,7 @@ package gyun.sample.domain.member.api;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.member.payload.request.AllMemberRequest;
-import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
@@ -57,9 +57,9 @@ public class UserRestController {
 
     @Operation(summary = "유저 생성")
     @PostMapping(value = "/create")
-    public ResponseEntity<String> createUser(@Valid @RequestBody CreateMemberAdminRequest createMemberAdminRequest, BindingResult bindingResult) {
+    public ResponseEntity<String> createUser(@Valid @RequestBody CreateMemberUserRequest createMemberUserRequest, BindingResult bindingResult) {
 
-        GlobalCreateResponse response = writeUserService.createMember(createMemberAdminRequest);
+        GlobalCreateResponse response = writeUserService.createMember(createMemberUserRequest);
         return restApiController.createRestResponse(response);
     }
 
@@ -78,7 +78,7 @@ public class UserRestController {
     @Operation(summary = "유저 수정")
     @PutMapping(value = "/update")
     public ResponseEntity<String> updateUser(@Valid @RequestBody UpdateMemberRequest updateMemberRequest, BindingResult bindingResult,
-                                              @CurrentAccount CurrentAccountDTO currentAccountDTO) {
+                                             @CurrentAccount CurrentAccountDTO currentAccountDTO) {
         GlobalUpdateResponse response = writeUserService.updateMember(updateMemberRequest, currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
