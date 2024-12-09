@@ -3,6 +3,7 @@ package gyun.sample.domain.init.service;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
+import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
 import jakarta.annotation.PostConstruct;
@@ -18,6 +19,7 @@ public class InitService {
     //    service
     private final ReadMemberService readAdminService;
     private final WriteMemberService writeAdminService;
+    private final WriteMemberService writeUserService;
 
     //    서버 시작시 실행
     @PostConstruct
@@ -48,13 +50,13 @@ public class InitService {
         }
     }
 
-    //    유저가 없을경우 관리자 10개 생성
+    //    유저가 없을경우 유저 10개 생성
     @Transactional
     public void createMemberByRoleUser() {
         if (!readAdminService.existsByRole(AccountRole.USER)) {
             for (int i = 1; i <= 10; i++) {
-                CreateMemberAdminRequest request = new CreateMemberAdminRequest("user" + i, "유저이름" + i, "1234", AccountRole.USER, MemberType.GENERAL);
-                writeAdminService.createMember(request);
+                CreateMemberUserRequest request = new CreateMemberUserRequest("user" + i, "유저이름" + i, "1234", MemberType.GENERAL);
+                writeUserService.createMember(request);
             }
         }
     }

@@ -40,7 +40,7 @@ public class AdminRestController {
     private final UpdateAdminValidator updateAdminValidator;
 
 
-    @InitBinder(value = "createMemberRequest")
+    @InitBinder(value = "createMemberAdminRequest")
     public void initBinder(WebDataBinder dataBinder) {
         dataBinder.addValidators(createAdminValidator);
     }

@@ -40,7 +40,7 @@ public class UserRestController {
     private final UpdateUserValidator updateUserValidator;
 
 
-    @InitBinder(value = "createMemberRequest")
+    @InitBinder(value = "createMemberUserRequest")
     public void initBinder(WebDataBinder dataBinder) {
         dataBinder.addValidators(createUserValidator);
     }
