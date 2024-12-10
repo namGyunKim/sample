@@ -1,6 +1,7 @@
 package gyun.sample.global.config.redis;
 
-import org.springframework.beans.factory.annotation.Value;
+//레디스 사용할거면 주석 해제
+/*import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -35,4 +36,4 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
     }
-}
+}*/

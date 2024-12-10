@@ -27,6 +27,16 @@ repositories {
     mavenCentral()
 }
 
+// BOM 관리
+dependencyManagement {
+    imports {
+        // Spring Cloud BOM
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2022.0.3"
+        // AWS SDK BOM
+        mavenBom "software.amazon.awssdk:bom:2.20.26"
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -39,9 +49,10 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.3")
+
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
     implementation "io.github.openfeign:feign-jackson"
+
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // WebSocket and STOMP
@@ -53,8 +64,7 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    // AWS S3
-    implementation platform('software.amazon.awssdk:bom:2.20.26')
+    // AWS S3 (버전 BOM 관리)
     implementation 'software.amazon.awssdk:s3'
 
     // Swagger
@@ -62,11 +72,6 @@ dependencies {
 
     // password encoder
     implementation 'org.mindrot:jbcrypt:0.4'
-
-    // Http Utils
-    implementation 'commons-fileupload:commons-fileupload:1.4'
-    implementation 'org.apache.poi:poi-ooxml:5.2.2'
-    implementation 'org.apache.httpcomponents:httpmime:4.5.13'
 
     // JWT Token
     implementation 'com.auth0:java-jwt:3.18.2'
@@ -76,21 +81,14 @@ dependencies {
     // p6spy query logging
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
-    // redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-    // junit5
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-
-//    s3
-    implementation 'software.amazon.awssdk:s3:2.20.0'
-
     // Spring Boot Email (JavaMail)
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-//    sms
+    // sms
     implementation 'net.nurigo:sdk:4.2.7'
 
+    // 필요 시 활성화
+    // implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {
