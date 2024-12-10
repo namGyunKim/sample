@@ -89,7 +89,7 @@ public class SmsService {
         final String formattedPhoneNumber = UtilService.removeNonDigits(request.phoneNumber());
         final String formattedCountryCode = UtilService.removeNonDigits(request.countryCode());
         SMS sms = smsRepository.findByPhoneNumberAndVerificationCodeAndVerified(formattedPhoneNumber, formattedCountryCode, false)
-                .orElseThrow(() -> new GlobalException(ErrorCode.INVALID_VERIFICATION_CODE));
+                .orElseThrow(() -> new GlobalException(ErrorCode.VERIFICATION_CODE_INVALID));
         sms.verify();
         return true;
     }
@@ -100,7 +100,7 @@ public class SmsService {
             final String formattedPhoneNumber = UtilService.removeNonDigits(request.phoneNumber());
             final String formattedCountryCode = UtilService.removeNonDigits(request.countryCode());
             Member member = memberRepository.findByPhoneNumberAndCountryCodeAndActive((formattedPhoneNumber), formattedCountryCode, GlobalActiveEnums.ACTIVE)
-                    .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+                    .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
             return member.getLoginId();
         } else {
             return "fail";
@@ -120,7 +120,7 @@ public class SmsService {
         final String formattedCountryCode = UtilService.removeNonDigits(request.countryCode());
         boolean exists = memberRepository.existsByLoginIdAndPhoneNumberAndCountryCodeAndActive((request.loginId()), formattedPhoneNumber, formattedCountryCode, GlobalActiveEnums.ACTIVE);
         if (!exists) {
-            throw new GlobalException(ErrorCode.NOT_EXIST_MEMBER);
+            throw new GlobalException(ErrorCode.MEMBER_NOT_EXIST);
         }
 
         sendVerificationCode(formattedCountryCode, formattedPhoneNumber);

@@ -147,7 +147,7 @@ public class S3MemberService implements S3Service {
         String extension =
                 memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
                         .map(Member::getImageExtension)
-                        .orElseThrow(() -> new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER));
+                        .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_INACTIVE));
         return generatedKeyWithUpload(entityId, extension);
     }
 
@@ -168,7 +168,7 @@ public class S3MemberService implements S3Service {
         // 확장자 체크
         String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new GlobalException(ErrorCode.INVALID_FILE_FORMAT);
+            throw new GlobalException(ErrorCode.FILE_FORMAT_INVALID);
         }
 
         // 파일 크기 체크
@@ -179,13 +179,13 @@ public class S3MemberService implements S3Service {
 
     public long getEntityId(long memberId) {
         return memberRepository.findByIdAndActive(memberId, GlobalActiveEnums.ACTIVE)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER)).getId();
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST)).getId();
     }
 
     public void saveExtension(long entityId, String extension) {
         // 확장자 저장
         Member member = memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_INACTIVE));
         member.updateProfileExtension(extension);
     }
 

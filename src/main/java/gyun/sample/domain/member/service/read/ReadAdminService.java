@@ -44,26 +44,26 @@ public class ReadAdminService implements ReadMemberService {
     @Override
     public DetailMemberResponse getDetail(long id) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Member member = memberRepository.findByIdAndRoleIn(id, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
-        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        Member member = memberRepository.findByIdAndRoleIn(id, roles).orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
+        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.MEMBER_INACTIVE);
         return new DetailMemberResponse(member);
     }
 
     @Override
     public Member getByLoginIdAndRoles(String loginId, List<AccountRole> roles) {
-        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByLoginIdAndRoleIn(loginId, roles).orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
         validationMember(member);
         return member;
     }
 
     @Override
     public Member getByLoginIdAndRole(String loginId, AccountRole role) {
-        Member member = memberRepository.findByLoginIdAndRole(loginId, role).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member member = memberRepository.findByLoginIdAndRole(loginId, role).orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
         validationMember(member);
         return member;
     }
 
     private void validationMember(Member member) {
-        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+        if (member.getActive() == GlobalActiveEnums.INACTIVE) throw new GlobalException(ErrorCode.MEMBER_INACTIVE);
     }
 }

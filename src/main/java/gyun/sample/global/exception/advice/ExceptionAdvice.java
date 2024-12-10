@@ -70,13 +70,13 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
         } else if (exception instanceof MaxUploadSizeExceededException) {
             errorCode = ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED;
         } else if (exception instanceof MethodArgumentNotValidException) {
-            errorCode = ErrorCode.INVALID_INPUT_VALUE;
+            errorCode = ErrorCode.INPUT_VALUE_INVALID;
         } else if (exception instanceof NoHandlerFoundException) {
             errorCode = ErrorCode.PAGE_NOT_EXIST;
         } else if (exception instanceof HttpRequestMethodNotSupportedException) {
             errorCode = ErrorCode.METHOD_NOT_SUPPORTED;
         } else if (exception instanceof IllegalArgumentException) {
-            errorCode = ErrorCode.INVALID_ARGUMENT;
+            errorCode = ErrorCode.ARGUMENT_INVALID;
         } else {
             errorCode = ErrorCode.FAILED;
         }

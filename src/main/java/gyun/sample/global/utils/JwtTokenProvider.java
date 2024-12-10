@@ -99,7 +99,7 @@ public class JwtTokenProvider {
                     .getBody();
             return new ClaimsWithErrorCodeDTO(claims, null);
         } catch (ExpiredJwtException e) {
-            return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_TOKEN_EXPIRED);
+            return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_EXPIRED);
         } catch (SignatureException e) {
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_SIGNATURE_ERROR);
         } catch (JwtException e) {

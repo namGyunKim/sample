@@ -34,9 +34,9 @@ public class LoginAccountValidator implements Validator {
 
     private void validateMemberRequest(AccountLoginRequest request, Errors errors) {
         Member member = memberRepository.findByLoginIdAndRole(request.loginId(), request.role())
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
         if (member.getActive() != GlobalActiveEnums.ACTIVE) {
-            throw new GlobalException(ErrorCode.NOT_ACTIVE_MEMBER);
+            throw new GlobalException(ErrorCode.MEMBER_INACTIVE);
         }
         validatePassword(request.password(), member.getPassword());
     }
@@ -44,7 +44,7 @@ public class LoginAccountValidator implements Validator {
     private void validatePassword(String password, String memberPassword) {
         boolean matches = passwordEncoder.matches(password, memberPassword);
         if (!matches) {
-            throw new GlobalException(ErrorCode.NOT_MATCH_PASSWORD);
+            throw new GlobalException(ErrorCode.PASSWORD_NOT_MATCH);
         }
     }
 }

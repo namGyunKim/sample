@@ -22,19 +22,19 @@ public class ReadAccountService {
 
 
     public LoginMemberResponse getLoginData(CurrentAccountDTO request) {
-        Member byLoginIdAndRole = memberRepository.findByLoginIdAndRole(request.loginId(), request.role()).orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+        Member byLoginIdAndRole = memberRepository.findByLoginIdAndRole(request.loginId(), request.role()).orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
         if (byLoginIdAndRole.getActive() != GlobalActiveEnums.ACTIVE)
-            throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+            throw new GlobalException(ErrorCode.MEMBER_INACTIVE);
         return new LoginMemberResponse(byLoginIdAndRole);
     }
 
     //    로그인 아이디와 권한으로 멤버 조회 및 활성 여부 검증
     public Member findByLoginIdAndRole(String loginId, AccountRole role) {
         Member member = memberRepository.findByLoginIdAndRole(loginId, role)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
 
         if (member.getActive() != GlobalActiveEnums.ACTIVE) {
-            throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+            throw new GlobalException(ErrorCode.MEMBER_INACTIVE);
         }
         return member;
     }
@@ -42,10 +42,10 @@ public class ReadAccountService {
     //    로그인 아이디로 멤버 조회 및 활성 여부 검증
     public Member findByLoginId(String loginId) {
         Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_MEMBER));
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
 
         if (member.getActive() != GlobalActiveEnums.ACTIVE) {
-            throw new GlobalException(ErrorCode.INACTIVE_MEMBER);
+            throw new GlobalException(ErrorCode.MEMBER_INACTIVE);
         }
         return member;
     }
