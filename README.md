@@ -2,9 +2,9 @@
 
 프로젝트를 처음 시작할때 기본적인 세팅을 스킵하기 위한 프로젝트
 
-아주 간단한 관리자,유저 CRUD 까지만 구현
+아주 간단한 기능들 구현
 
-h2 와 redis 가 설치되어 있어야 합니다
+h2 가 설치되어 있어야 합니다
 
 자바 17  및 스프링부트 3.0.5 버전 사용
 
@@ -13,7 +13,6 @@ http://localhost:8090/swagger-ui/index.html#
 
 RestApi 프로젝트
 
-화면은 리액트로 구성
 
 올바르지 않은 RequestData를 보내면 400에러를 반환하도록 구현
 BindingResult가 메소드에 포함되어 있다면 AOP를 적용한 BindingAdvice를 통해 에러를 처리하도록 구현
@@ -32,7 +31,7 @@ https://blog.naver.com/skarbs01/223210410721
 
 ![img_3.png](gitimage/img_3.png)
 
-로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장
+로그인 기능은 JWT 로 구현 RefreshToken은 Redis에 저장 -> Member 엔티티로 수정
 
 https://blog.naver.com/skarbs01/223210430457
 
