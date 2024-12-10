@@ -3,6 +3,8 @@ package gyun.sample.domain.member.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.board.entity.Board;
+import gyun.sample.domain.board.entity.BoardComment;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
 import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
@@ -14,6 +16,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -64,6 +69,17 @@ public class Member extends BaseTimeEntity {
     @Comment("JWT Refresh Token")
     @Column(columnDefinition = "text")
     private String refreshToken;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Board> boards = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<BoardComment> createComment = new ArrayList<>();
+
+    @OneToMany(mappedBy = "deActiveMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<BoardComment> deActiveComment = new ArrayList<>();
+
+
 
     //    최고 관리자 리퀘스트로 생성
     public Member(CreateMemberAdminRequest request) {
@@ -122,5 +138,9 @@ public class Member extends BaseTimeEntity {
 
     public void invalidateRefreshToken() {
         this.refreshToken = null;
+    }
+
+    public void addBoard(Board savedBoard) {
+        this.boards.add(savedBoard);
     }
 }

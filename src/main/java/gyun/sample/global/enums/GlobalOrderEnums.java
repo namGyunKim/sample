@@ -31,4 +31,9 @@ public enum GlobalOrderEnums {
         List<GlobalOrderEnums> allowedValues = Arrays.asList(CREATE_ASC, CREATE_DESC);
         return allowedValues.contains(enums);
     }
+
+    public static boolean checkBoard(GlobalOrderEnums enums) {
+        List<GlobalOrderEnums> allowedValues = Arrays.asList(CREATE_ASC, CREATE_DESC);
+        return allowedValues.contains(enums);
+    }
 }

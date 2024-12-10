@@ -33,7 +33,7 @@ public class MemberRepositoryCustomUtil {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(member.role.in(accountRoles));
         GlobalActiveEnums active = request.active();
-        if(active != GlobalActiveEnums.ALL){
+        if (active != GlobalActiveEnums.ALL) {
             builder.and(member.active.eq(active));
         }
         final String searchWord = request.searchWord();

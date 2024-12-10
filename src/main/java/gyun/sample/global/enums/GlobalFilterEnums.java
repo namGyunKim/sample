@@ -12,7 +12,9 @@ import java.util.stream.Stream;
 public enum GlobalFilterEnums {
     ALL("전체"),
     NICK_NAME("닉네임"),
-    LOGIN_ID("로그인 아이디");
+    LOGIN_ID("로그인 아이디"),
+    TITLE("제목"),
+    CONTENT("내용");
     private final String value;
 
     GlobalFilterEnums(String value) {
@@ -30,6 +32,11 @@ public enum GlobalFilterEnums {
 
     public static boolean checkAdminMember(GlobalFilterEnums enums) {
         List<GlobalFilterEnums> allowedValues = Arrays.asList(ALL, NICK_NAME, LOGIN_ID);
+        return allowedValues.contains(enums);
+    }
+
+    public static boolean checkBoard(GlobalFilterEnums enums) {
+        List<GlobalFilterEnums> allowedValues = Arrays.asList(ALL, NICK_NAME, TITLE, CONTENT);
         return allowedValues.contains(enums);
     }
 }

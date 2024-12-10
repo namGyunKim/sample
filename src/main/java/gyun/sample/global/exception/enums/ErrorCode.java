@@ -34,6 +34,14 @@ public enum ErrorCode {
     KAKAO_API_LOGOUT_ERROR("1204", "카카오 API Logout Error"),
     KAKAO_API_UNLINK_ERROR("1205", "카카오 API Unlink Error"),
 
+    // === BOARD (2000) ===
+    COMMENT_NOT_EXIST("2001", "존재하지 않는 댓글입니다."),
+    COMMENT_INACTIVE("2002", "비활성화된 댓글입니다."),
+    BOARD_INACTIVE("2003", "비활성화된 게시글입니다."),
+    FREE_BOARD_NOT_EXIST("2004", "존재하지 않는 자유 게시글 입니다."),
+    BOARD_NOT_EXIST("2005", "존재하지 않는 게시글입니다."),
+    QUESTION_BOARD_NOT_EXIST("2006", "존재하지 않는 질문 게시글 입니다."),
+
     // === OTHER (9000) ===
     JSON_PROCESS_FAIL("9001", "Json 파일을 처리하는데 실패했습니다."),
     COUNT_FETCH_ERROR("9002", "개수 조회에 실패하였습니다."),
@@ -51,7 +59,7 @@ public enum ErrorCode {
     FILE_TOO_LARGE("9014", "파일 크기가 너무 큽니다."),
     VERIFICATION_CODE_INVALID("9015", "인증 코드가 일치하지 않습니다."),
     UPLOAD_FAILED("9016", "파일 업로드에 실패하였습니다."),
-
+    FILTER_NOT_EXIST("9017", "필터가 존재하지 않습니다."),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =

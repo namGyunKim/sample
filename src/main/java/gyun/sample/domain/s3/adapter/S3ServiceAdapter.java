@@ -1,4 +1,4 @@
-package gyun.sample.domain.s3;
+package gyun.sample.domain.s3.adapter;
 
 import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.domain.s3.service.S3MemberService;

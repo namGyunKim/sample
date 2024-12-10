@@ -33,4 +33,14 @@ public enum GlobalActiveEnums {
         List<GlobalActiveEnums> allowedValues = Arrays.asList(ALL, ACTIVE, INACTIVE);
         return allowedValues.contains(enums);
     }
+
+    public static boolean checkBoard(GlobalActiveEnums enums) {
+        List<GlobalActiveEnums> allowedValues = Arrays.asList(ALL, ACTIVE, INACTIVE);
+        return allowedValues.contains(enums);
+    }
+
+    public static boolean checkComment(GlobalActiveEnums enums) {
+        List<GlobalActiveEnums> allowedValues = Arrays.asList(ALL, ACTIVE, INACTIVE);
+        return allowedValues.contains(enums);
+    }
 }

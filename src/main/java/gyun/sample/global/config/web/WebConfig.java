@@ -3,6 +3,7 @@ package gyun.sample.global.config.web;
 import gyun.sample.global.config.converter.GenericEnumConverterFactory;
 import gyun.sample.global.interceptor.AdminInterceptor;
 import gyun.sample.global.interceptor.JWTInterceptor;
+import gyun.sample.global.interceptor.LoginInterceptor;
 import gyun.sample.global.interceptor.SuperAdminInterceptor;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import gyun.sample.global.utils.JwtTokenProvider;
@@ -31,6 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final JwtTokenProvider jwtTokenProvider;
     //    인터셉터
     private final JWTInterceptor jwtInterceptor;
+    private final LoginInterceptor loginInterceptor;
     private final AdminInterceptor adminInterceptor;
     private final SuperAdminInterceptor superAdminInterceptor;
     private final GenericEnumConverterFactory genericEnumConverterFactory;
@@ -67,12 +69,16 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor)
                 .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout","/api/account/access-denied/**","/social/kakao/**")
                 .order(1);
+        registry.addInterceptor(loginInterceptor)
+                .addPathPatterns("/api/**/login/**")
+                .excludePathPatterns("/api/account/login")
+                .order(2);
         registry.addInterceptor(superAdminInterceptor)
                 .addPathPatterns("/api/admin/create")
-                .order(2);
+                .order(3);
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/api/admin/**","/enums")
-                .order(3);
+                .order(4);
     }
 
 
