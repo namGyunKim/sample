@@ -1,4 +1,4 @@
-package gyun.sample.domain.socket.controller;
+package gyun.sample.domain.socket.api;
 
 import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.socket.payload.request.SendMessageRequest;

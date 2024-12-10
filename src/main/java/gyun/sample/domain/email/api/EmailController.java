@@ -1,4 +1,4 @@
-package gyun.sample.domain.email.controller;
+package gyun.sample.domain.email.api;
 
 import gyun.sample.domain.email.service.EmailService;
 import gyun.sample.global.api.RestApiController;
