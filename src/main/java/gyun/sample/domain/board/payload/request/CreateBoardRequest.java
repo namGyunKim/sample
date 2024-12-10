@@ -12,7 +12,7 @@ public record CreateBoardRequest(
         String title,
         @NotNull(message = "내용을 입력해주세요.")
         @NotBlank(message = "내용을 입력해주세요.")
-        @Schema(description = "내용", example = "내용")
+        @Schema(description = "내용", example = "게시글 내용")
         String content,
         @Schema(description = "공지 여부", example = "false")
         boolean notice,

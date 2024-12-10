@@ -7,12 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record CreateCommentRequest(
-        @Schema(description = "게시판 ID", example = "3")
+        @Schema(description = "게시판 ID", example = "1")
         @Positive(message = "게시판 ID는 1 이상이어야 합니다.")
         long boardId,
         @NotNull(message = "내용을 입력해주세요.")
         @NotBlank(message = "내용을 입력해주세요.")
-        @Schema(description = "내용", example = "내용입니다.")
+        @Schema(description = "내용", example = "댓글내용임.")
         String content,
         @Schema(description = "부모 댓글 ID")
         Long parentId,
