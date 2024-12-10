@@ -2,7 +2,6 @@ package gyun.sample.domain.member.service.write;
 
 
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
@@ -28,7 +27,6 @@ public class WriteAdminService implements WriteMemberService<CreateMemberAdminRe
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final SocialServiceAdapter socialServiceAdapter;
     private final ReadAdminService readAdminService;
 
@@ -54,11 +52,11 @@ public class WriteAdminService implements WriteMemberService<CreateMemberAdminRe
     }
 
     @Override
-    public GlobalInactiveResponse inactiveMember(String loginId) {
+    @Transactional
+    public GlobalInactiveResponse deActiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
         member.deActive();
-        refreshTokenRepository.deleteWithLoginId(loginId);
 
         if (member.getMemberType().checkSocialType()) {
             SocialService socialService = socialServiceAdapter.getService(member.getMemberType());

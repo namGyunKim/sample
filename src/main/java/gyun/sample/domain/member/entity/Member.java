@@ -61,6 +61,10 @@ public class Member extends BaseTimeEntity {
     @Comment("소셜 키")
     private String socialKey;
 
+    @Comment("JWT Refresh Token")
+    @Column(columnDefinition = "text")
+    private String refreshToken;
+
     //    최고 관리자 리퀘스트로 생성
     public Member(CreateMemberAdminRequest request) {
         this.loginId = request.loginId();
@@ -110,5 +114,13 @@ public class Member extends BaseTimeEntity {
 
     public void updateProfileExtension(String extension) {
         this.imageExtension = extension;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void invalidateRefreshToken() {
+        this.refreshToken = null;
     }
 }

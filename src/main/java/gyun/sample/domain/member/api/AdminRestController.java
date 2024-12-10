@@ -85,7 +85,7 @@ public class AdminRestController {
     @Operation(summary = "관리자 비활성화")
     @PatchMapping(value = "/inactive")
     public ResponseEntity<String> inactiveAdmin(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        GlobalInactiveResponse response = writeAdminService.inactiveMember(currentAccountDTO.loginId());
+        GlobalInactiveResponse response = writeAdminService.deActiveMember(currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 }

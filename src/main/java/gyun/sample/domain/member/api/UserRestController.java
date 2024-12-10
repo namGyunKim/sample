@@ -86,7 +86,7 @@ public class UserRestController {
     @Operation(summary = "유저 비활성화")
     @PatchMapping(value = "/inactive")
     public ResponseEntity<String> inactiveUser(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        GlobalInactiveResponse response = writeUserService.inactiveMember(currentAccountDTO.loginId());
+        GlobalInactiveResponse response = writeUserService.deActiveMember(currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 }

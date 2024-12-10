@@ -3,11 +3,12 @@ package gyun.sample.global.utils;
 import gyun.sample.domain.account.dto.ClaimsWithErrorCodeDTO;
 import gyun.sample.domain.account.enums.TokenType;
 import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.domain.account.repository.RefreshTokenRepository;
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.exception.enums.ErrorCode;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,9 +20,9 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class JwtTokenProvider {
 
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${spring.jwt.secret}")
     private String secretKey;
@@ -31,6 +32,8 @@ public class JwtTokenProvider {
 
     @Value("${spring.jwt.token.refresh-expiration-time}")
     private long refreshExpirationTime;
+
+    private final MemberRepository memberRepository;
 
     /**
      * Access 토큰 생성
@@ -56,6 +59,7 @@ public class JwtTokenProvider {
     /**
      * Refresh 토큰 생성
      */
+    @Transactional
     public String createRefreshToken(Member member) {
         Date now = new Date();
         Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
@@ -74,7 +78,7 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        refreshTokenRepository.save(refreshToken, member.getLoginId(), refreshExpirationTime);
+        member.updateRefreshToken(refreshToken);
         return refreshToken;
     }
 
@@ -127,16 +131,12 @@ public class JwtTokenProvider {
         );
     }
 
-    // 리프레쉬 토큰 제거
-    public String deleteToken(String refreshToken) {
-        return refreshTokenRepository.deleteWithRefreshToken(refreshToken);
-    }
 
-    public TokenResponse getTokenResponse(HttpServletRequest httpServletRequest){
+    public TokenResponse getTokenResponse(HttpServletRequest httpServletRequest) {
         try {
             String bearer = httpServletRequest.getHeader("Authorization").split(" ")[1];
             return getTokenResponse(bearer);
-        }catch (Exception e){
+        } catch (Exception e) {
             return TokenResponse.generatedGuest(ErrorCode.JWT_INVALID);
         }
     }

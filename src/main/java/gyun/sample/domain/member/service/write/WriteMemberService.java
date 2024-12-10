@@ -13,6 +13,6 @@ public interface WriteMemberService<T> {
 
     GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId);
 
-    GlobalInactiveResponse inactiveMember(String loginId);
+    GlobalInactiveResponse deActiveMember(String loginId);
 
 }
