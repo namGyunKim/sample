@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record SendMessageRequest(
+public record MessageSendRequest(
 
         String roomId,
         @Hidden

@@ -2,7 +2,7 @@ package gyun.sample.domain.sms.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record FindPasswordRequest(
+public record PasswordGetRequest(
         @NotBlank(message = "국가 코드를 입력해주세요.")
         String countryCode,
         @NotBlank(message = "전화번호를 입력해주세요.")

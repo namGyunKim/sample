@@ -1,7 +1,7 @@
 package gyun.sample.domain.socket.api;
 
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
-import gyun.sample.domain.socket.payload.request.SendMessageRequest;
+import gyun.sample.domain.socket.payload.request.MessageSendRequest;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,13 +37,13 @@ public class SocketController {
 //    @MessageMapping("/hello")
 //    sendMessage 함수에서 메시지 보내서 SendTo 주석 처리
 //    @SendTo("/topic/public/{roomId}")
-    public ResponseEntity<String> sendMessage(@Valid @RequestBody SendMessageRequest sendMessageRequest, BindingResult bindingResult,
+    public ResponseEntity<String> sendMessage(@Valid @RequestBody MessageSendRequest messageSendRequest, BindingResult bindingResult,
                                               @CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
 //        기능만 구현해둠
-        String destination = "/topic/public/" + sendMessageRequest.roomId();
-        simpMessagingTemplate.convertAndSend(destination, sendMessageRequest);
+        String destination = "/topic/public/" + messageSendRequest.roomId();
+        simpMessagingTemplate.convertAndSend(destination, messageSendRequest);
 
-        return restApiController.createRestResponse(sendMessageRequest);
+        return restApiController.createRestResponse(messageSendRequest);
     }
 }

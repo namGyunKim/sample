@@ -3,7 +3,7 @@ package gyun.sample.domain.sms.service;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.sms.entity.SMS;
-import gyun.sample.domain.sms.payload.request.FindPasswordRequest;
+import gyun.sample.domain.sms.payload.request.PasswordGetRequest;
 import gyun.sample.domain.sms.payload.request.SMSRequest;
 import gyun.sample.domain.sms.repository.SMSRepository;
 import gyun.sample.global.enums.GlobalActiveEnums;
@@ -115,7 +115,7 @@ public class SmsService {
         return String.valueOf(code);
     }
 
-    public boolean findPassword(FindPasswordRequest request) {
+    public boolean findPassword(PasswordGetRequest request) {
         final String formattedPhoneNumber = UtilService.removeNonDigits(request.phoneNumber());
         final String formattedCountryCode = UtilService.removeNonDigits(request.countryCode());
         boolean exists = memberRepository.existsByLoginIdAndPhoneNumberAndCountryCodeAndActive((request.loginId()), formattedPhoneNumber, formattedCountryCode, GlobalActiveEnums.ACTIVE);

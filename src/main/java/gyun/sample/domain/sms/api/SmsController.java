@@ -1,6 +1,6 @@
 package gyun.sample.domain.sms.api;
 
-import gyun.sample.domain.sms.payload.request.FindPasswordRequest;
+import gyun.sample.domain.sms.payload.request.PasswordGetRequest;
 import gyun.sample.domain.sms.payload.request.SMSRequest;
 import gyun.sample.domain.sms.service.SmsService;
 import gyun.sample.global.api.RestApiController;
@@ -53,7 +53,7 @@ public class SmsController {
 
     @Operation(summary = "비밀번호 찾기 true is pass", description = "한번 검증한 코드는 재활용 불가능.")
     @PostMapping("/verify/password")
-    public ResponseEntity<String> findPassword(@Valid @RequestBody FindPasswordRequest smsRequest, BindingResult bindingResult) {
+    public ResponseEntity<String> findPassword(@Valid @RequestBody PasswordGetRequest smsRequest, BindingResult bindingResult) {
 
         boolean result = smsService.findPassword(smsRequest);
         return restApiController.createSuccessRestResponse(result);
