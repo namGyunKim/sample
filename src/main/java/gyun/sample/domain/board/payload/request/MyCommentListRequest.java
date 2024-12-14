@@ -4,7 +4,7 @@ import gyun.sample.global.enums.GlobalActiveEnums;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Positive;
 
-public record MyCommentRequestList(
+public record MyCommentListRequest(
         @Schema(description = "활성화 상태", example = "ALL")
         GlobalActiveEnums active,
         @Schema(description = "페이지 번호", example = "1")

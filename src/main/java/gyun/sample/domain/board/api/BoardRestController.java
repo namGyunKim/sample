@@ -1,16 +1,16 @@
 package gyun.sample.domain.board.api;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.adapter.ReadBoardServiceAdapter;
 import gyun.sample.domain.board.adapter.WriteBoardServiceAdapter;
 import gyun.sample.domain.board.payload.request.*;
 import gyun.sample.domain.board.service.read.ReadBoardService;
 import gyun.sample.domain.board.service.write.WriteBoardService;
-import gyun.sample.domain.board.validator.BoardValidatorList;
-import gyun.sample.domain.board.validator.CreateBoardValidator;
-import gyun.sample.domain.board.validator.InactiveBoardValidator;
-import gyun.sample.domain.board.validator.UpdateBoardValidator;
+import gyun.sample.domain.board.validator.BoardCreateValidator;
+import gyun.sample.domain.board.validator.BoardInactiveValidator;
+import gyun.sample.domain.board.validator.BoardListValidator;
+import gyun.sample.domain.board.validator.BoardUpdateValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,65 +36,65 @@ public class BoardRestController {
     private final RestApiController restApiController;
     private final ReadBoardServiceAdapter readBoardServiceAdapter;
     //    validator 추가
-    private final CreateBoardValidator createBoardValidator;
-    private final UpdateBoardValidator updateBoardValidator;
-    private final BoardValidatorList boardValidatorList;
-    private final InactiveBoardValidator inactiveBoardValidator;
+    private final BoardCreateValidator boardCreateValidator;
+    private final BoardUpdateValidator boardUpdateValidator;
+    private final BoardListValidator boardListValidator;
+    private final BoardInactiveValidator boardInactiveValidator;
 
-    @InitBinder("createBoardRequest")
+    @InitBinder("boardCreateRequest")
     public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(createBoardValidator);
+        webDataBinder.addValidators(boardCreateValidator);
     }
 
-    @InitBinder("updateBoardRequest")
+    @InitBinder("boardUpdateRequest")
     public void initBinder2(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(updateBoardValidator);
+        webDataBinder.addValidators(boardUpdateValidator);
     }
 
-    @InitBinder("boardRequestList")
+    @InitBinder("boardListRequest")
     public void initBinder3(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(boardValidatorList);
+        webDataBinder.addValidators(boardListValidator);
     }
 
-    @InitBinder("inactiveBoardRequest")
+    @InitBinder("boardInactiveRequest")
     public void initBinder4(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(inactiveBoardValidator);
+        webDataBinder.addValidators(boardInactiveValidator);
     }
 
     @Operation(summary = "게시글 생성")
     @PostMapping(value = "/login/create")
-    public ResponseEntity<String> createClan(@Valid @RequestBody CreateBoardRequest createBoardRequest, BindingResult bindingResult,
+    public ResponseEntity<String> createClan(@Valid @RequestBody BoardCreateRequest boardCreateRequest, BindingResult bindingResult,
                                              @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        WriteBoardService writeBoardService = writeBoardServiceAdapter.getService(createBoardRequest.boardType());
-        return restApiController.createSuccessRestResponse(writeBoardService.create(createBoardRequest, currentAccountDTO));
+        WriteBoardService writeBoardService = writeBoardServiceAdapter.getService(boardCreateRequest.boardType());
+        return restApiController.createSuccessRestResponse(writeBoardService.create(boardCreateRequest, currentAccountDTO));
     }
 
     @Operation(summary = "게시글 상세보기")
     @GetMapping(value = "/detail")
-    public ResponseEntity<String> getBoard(@Valid DetailBoardRequest detailBoardRequest, BindingResult bindingResult) {
-        ReadBoardService readBoardService = readBoardServiceAdapter.getService(detailBoardRequest.boardType());
-        return restApiController.createSuccessRestResponse(readBoardService.getBoard(detailBoardRequest));
+    public ResponseEntity<String> getBoard(@Valid BoardDetailRequest boardDetailRequest, BindingResult bindingResult) {
+        ReadBoardService readBoardService = readBoardServiceAdapter.getService(boardDetailRequest.boardType());
+        return restApiController.createSuccessRestResponse(readBoardService.getBoard(boardDetailRequest));
     }
 
     @Operation(summary = "게시글 수정")
     @PutMapping(value = "/login/update")
-    public ResponseEntity<String> updateBoard(@Valid @RequestBody UpdateBoardRequest updateBoardRequest, BindingResult bindingResult) {
-        WriteBoardService writeBoardService = writeBoardServiceAdapter.getService(updateBoardRequest.boardType());
-        return restApiController.createSuccessRestResponse(writeBoardService.update(updateBoardRequest));
+    public ResponseEntity<String> updateBoard(@Valid @RequestBody BoardUpdateRequest boardUpdateRequest, BindingResult bindingResult) {
+        WriteBoardService writeBoardService = writeBoardServiceAdapter.getService(boardUpdateRequest.boardType());
+        return restApiController.createSuccessRestResponse(writeBoardService.update(boardUpdateRequest));
     }
 
     @Operation(summary = "게시글 리스트")
     @GetMapping(value = "/list")
-    public ResponseEntity<String> getBoardList(@Valid BoardRequestList boardRequestList, BindingResult bindingResult) {
-        ReadBoardService readBoardService = readBoardServiceAdapter.getService(boardRequestList.boardType());
-        return restApiController.createSuccessRestResponse(readBoardService.getBoardList(boardRequestList));
+    public ResponseEntity<String> getBoardList(@Valid BoardListRequest boardListRequest, BindingResult bindingResult) {
+        ReadBoardService readBoardService = readBoardServiceAdapter.getService(boardListRequest.boardType());
+        return restApiController.createSuccessRestResponse(readBoardService.getBoardList(boardListRequest));
     }
 
     @Operation(summary = "게시글 비활성화")
     @PatchMapping(value = "/login/inactive")
-    public ResponseEntity<String> inactiveBoard(@Valid @RequestBody InactiveBoardRequest inactiveBoardRequest, BindingResult bindingResult, @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        WriteBoardService writeBoardService = writeBoardServiceAdapter.getService(inactiveBoardRequest.boardType());
-        return restApiController.createSuccessRestResponse(writeBoardService.inactive(inactiveBoardRequest, currentAccountDTO));
+    public ResponseEntity<String> inactiveBoard(@Valid @RequestBody BoardInactiveRequest boardInactiveRequest, BindingResult bindingResult, @CurrentAccount CurrentAccountDTO currentAccountDTO) {
+        WriteBoardService writeBoardService = writeBoardServiceAdapter.getService(boardInactiveRequest.boardType());
+        return restApiController.createSuccessRestResponse(writeBoardService.inactive(boardInactiveRequest, currentAccountDTO));
     }
 
 }

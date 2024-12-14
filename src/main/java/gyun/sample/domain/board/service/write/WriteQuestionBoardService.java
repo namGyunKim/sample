@@ -1,12 +1,12 @@
 package gyun.sample.domain.board.service.write;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.entity.QuestionBoard;
-import gyun.sample.domain.board.payload.request.CreateBoardRequest;
-import gyun.sample.domain.board.payload.request.InactiveBoardRequest;
-import gyun.sample.domain.board.payload.request.UpdateBoardRequest;
+import gyun.sample.domain.board.payload.request.BoardCreateRequest;
+import gyun.sample.domain.board.payload.request.BoardInactiveRequest;
+import gyun.sample.domain.board.payload.request.BoardUpdateRequest;
 import gyun.sample.domain.board.repository.BoardRepository;
 import gyun.sample.domain.board.repository.QuestionBoardRepository;
 import gyun.sample.domain.board.service.read.ReadBoardService;
@@ -35,7 +35,7 @@ public class WriteQuestionBoardService implements WriteBoardService {
 
     @Override
     @Transactional
-    public GlobalCreateResponse create(CreateBoardRequest request, CurrentAccountDTO currentAccountDTO) {
+    public GlobalCreateResponse create(BoardCreateRequest request, CurrentAccountDTO currentAccountDTO) {
         Member member = getMember(currentAccountDTO);
         String createIp = UtilService.getClientIp(httpServletRequest);
         Board board = new Board(request, member, createIp);
@@ -52,7 +52,7 @@ public class WriteQuestionBoardService implements WriteBoardService {
 
     @Override
     @Transactional
-    public GlobalUpdateResponse update(UpdateBoardRequest request) {
+    public GlobalUpdateResponse update(BoardUpdateRequest request) {
         Board board = readQuestionBoardService.getBoardById(request.boardId());
         board.update(request);
         return new GlobalUpdateResponse(board.getId());
@@ -60,11 +60,11 @@ public class WriteQuestionBoardService implements WriteBoardService {
 
     @Override
     @Transactional
-    public GlobalInactiveResponse inactive(InactiveBoardRequest inactiveBoardRequest, CurrentAccountDTO currentAccountDTO) {
-        Board board = readQuestionBoardService.getBoardById(inactiveBoardRequest.boardId());
+    public GlobalInactiveResponse inactive(BoardInactiveRequest boardInactiveRequest, CurrentAccountDTO currentAccountDTO) {
+        Board board = readQuestionBoardService.getBoardById(boardInactiveRequest.boardId());
         Member member = getMember(currentAccountDTO);
         String inactiveIp = UtilService.getClientIp(httpServletRequest);
-        board.inactive(inactiveBoardRequest.inactiveReason(), member, inactiveIp);
+        board.inactive(boardInactiveRequest.inactiveReason(), member, inactiveIp);
         return new GlobalInactiveResponse(board.getId());
     }
 

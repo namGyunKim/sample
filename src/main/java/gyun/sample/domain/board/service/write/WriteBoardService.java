@@ -1,9 +1,9 @@
 package gyun.sample.domain.board.service.write;
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.board.payload.request.CreateBoardRequest;
-import gyun.sample.domain.board.payload.request.InactiveBoardRequest;
-import gyun.sample.domain.board.payload.request.UpdateBoardRequest;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
+import gyun.sample.domain.board.payload.request.BoardCreateRequest;
+import gyun.sample.domain.board.payload.request.BoardInactiveRequest;
+import gyun.sample.domain.board.payload.request.BoardUpdateRequest;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 @Service
 public interface WriteBoardService {
 
-    GlobalCreateResponse create(CreateBoardRequest createBoardRequest, CurrentAccountDTO currentAccountDTO);
+    GlobalCreateResponse create(BoardCreateRequest boardCreateRequest, CurrentAccountDTO currentAccountDTO);
 
-    GlobalUpdateResponse update(UpdateBoardRequest updateBoardRequest);
+    GlobalUpdateResponse update(BoardUpdateRequest boardUpdateRequest);
 
-    GlobalInactiveResponse inactive(InactiveBoardRequest inactiveBoardRequest, CurrentAccountDTO currentAccountDTO);
+    GlobalInactiveResponse inactive(BoardInactiveRequest boardInactiveRequest, CurrentAccountDTO currentAccountDTO);
 }

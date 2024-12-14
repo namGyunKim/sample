@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public record CreateCommentRequest(
+public record CommentCreateRequest(
         @Schema(description = "게시판 ID", example = "1")
         @Positive(message = "게시판 ID는 1 이상이어야 합니다.")
         long boardId,

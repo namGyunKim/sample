@@ -1,7 +1,7 @@
 package gyun.sample.domain.board.validator;
 
 import gyun.sample.domain.board.enums.BoardType;
-import gyun.sample.domain.board.payload.request.BoardRequestList;
+import gyun.sample.domain.board.payload.request.BoardListRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
@@ -12,23 +12,23 @@ import org.springframework.validation.Validator;
 
 @Component
 @RequiredArgsConstructor
-public class BoardValidatorList implements Validator {
+public class BoardListValidator implements Validator {
 
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return BoardRequestList.class.isAssignableFrom(clazz);
+        return BoardListRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
         // CreateMemberRequest 검증
-        BoardRequestList request = (BoardRequestList) target;
+        BoardListRequest request = (BoardListRequest) target;
         validateMemberRequest(request, errors);
     }
 
 
-    private void validateMemberRequest(BoardRequestList request, Errors errors) {
+    private void validateMemberRequest(BoardListRequest request, Errors errors) {
         if (request.boardType() == BoardType.ALL) {
             errors.rejectValue("boardType", "invalid.boardType", "게시판 타입을 선택해주세요.");
         }

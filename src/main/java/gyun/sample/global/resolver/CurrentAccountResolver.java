@@ -1,6 +1,6 @@
 package gyun.sample.global.resolver;
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.utils.JwtTokenProvider;

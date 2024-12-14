@@ -5,7 +5,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.entity.QBoard;
-import gyun.sample.domain.board.payload.request.BoardRequestList;
+import gyun.sample.domain.board.payload.request.BoardListRequest;
 import gyun.sample.domain.board.repository.custom.BoardRepositoryCustom;
 import gyun.sample.domain.board.repository.custom.util.BoardRepositoryCustomUtil;
 import gyun.sample.global.exception.GlobalException;
@@ -25,7 +25,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
     QBoard board = QBoard.board;
 
     @Override
-    public Page<Board> getBoardList(BoardRequestList request, Pageable pageable) {
+    public Page<Board> getBoardList(BoardListRequest request, Pageable pageable) {
 
 //        조건 추가
         BooleanBuilder builder = boardRepositoryCustomUtil.getBoardListFilter(request);

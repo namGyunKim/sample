@@ -1,19 +1,19 @@
 package gyun.sample.domain.board.service.read;
 
 import gyun.sample.domain.board.entity.Board;
-import gyun.sample.domain.board.payload.request.BoardRequestList;
-import gyun.sample.domain.board.payload.request.DetailBoardRequest;
-import gyun.sample.domain.board.payload.response.BoardResponseList;
-import gyun.sample.domain.board.payload.response.DetailBoardResponse;
+import gyun.sample.domain.board.payload.request.BoardDetailRequest;
+import gyun.sample.domain.board.payload.request.BoardListRequest;
+import gyun.sample.domain.board.payload.response.BoardDetailResponse;
+import gyun.sample.domain.board.payload.response.BoardListResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface ReadBoardService {
 
-    DetailBoardResponse getBoard(DetailBoardRequest detailBoardRequest);
+    BoardDetailResponse getBoard(BoardDetailRequest boardDetailRequest);
 
     Board getBoardById(long boardId);
 
-    Page<BoardResponseList> getBoardList(BoardRequestList boardRequestList);
+    Page<BoardListResponse> getBoardList(BoardListRequest boardListRequest);
 }

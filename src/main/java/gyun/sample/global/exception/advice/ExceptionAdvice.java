@@ -1,7 +1,7 @@
 package gyun.sample.global.exception.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;

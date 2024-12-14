@@ -1,10 +1,10 @@
 package gyun.sample.domain.board.service.read;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.entity.BoardComment;
-import gyun.sample.domain.board.payload.request.MyCommentRequestList;
-import gyun.sample.domain.board.payload.response.MyCommentResponseList;
+import gyun.sample.domain.board.payload.request.MyCommentListRequest;
+import gyun.sample.domain.board.payload.response.MyCommentListResponse;
 import gyun.sample.domain.board.repository.BoardCommentRepository;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
@@ -29,15 +29,15 @@ public class ReadCommentService {
         return comment;
     }
 
-    public Page<MyCommentResponseList> myCommentList(CurrentAccountDTO currentAccountDTO, MyCommentRequestList requestList) {
+    public Page<MyCommentListResponse> myCommentList(CurrentAccountDTO currentAccountDTO, MyCommentListRequest requestList) {
         Pageable pageable = UtilService.getPageable(requestList.page(), requestList.size());
         GlobalActiveEnums active = requestList.active();
         if (active == GlobalActiveEnums.ALL) {
             Page<BoardComment> allByMemberId = boardCommentRepository.getAllByMemberId(currentAccountDTO.id(), pageable);
-            return allByMemberId.map(MyCommentResponseList::new);
+            return allByMemberId.map(MyCommentListResponse::new);
         } else {
             Page<BoardComment> allByMemberIdAndActive = boardCommentRepository.getAllByMemberIdAndActive(currentAccountDTO.id(), active, pageable);
-            return allByMemberIdAndActive.map(MyCommentResponseList::new);
+            return allByMemberIdAndActive.map(MyCommentListResponse::new);
         }
     }
 

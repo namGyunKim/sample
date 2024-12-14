@@ -5,7 +5,7 @@ import gyun.sample.domain.board.enums.BoardType;
 
 import java.time.LocalDateTime;
 
-public record DetailCommentDTO(
+public record CommentDetailDTO(
         long commentId,
         String content,
         Long parentId,
@@ -20,7 +20,7 @@ public record DetailCommentDTO(
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public DetailCommentDTO(BoardComment comment) {
+    public CommentDetailDTO(BoardComment comment) {
         this(comment.getId(),
                 comment.getContent(),
                 comment.getParent() == null ? null : comment.getParent().getId(),

@@ -1,7 +1,7 @@
 package gyun.sample.global.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.exception.advice.RestApiControllerAdvice;

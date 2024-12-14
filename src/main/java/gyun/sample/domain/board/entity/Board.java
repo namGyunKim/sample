@@ -2,8 +2,8 @@ package gyun.sample.domain.board.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.board.enums.BoardType;
-import gyun.sample.domain.board.payload.request.CreateBoardRequest;
-import gyun.sample.domain.board.payload.request.UpdateBoardRequest;
+import gyun.sample.domain.board.payload.request.BoardCreateRequest;
+import gyun.sample.domain.board.payload.request.BoardUpdateRequest;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
@@ -68,7 +68,7 @@ public class Board extends BaseTimeEntity {
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardComment> comments = new ArrayList<>(); // 댓글
 
-    public Board(CreateBoardRequest request, Member member, String createIp) {
+    public Board(BoardCreateRequest request, Member member, String createIp) {
         this.title = request.title();
         this.content = request.content();
         this.notice = request.notice();
@@ -100,7 +100,7 @@ public class Board extends BaseTimeEntity {
         this.freeBoard = freeBoard;
     }
 
-    public void update(UpdateBoardRequest request) {
+    public void update(BoardUpdateRequest request) {
         this.title = request.title();
         this.content = request.content();
         this.notice = request.notice();

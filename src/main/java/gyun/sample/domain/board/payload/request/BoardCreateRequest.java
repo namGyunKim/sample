@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateBoardRequest(
+public record BoardCreateRequest(
         @NotNull(message = "제목을 입력해주세요.")
         @NotBlank(message = "제목을 입력해주세요.")
         @Schema(description = "제목", example = "제목")

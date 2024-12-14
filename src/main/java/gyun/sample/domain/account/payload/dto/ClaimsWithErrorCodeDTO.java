@@ -1,4 +1,4 @@
-package gyun.sample.domain.account.dto;
+package gyun.sample.domain.account.payload.dto;
 
 import gyun.sample.global.exception.enums.ErrorCode;
 import io.jsonwebtoken.Claims;

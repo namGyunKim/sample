@@ -1,15 +1,15 @@
 package gyun.sample.domain.board.api;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
-import gyun.sample.domain.board.payload.request.CreateCommentRequest;
-import gyun.sample.domain.board.payload.request.InactiveCommentRequest;
-import gyun.sample.domain.board.payload.request.MyCommentRequestList;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
+import gyun.sample.domain.board.payload.request.CommentCreateRequest;
+import gyun.sample.domain.board.payload.request.CommentInactiveRequest;
+import gyun.sample.domain.board.payload.request.MyCommentListRequest;
 import gyun.sample.domain.board.service.read.ReadCommentService;
 import gyun.sample.domain.board.service.write.WriteCommentService;
-import gyun.sample.domain.board.validator.CreateCommentValidator;
+import gyun.sample.domain.board.validator.CommentCreateValidator;
 import gyun.sample.domain.board.validator.InactiveCommentValidator;
-import gyun.sample.domain.board.validator.MyCommentValidator;
+import gyun.sample.domain.board.validator.MyCommentListValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,43 +36,43 @@ public class CommentRestController {
     private final ReadCommentService readCommentService;
 
     //    validator 추가
-    private final CreateCommentValidator createCommentValidator;
+    private final CommentCreateValidator commentCreateValidator;
     private final InactiveCommentValidator inactiveCommentValidator;
-    private final MyCommentValidator myCommentValidator;
+    private final MyCommentListValidator myCommentListValidator;
 
-    @InitBinder("createCommentRequest")
+    @InitBinder("commentCreateRequest")
     public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(createCommentValidator);
+        webDataBinder.addValidators(commentCreateValidator);
     }
 
-    @InitBinder("inactiveCommentRequest")
+    @InitBinder("commentInactiveRequest")
     public void initBinder2(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(inactiveCommentValidator);
     }
 
-    @InitBinder("myCommentRequestList")
+    @InitBinder("myCommentListRequest")
     public void initBinder3(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(myCommentValidator);
+        webDataBinder.addValidators(myCommentListValidator);
     }
 
     @Operation(summary = "댓글 생성")
     @PostMapping("/login/create")
-    public ResponseEntity<String> create(@RequestBody @Valid CreateCommentRequest createCommentRequest, BindingResult bindingResult,
+    public ResponseEntity<String> create(@RequestBody @Valid CommentCreateRequest commentCreateRequest, BindingResult bindingResult,
                                          @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        return restApiController.createSuccessRestResponse(writeCommentService.create(createCommentRequest, currentAccountDTO));
+        return restApiController.createSuccessRestResponse(writeCommentService.create(commentCreateRequest, currentAccountDTO));
     }
 
     @Operation(summary = "댓글 비활성화")
     @PatchMapping("/login/inactive")
-    public ResponseEntity<String> inactive(@Valid @RequestBody InactiveCommentRequest inactiveCommentRequest, BindingResult bindingResult,
+    public ResponseEntity<String> inactive(@Valid @RequestBody CommentInactiveRequest commentInactiveRequest, BindingResult bindingResult,
                                            @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        return restApiController.createSuccessRestResponse(writeCommentService.inactive(inactiveCommentRequest, currentAccountDTO));
+        return restApiController.createSuccessRestResponse(writeCommentService.inactive(commentInactiveRequest, currentAccountDTO));
     }
 
     @Operation(summary = "내 댓글 목록")
     @GetMapping("/login/my")
-    public ResponseEntity<String> myCommentList(@CurrentAccount CurrentAccountDTO currentAccountDTO, @Valid MyCommentRequestList myCommentRequestList, BindingResult bindingResult) {
-        return restApiController.createSuccessRestResponse(readCommentService.myCommentList(currentAccountDTO, myCommentRequestList));
+    public ResponseEntity<String> myCommentList(@CurrentAccount CurrentAccountDTO currentAccountDTO, @Valid MyCommentListRequest myCommentListRequest, BindingResult bindingResult) {
+        return restApiController.createSuccessRestResponse(readCommentService.myCommentList(currentAccountDTO, myCommentListRequest));
     }
 
 }

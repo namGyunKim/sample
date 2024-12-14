@@ -1,7 +1,7 @@
 package gyun.sample.global.utils;
 
-import gyun.sample.domain.account.dto.ClaimsWithErrorCodeDTO;
 import gyun.sample.domain.account.enums.TokenType;
+import gyun.sample.domain.account.payload.dto.ClaimsWithErrorCodeDTO;
 import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;

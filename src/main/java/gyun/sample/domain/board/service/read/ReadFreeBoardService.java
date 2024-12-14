@@ -2,10 +2,10 @@ package gyun.sample.domain.board.service.read;
 
 
 import gyun.sample.domain.board.entity.Board;
-import gyun.sample.domain.board.payload.request.BoardRequestList;
-import gyun.sample.domain.board.payload.request.DetailBoardRequest;
-import gyun.sample.domain.board.payload.response.BoardResponseList;
-import gyun.sample.domain.board.payload.response.DetailBoardResponse;
+import gyun.sample.domain.board.payload.request.BoardDetailRequest;
+import gyun.sample.domain.board.payload.request.BoardListRequest;
+import gyun.sample.domain.board.payload.response.BoardDetailResponse;
+import gyun.sample.domain.board.payload.response.BoardListResponse;
 import gyun.sample.domain.board.repository.BoardRepository;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
@@ -26,10 +26,10 @@ public class ReadFreeBoardService implements ReadBoardService {
 
 
     @Override
-    public DetailBoardResponse getBoard(DetailBoardRequest detailBoardRequest) {
-        Board board = boardRepository.findById(detailBoardRequest.boardId()).orElseThrow(() -> new GlobalException((ErrorCode.BOARD_NOT_EXIST)));
+    public BoardDetailResponse getBoard(BoardDetailRequest boardDetailRequest) {
+        Board board = boardRepository.findById(boardDetailRequest.boardId()).orElseThrow(() -> new GlobalException((ErrorCode.BOARD_NOT_EXIST)));
         boardValidate(board);
-        return new DetailBoardResponse(board);
+        return new BoardDetailResponse(board);
     }
 
     @Override
@@ -40,10 +40,10 @@ public class ReadFreeBoardService implements ReadBoardService {
     }
 
     @Override
-    public Page<BoardResponseList> getBoardList(BoardRequestList request) {
+    public Page<BoardListResponse> getBoardList(BoardListRequest request) {
         Pageable pageable = UtilService.getPageable(request.page(), request.size());
         Page<Board> boardList = boardRepository.getBoardList(request, pageable);
-        return boardList.map(BoardResponseList::new);
+        return boardList.map(BoardListResponse::new);
     }
 
     private void boardValidate(Board board) {

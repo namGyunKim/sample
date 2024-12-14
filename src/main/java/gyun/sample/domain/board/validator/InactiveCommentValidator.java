@@ -2,7 +2,7 @@ package gyun.sample.domain.board.validator;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.domain.board.payload.request.InactiveCommentRequest;
+import gyun.sample.domain.board.payload.request.CommentInactiveRequest;
 import gyun.sample.domain.board.service.read.ReadCommentService;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,16 +21,16 @@ public class InactiveCommentValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return InactiveCommentRequest.class.isAssignableFrom(clazz);
+        return CommentInactiveRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        InactiveCommentRequest request = (InactiveCommentRequest) target;
+        CommentInactiveRequest request = (CommentInactiveRequest) target;
         validateRequest(request, errors);
     }
 
-    private void validateRequest(InactiveCommentRequest request, Errors errors) {
+    private void validateRequest(CommentInactiveRequest request, Errors errors) {
         TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
         AccountRole accountRole = AccountRole.getByName(tokenResponse.role());
 

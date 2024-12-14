@@ -1,4 +1,4 @@
-package gyun.sample.domain.account.dto;
+package gyun.sample.domain.account.payload.dto;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.TokenResponse;

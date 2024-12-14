@@ -6,7 +6,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import gyun.sample.domain.board.entity.QBoard;
 import gyun.sample.domain.board.enums.BoardType;
-import gyun.sample.domain.board.payload.request.BoardRequestList;
+import gyun.sample.domain.board.payload.request.BoardListRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
@@ -26,7 +26,7 @@ public class BoardRepositoryCustomUtil {
         };
     }
 
-    public BooleanBuilder getBoardListFilter(BoardRequestList request) {
+    public BooleanBuilder getBoardListFilter(BoardListRequest request) {
 
         BooleanBuilder builder = new BooleanBuilder();
         GlobalActiveEnums active = request.active();

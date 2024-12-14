@@ -1,6 +1,6 @@
 package gyun.sample.domain.s3.api;
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.s3.adapter.S3ServiceAdapter;
 import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.domain.s3.service.S3Service;

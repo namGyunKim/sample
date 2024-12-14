@@ -1,8 +1,8 @@
 package gyun.sample.domain.board.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
-import gyun.sample.domain.board.payload.request.CreateCommentRequest;
-import gyun.sample.domain.board.payload.request.InactiveCommentRequest;
+import gyun.sample.domain.board.payload.request.CommentCreateRequest;
+import gyun.sample.domain.board.payload.request.CommentInactiveRequest;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
@@ -55,7 +55,7 @@ public class BoardComment extends BaseTimeEntity {
     private BoardComment parent;
 
 
-    public BoardComment(CreateCommentRequest request, Board board, Member member, BoardComment parent, String createIp) {
+    public BoardComment(CommentCreateRequest request, Board board, Member member, BoardComment parent, String createIp) {
         this.content = request.content();
         this.board = board;
         this.member = member;
@@ -69,7 +69,7 @@ public class BoardComment extends BaseTimeEntity {
         reply.parent = this;
     }
 
-    public void deActive(InactiveCommentRequest request, Member member, String inactiveIp) {
+    public void deActive(CommentInactiveRequest request, Member member, String inactiveIp) {
         this.active = GlobalActiveEnums.INACTIVE;
         this.inactiveReason = request.inactiveReason();
         this.deActiveMember = member;

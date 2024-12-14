@@ -1,7 +1,7 @@
 package gyun.sample.domain.member.api;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.member.payload.request.AllMemberRequest;
 import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
 import gyun.sample.domain.member.payload.request.UpdateMemberRequest;

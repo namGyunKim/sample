@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record UpdateBoardRequest(
+public record BoardUpdateRequest(
         @Schema(description = "게시판 아이디", example = "1")
         long boardId,
         @NotNull(message = "제목을 입력해주세요.")

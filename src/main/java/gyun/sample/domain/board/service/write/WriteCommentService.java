@@ -1,12 +1,12 @@
 package gyun.sample.domain.board.service.write;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.adapter.ReadBoardServiceAdapter;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.entity.BoardComment;
-import gyun.sample.domain.board.payload.request.CreateCommentRequest;
-import gyun.sample.domain.board.payload.request.InactiveCommentRequest;
+import gyun.sample.domain.board.payload.request.CommentCreateRequest;
+import gyun.sample.domain.board.payload.request.CommentInactiveRequest;
 import gyun.sample.domain.board.repository.BoardCommentRepository;
 import gyun.sample.domain.board.service.read.ReadBoardService;
 import gyun.sample.domain.board.service.read.ReadCommentService;
@@ -33,7 +33,7 @@ public class WriteCommentService {
     private final HttpServletRequest httpServletRequest;
 
     @Transactional
-    public GlobalCreateResponse create(CreateCommentRequest request, CurrentAccountDTO currentAccountDTO) {
+    public GlobalCreateResponse create(CommentCreateRequest request, CurrentAccountDTO currentAccountDTO) {
         Board board = getBoard(request);
         Member member = getMember(currentAccountDTO);
         BoardComment parentComment = getParentComment(request);
@@ -48,7 +48,7 @@ public class WriteCommentService {
     }
 
     @Transactional
-    public GlobalInactiveResponse inactive(InactiveCommentRequest request, CurrentAccountDTO currentAccountDTO) {
+    public GlobalInactiveResponse inactive(CommentInactiveRequest request, CurrentAccountDTO currentAccountDTO) {
         BoardComment comment = readCommentService.getCommentById(request.commentId());
         Member member = getMember(currentAccountDTO);
         String inactiveIp = UtilService.getClientIp(httpServletRequest);
@@ -56,7 +56,7 @@ public class WriteCommentService {
         return new GlobalInactiveResponse(comment.getId());
     }
 
-    private Board getBoard(CreateCommentRequest request) {
+    private Board getBoard(CommentCreateRequest request) {
         ReadBoardService readBoardService = readBoardServiceAdapter.getService(request.boardType());
         return readBoardService.getBoardById(request.boardId());
     }
@@ -66,7 +66,7 @@ public class WriteCommentService {
         return readMemberService.getByLoginIdAndRole(currentAccountDTO.loginId(), currentAccountDTO.role());
     }
 
-    private BoardComment getParentComment(CreateCommentRequest request) {
+    private BoardComment getParentComment(CommentCreateRequest request) {
         if (request.parentId() >= 1) {
             return readCommentService.getCommentById(request.parentId());
         }

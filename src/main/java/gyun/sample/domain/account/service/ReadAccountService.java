@@ -1,8 +1,8 @@
 package gyun.sample.domain.account.service;
 
 
-import gyun.sample.domain.account.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.LoginMemberResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;

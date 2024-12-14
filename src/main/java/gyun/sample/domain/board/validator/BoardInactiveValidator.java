@@ -5,7 +5,7 @@ import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.board.adapter.ReadBoardServiceAdapter;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.enums.BoardType;
-import gyun.sample.domain.board.payload.request.InactiveBoardRequest;
+import gyun.sample.domain.board.payload.request.BoardInactiveRequest;
 import gyun.sample.domain.board.service.read.ReadBoardService;
 import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,7 @@ import org.springframework.validation.Validator;
 
 @Component
 @RequiredArgsConstructor
-public class InactiveBoardValidator implements Validator {
+public class BoardInactiveValidator implements Validator {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final HttpServletRequest httpServletRequest;
@@ -24,16 +24,16 @@ public class InactiveBoardValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return InactiveBoardRequest.class.isAssignableFrom(clazz);
+        return BoardInactiveRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        InactiveBoardRequest request = (InactiveBoardRequest) target;
+        BoardInactiveRequest request = (BoardInactiveRequest) target;
         validateRequest(request, errors);
     }
 
-    private void validateRequest(InactiveBoardRequest request, Errors errors) {
+    private void validateRequest(BoardInactiveRequest request, Errors errors) {
         TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
 
         if (isInvalidBoardType(request, errors)) return;
@@ -51,7 +51,7 @@ public class InactiveBoardValidator implements Validator {
         }
     }
 
-    private boolean isInvalidBoardType(InactiveBoardRequest request, Errors errors) {
+    private boolean isInvalidBoardType(BoardInactiveRequest request, Errors errors) {
         if (request.boardType() == BoardType.ALL) {
             errors.rejectValue("boardType", "invalid.boardType", "게시판 타입을 선택해주세요.");
             return true;
