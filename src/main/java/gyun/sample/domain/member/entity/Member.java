@@ -6,9 +6,9 @@ import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.entity.BoardComment;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
-import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
-import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
+import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
+import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
+import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
 import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
@@ -82,7 +82,7 @@ public class Member extends BaseTimeEntity {
 
 
     //    최고 관리자 리퀘스트로 생성
-    public Member(CreateMemberAdminRequest request) {
+    public Member(MemberAdminCreateRequest request) {
         this.loginId = request.loginId();
         this.nickName = request.nickName();
         this.password = request.password();
@@ -92,7 +92,7 @@ public class Member extends BaseTimeEntity {
     }
 
     //    일반 유저 리퀘스트로 생성
-    public Member(CreateMemberUserRequest request) {
+    public Member(MemberUserCreateRequest request) {
         this.loginId = request.loginId();
         this.nickName = request.nickName();
         this.password = request.password();
@@ -116,8 +116,8 @@ public class Member extends BaseTimeEntity {
         this.password = password;
     }
 
-    public void update(UpdateMemberRequest updateMemberRequest) {
-        this.nickName = updateMemberRequest.nickName();
+    public void update(MemberUpdateRequest memberUpdateRequest) {
+        this.nickName = memberUpdateRequest.nickName();
     }
 
     public void deActive() {

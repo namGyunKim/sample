@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public record AllMemberRequest(
+public record MemberAdminListRequest(
         @Schema(description = "페이지 번호", example = "1")
         @Positive(message = "페이지 번호는 1 이상이어야 합니다.")
         int page,

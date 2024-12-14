@@ -1,6 +1,6 @@
 package gyun.sample.domain.member.validator;
 
-import gyun.sample.domain.member.payload.request.AllMemberRequest;
+import gyun.sample.domain.member.payload.request.MemberUserListRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
@@ -9,21 +9,21 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-public class AllAdminValidator implements Validator {
+public class MemberUserListValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return AllMemberRequest.class.isAssignableFrom(clazz);
+        return MemberUserListRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
         // CreateMemberRequest 검증
-        AllMemberRequest request = (AllMemberRequest) target;
+        MemberUserListRequest request = (MemberUserListRequest) target;
         validateMemberRequest(request, errors);
     }
 
-    private void validateMemberRequest(AllMemberRequest request, Errors errors) {
+    private void validateMemberRequest(MemberUserListRequest request, Errors errors) {
         if (!GlobalOrderEnums.checkAdminMember(request.order()) && request.order() != null) {
             errors.rejectValue("order", "order.notAdmin", "관리자 정렬 기준이 아닙니다.");
         }

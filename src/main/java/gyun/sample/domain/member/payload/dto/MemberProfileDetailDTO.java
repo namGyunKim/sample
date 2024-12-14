@@ -4,7 +4,7 @@ import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
 
-public record AllMemberProfileDTO(
+public record MemberProfileDetailDTO(
         Long id,
         String loginId,
         String nickName,
@@ -13,7 +13,7 @@ public record AllMemberProfileDTO(
 
 ) {
 
-    public AllMemberProfileDTO(Member member){
+    public MemberProfileDetailDTO(Member member) {
         this(member.getId(), member.getLoginId(), member.getNickName(), member.getRole(), member.getMemberType());
     }
 }

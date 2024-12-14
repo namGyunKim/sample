@@ -3,8 +3,8 @@ package gyun.sample.domain.member.service.write;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
-import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
+import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
+import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadUserService;
 import gyun.sample.domain.social.SocialServiceAdapter;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WriteUserService implements WriteMemberService<CreateMemberUserRequest> {
+public class WriteUserService implements WriteMemberService<MemberUserCreateRequest> {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
@@ -28,7 +28,7 @@ public class WriteUserService implements WriteMemberService<CreateMemberUserRequ
     private final ReadUserService readUserService;
 
     @Override
-    public GlobalCreateResponse createMember(CreateMemberUserRequest request) {
+    public GlobalCreateResponse createMember(MemberUserCreateRequest request) {
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));
@@ -36,12 +36,12 @@ public class WriteUserService implements WriteMemberService<CreateMemberUserRequ
     }
 
     @Override
-    public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
+    public GlobalUpdateResponse updateMember(MemberUpdateRequest memberUpdateRequest, String loginId) {
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
-        member.update(updateMemberRequest);
+        member.update(memberUpdateRequest);
 
-        if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
-            member.updatePassword(passwordEncoder.encode(updateMemberRequest.password()));
+        if (memberUpdateRequest.password() != null && !memberUpdateRequest.password().isBlank()) {
+            member.updatePassword(passwordEncoder.encode(memberUpdateRequest.password()));
         }
         return new GlobalUpdateResponse(member.getId());
     }

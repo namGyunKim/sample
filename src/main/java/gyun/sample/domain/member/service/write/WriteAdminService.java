@@ -3,8 +3,8 @@ package gyun.sample.domain.member.service.write;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
-import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
+import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
+import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadAdminService;
 import gyun.sample.domain.social.SocialServiceAdapter;
@@ -23,7 +23,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WriteAdminService implements WriteMemberService<CreateMemberAdminRequest> {
+public class WriteAdminService implements WriteMemberService<MemberAdminCreateRequest> {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
@@ -31,7 +31,7 @@ public class WriteAdminService implements WriteMemberService<CreateMemberAdminRe
     private final ReadAdminService readAdminService;
 
     @Override
-    public GlobalCreateResponse createMember(CreateMemberAdminRequest request) {
+    public GlobalCreateResponse createMember(MemberAdminCreateRequest request) {
         request.generatedWithUser();
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
@@ -40,13 +40,13 @@ public class WriteAdminService implements WriteMemberService<CreateMemberAdminRe
     }
 
     @Override
-    public GlobalUpdateResponse updateMember(UpdateMemberRequest updateMemberRequest, String loginId) {
+    public GlobalUpdateResponse updateMember(MemberUpdateRequest memberUpdateRequest, String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
-        member.update(updateMemberRequest);
+        member.update(memberUpdateRequest);
 
-        if (updateMemberRequest.password() != null && !updateMemberRequest.password().isBlank()) {
-            member.updatePassword(passwordEncoder.encode(updateMemberRequest.password()));
+        if (memberUpdateRequest.password() != null && !memberUpdateRequest.password().isBlank()) {
+            member.updatePassword(passwordEncoder.encode(memberUpdateRequest.password()));
         }
         return new GlobalUpdateResponse(member.getId());
     }

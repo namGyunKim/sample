@@ -2,8 +2,8 @@ package gyun.sample.domain.init.service;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.domain.member.payload.request.CreateMemberAdminRequest;
-import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
+import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
+import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
 import jakarta.annotation.PostConstruct;
@@ -18,8 +18,8 @@ public class InitService {
 
     //    service
     private final ReadMemberService readAdminService;
-    private final WriteMemberService<CreateMemberAdminRequest> writeAdminService;
-    private final WriteMemberService<CreateMemberUserRequest> writeUserService;
+    private final WriteMemberService<MemberAdminCreateRequest> writeAdminService;
+    private final WriteMemberService<MemberUserCreateRequest> writeUserService;
 
     //    서버 시작시 실행
     @PostConstruct
@@ -34,7 +34,7 @@ public class InitService {
     @Transactional
     public void createMemberByRoleSuperAdmin() {
         if (!readAdminService.existsByRole(AccountRole.SUPER_ADMIN)) {
-            CreateMemberAdminRequest request = new CreateMemberAdminRequest("superAdmin", "최고관리자", "1234", AccountRole.SUPER_ADMIN, MemberType.GENERAL);
+            MemberAdminCreateRequest request = new MemberAdminCreateRequest("superAdmin", "최고관리자", "1234", AccountRole.SUPER_ADMIN, MemberType.GENERAL);
             writeAdminService.createMember(request);
         }
     }
@@ -44,7 +44,7 @@ public class InitService {
     public void createMemberByRoleAdmin() {
         if (!readAdminService.existsByRole(AccountRole.ADMIN)) {
             for (int i = 1; i <= 10; i++) {
-                CreateMemberAdminRequest request = new CreateMemberAdminRequest("admin" + i, "관리자" + i, "1234", AccountRole.ADMIN, MemberType.GENERAL);
+                MemberAdminCreateRequest request = new MemberAdminCreateRequest("admin" + i, "관리자" + i, "1234", AccountRole.ADMIN, MemberType.GENERAL);
                 writeAdminService.createMember(request);
             }
         }
@@ -55,7 +55,7 @@ public class InitService {
     public void createMemberByRoleUser() {
         if (!readAdminService.existsByRole(AccountRole.USER)) {
             for (int i = 1; i <= 10; i++) {
-                CreateMemberUserRequest request = new CreateMemberUserRequest("user" + i, "유저이름" + i, "1234", MemberType.GENERAL);
+                MemberUserCreateRequest request = new MemberUserCreateRequest("user" + i, "유저이름" + i, "1234", MemberType.GENERAL);
                 writeUserService.createMember(request);
             }
         }

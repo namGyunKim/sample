@@ -2,14 +2,14 @@ package gyun.sample.domain.member.api;
 
 
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
-import gyun.sample.domain.member.payload.request.AllMemberRequest;
-import gyun.sample.domain.member.payload.request.CreateMemberUserRequest;
-import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
+import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
+import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
+import gyun.sample.domain.member.payload.request.MemberUserListRequest;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
-import gyun.sample.domain.member.validator.AllUserValidator;
-import gyun.sample.domain.member.validator.CreateUserValidator;
-import gyun.sample.domain.member.validator.UpdateUserValidator;
+import gyun.sample.domain.member.validator.MemberUserCreateValidator;
+import gyun.sample.domain.member.validator.MemberUserListValidator;
+import gyun.sample.domain.member.validator.MemberUserUpdateValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
@@ -33,40 +33,40 @@ import org.springframework.web.bind.annotation.*;
 public class UserRestController {
 
     private final RestApiController restApiController;
-    private final WriteMemberService<CreateMemberUserRequest> writeUserService;
-    private final ReadMemberService readUserService;
-    private final CreateUserValidator createUserValidator;
-    private final AllUserValidator allUserValidator;
-    private final UpdateUserValidator updateUserValidator;
+    private final WriteMemberService<MemberUserCreateRequest> writeUserService;
+    private final ReadMemberService<MemberUserListRequest> readUserService;
+    private final MemberUserCreateValidator memberUserCreateValidator;
+    private final MemberUserListValidator memberUserListValidator;
+    private final MemberUserUpdateValidator memberUserUpdateValidator;
 
 
-    @InitBinder(value = "createMemberUserRequest")
+    @InitBinder(value = "memberUserCreateRequest")
     public void initBinder(WebDataBinder dataBinder) {
-        dataBinder.addValidators(createUserValidator);
+        dataBinder.addValidators(memberUserCreateValidator);
     }
 
-    @InitBinder(value = "allMemberRequest")
+    @InitBinder(value = "memberUserListRequest")
     public void initBinder2(WebDataBinder dataBinder) {
-        dataBinder.addValidators(allUserValidator);
+        dataBinder.addValidators(memberUserListValidator);
     }
 
-    @InitBinder(value = "updateMemberRequest")
+    @InitBinder(value = "memberUpdateRequest")
     public void initBinder3(WebDataBinder dataBinder) {
-        dataBinder.addValidators(updateUserValidator);
+        dataBinder.addValidators(memberUserUpdateValidator);
     }
 
     @Operation(summary = "유저 생성")
     @PostMapping(value = "/create")
-    public ResponseEntity<String> createUser(@Valid @RequestBody CreateMemberUserRequest createMemberUserRequest, BindingResult bindingResult) {
+    public ResponseEntity<String> createUser(@Valid @RequestBody MemberUserCreateRequest memberUserCreateRequest, BindingResult bindingResult) {
 
-        GlobalCreateResponse response = writeUserService.createMember(createMemberUserRequest);
+        GlobalCreateResponse response = writeUserService.createMember(memberUserCreateRequest);
         return restApiController.createRestResponse(response);
     }
 
     @Operation(summary = "유저 목록")
     @GetMapping(value = "/list")
-    public ResponseEntity<String> getUserList(@Valid AllMemberRequest allMemberRequest, BindingResult bindingResult) {
-        return restApiController.createRestResponse(readUserService.getList(allMemberRequest));
+    public ResponseEntity<String> getUserList(@Valid MemberUserListRequest memberUserListRequest, BindingResult bindingResult) {
+        return restApiController.createRestResponse(readUserService.getList(memberUserListRequest));
     }
 
     @Operation(summary = "유저 상세")
@@ -77,9 +77,9 @@ public class UserRestController {
 
     @Operation(summary = "유저 수정")
     @PutMapping(value = "/update")
-    public ResponseEntity<String> updateUser(@Valid @RequestBody UpdateMemberRequest updateMemberRequest, BindingResult bindingResult,
+    public ResponseEntity<String> updateUser(@Valid @RequestBody MemberUpdateRequest memberUpdateRequest, BindingResult bindingResult,
                                              @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        GlobalUpdateResponse response = writeUserService.updateMember(updateMemberRequest, currentAccountDTO.loginId());
+        GlobalUpdateResponse response = writeUserService.updateMember(memberUpdateRequest, currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 

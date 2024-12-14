@@ -3,9 +3,9 @@ package gyun.sample.domain.member.service.read;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.AllMemberRequest;
-import gyun.sample.domain.member.payload.response.AllMemberResponse;
+import gyun.sample.domain.member.payload.request.MemberAdminListRequest;
 import gyun.sample.domain.member.payload.response.DetailMemberResponse;
+import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
@@ -24,7 +24,7 @@ import static gyun.sample.global.utils.UtilService.getPageable;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ReadAdminService implements ReadMemberService {
+public class ReadAdminService implements ReadMemberService<MemberAdminListRequest> {
 
     protected final MemberRepository memberRepository;
 
@@ -34,11 +34,11 @@ public class ReadAdminService implements ReadMemberService {
     }
 
     @Override
-    public Page<AllMemberResponse> getList(AllMemberRequest request) {
+    public Page<MemberListResponse> getList(MemberAdminListRequest request) {
         Pageable pageable = getPageable(request.page(), request.size());
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
-        Page<Member> memberList = memberRepository.getMemberList(request, roles, pageable);
-        return memberList.map(AllMemberResponse::new);
+        Page<Member> memberList = memberRepository.getMemberAdminList(request, roles, pageable);
+        return memberList.map(MemberListResponse::new);
     }
 
     @Override

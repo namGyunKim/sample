@@ -2,7 +2,7 @@ package gyun.sample.domain.member.validator;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.domain.member.payload.request.UpdateMemberRequest;
+import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.global.utils.JwtTokenProvider;
@@ -16,7 +16,7 @@ import org.springframework.validation.Validator;
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UpdateUserValidator implements Validator {
+public class MemberUserUpdateValidator implements Validator {
 
     private final MemberRepository memberRepository;
     private final HttpServletRequest httpServletRequest;
@@ -25,18 +25,18 @@ public class UpdateUserValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return UpdateMemberRequest.class.isAssignableFrom(clazz);
+        return MemberUpdateRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
         // CreateMemberRequest 검증
-        UpdateMemberRequest request = (UpdateMemberRequest) target;
+        MemberUpdateRequest request = (MemberUpdateRequest) target;
         validateMemberRequest(request, errors);
     }
 
 
-    private void validateMemberRequest(UpdateMemberRequest request, Errors errors) {
+    private void validateMemberRequest(MemberUpdateRequest request, Errors errors) {
         TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
         if (memberRepository.existsByNickNameAndLoginIdNot(request.nickName(), tokenResponse.loginId())) {
             errors.rejectValue("nickName", "nickName.duplicate", "이미 등록된 닉네임입니다.");

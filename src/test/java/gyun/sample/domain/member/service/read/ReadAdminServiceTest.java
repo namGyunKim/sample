@@ -1,7 +1,7 @@
 package gyun.sample.domain.member.service.read;
 
-import gyun.sample.domain.member.payload.request.AllMemberRequest;
-import gyun.sample.domain.member.payload.response.AllMemberResponse;
+import gyun.sample.domain.member.payload.request.MemberUserListRequest;
+import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
@@ -21,10 +21,10 @@ class ReadAdminServiceTest {
     @Test
     void getList() {
         // Given
-        AllMemberRequest request = new AllMemberRequest(1, 10, GlobalOrderEnums.CREATE_DESC, "", GlobalFilterEnums.ALL, GlobalActiveEnums.ALL);
+        MemberUserListRequest request = new MemberUserListRequest(1, 10, GlobalOrderEnums.CREATE_DESC, "", GlobalFilterEnums.ALL, GlobalActiveEnums.ALL);
 
         // When
-        Page<AllMemberResponse> result = readAdminService.getList(request);
+        Page<MemberListResponse> result = readAdminService.getList(request);
 
         // Then
         assertEquals(101, result.getTotalElements(), "총 요소 수는 101이어야 합니다");

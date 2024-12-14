@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateMemberUserRequest(
+public record MemberUserCreateRequest(
         @NotBlank(message = "로그인 아이디를 입력해주세요.")
         @Schema(description = "로그인 아이디", example = "admin1")
         String loginId,
@@ -19,7 +19,7 @@ public record CreateMemberUserRequest(
         @Schema(description = "멤버 타입", example = "GENERAL")
         MemberType memberType) {
 
-    public CreateMemberUserRequest generatedWithUser() {
-        return new CreateMemberUserRequest(loginId, nickName, password, MemberType.GENERAL);
+    public MemberUserCreateRequest generatedWithUser() {
+        return new MemberUserCreateRequest(loginId, nickName, password, MemberType.GENERAL);
     }
 }
