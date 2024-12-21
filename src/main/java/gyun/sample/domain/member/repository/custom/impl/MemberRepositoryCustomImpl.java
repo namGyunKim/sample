@@ -6,8 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.entity.QMember;
-import gyun.sample.domain.member.payload.request.MemberAdminListRequest;
-import gyun.sample.domain.member.payload.request.MemberUserListRequest;
+import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.repository.custom.MemberRepositoryCustom;
 import gyun.sample.domain.member.repository.custom.util.MemberRepositoryCustomUtil;
 import gyun.sample.global.exception.GlobalException;
@@ -27,38 +26,10 @@ public class MemberRepositoryCustomImpl implements MemberRepositoryCustom {
     private final QMember member = QMember.member;
 
     @Override
-    public Page<Member> getMemberAdminList(MemberAdminListRequest request, List<AccountRole> accountRoles, Pageable pageable) {
+    public Page<Member> getMemberList(MemberListRequestDTO request, List<AccountRole> accountRoles, Pageable pageable) {
 
 //        조건 추가
-        BooleanBuilder builder = memberRepositoryCustomUtil.getMemberAdminListFilter(request, accountRoles);
-
-        // 동적 정렬 추가
-        OrderSpecifier<?> orderSpecifier = memberRepositoryCustomUtil.getMemberListOrder(request.order());
-
-        List<Member> content = jpaQueryFactory.selectFrom(member)
-                .where(builder)
-                .orderBy(orderSpecifier)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        Long total = jpaQueryFactory.select(member.id.count())
-                .from(member)
-                .where(builder)
-                .fetchOne();
-
-        if (total == null) {
-            throw new GlobalException(ErrorCode.COUNT_FETCH_ERROR, "관리자 수 조회에 실패하였습니다.");
-        }
-
-        return PageableExecutionUtils.getPage(content, pageable, () -> total);
-    }
-
-    @Override
-    public Page<Member> getMemberUserList(MemberUserListRequest request, List<AccountRole> accountRoles, Pageable pageable) {
-
-//        조건 추가
-        BooleanBuilder builder = memberRepositoryCustomUtil.getMemberUserListFilter(request, accountRoles);
+        BooleanBuilder builder = memberRepositoryCustomUtil.getMemberListFilter(request, accountRoles);
 
         // 동적 정렬 추가
         OrderSpecifier<?> orderSpecifier = memberRepositoryCustomUtil.getMemberListOrder(request.order());

@@ -6,8 +6,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.QMember;
-import gyun.sample.domain.member.payload.request.MemberAdminListRequest;
-import gyun.sample.domain.member.payload.request.MemberUserListRequest;
+import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
@@ -30,22 +29,7 @@ public class MemberRepositoryCustomUtil {
         };
     }
 
-    public BooleanBuilder getMemberAdminListFilter(MemberAdminListRequest request, List<AccountRole> accountRoles) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(member.role.in(accountRoles));
-        GlobalActiveEnums active = request.active();
-        if (active != GlobalActiveEnums.ALL) {
-            builder.and(member.active.eq(active));
-        }
-        final String searchWord = request.searchWord();
-        if (searchWord != null && !searchWord.isBlank()) {
-            addMemberListSearchConditions(builder, request.filter(), searchWord);
-        }
-
-        return builder;
-    }
-
-    public BooleanBuilder getMemberUserListFilter(MemberUserListRequest request, List<AccountRole> accountRoles) {
+    public BooleanBuilder getMemberListFilter(MemberListRequestDTO request, List<AccountRole> accountRoles) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(member.role.in(accountRoles));
         GlobalActiveEnums active = request.active();
