@@ -82,5 +82,11 @@
     </script>
 </div>
 
+<script th:inline="javascript">
+    const loginId = [[${currentAccount.loginId}]];
+    if (loginId !== 'GUEST') {
+        location.href = '/';
+    }
+</script>
 </body>
 </html>

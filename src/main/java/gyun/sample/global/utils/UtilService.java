@@ -148,8 +148,8 @@ public class UtilService {
     public CurrentAccountDTO getCurrentAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new GlobalException(ErrorCode.UNAUTHORIZED, "사용자가 인증되지 않았습니다.");
+        if (authentication == null || authentication.getPrincipal().equals("anonymousUser")) {
+            return CurrentAccountDTO.generatedGuest();
         }
 
         String loginId = authentication.getName();
@@ -171,6 +171,7 @@ public class UtilService {
             return CurrentAccountDTO.generatedGuest();
         }
 
+        log.info("authentication: {}", authentication.getAuthorities());
 
         Member member = memberRepository.findByLoginId(authentication.getName())
                 .orElse(null);

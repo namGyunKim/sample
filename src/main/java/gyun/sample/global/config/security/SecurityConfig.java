@@ -1,5 +1,6 @@
 package gyun.sample.global.config.security;
 
+import gyun.sample.global.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final UtilService utilService;
 
     /**
      * 비밀번호 암호화를 위한 PasswordEncoder 빈
@@ -50,9 +52,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1) 인증/인가 규칙
+                // 인증/인가 규칙
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인 페이지("/login")는 모두 접근 가능
+                        // 로그인 페이지("/login")는 모두 접근 가능, 하지만 인증된 사용자는 리다이렉트 처리
                         .requestMatchers("/login").permitAll()
 
                         // admin 경로는 ROLE_ADMIN 권한만
@@ -62,7 +64,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 2) 폼 로그인 설정
+                // 폼 로그인 설정
                 .formLogin(login -> login
                         .usernameParameter("loginId")
                         .passwordParameter("password")
@@ -73,20 +75,30 @@ public class SecurityConfig {
                         .permitAll()
                 )
 
-                // 3) 로그아웃 설정 (예시)
+                // 로그아웃 설정
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                         .logoutSuccessUrl("/login?logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
-                // 4) 로그인 유지 (Remember Me) 설정 추가
+
+                // Remember Me 설정 추가
                 .rememberMe(rememberMe -> rememberMe
-                        .key("uniqueAndSecretKey") // 서버의 키 (변경 가능)
-                        .tokenValiditySeconds(1209600) // 2주 (초 단위)
-                        .rememberMeParameter("remember-me") // "remember-me" 필드
-                        .userDetailsService(customUserDetailsService) // 사용자 로드 서비스 설정
+                        .key("uniqueAndSecretKey")
+                        .tokenValiditySeconds(1209600)
+                        .rememberMeParameter("remember-me")
+                        .userDetailsService(customUserDetailsService)
+                )
+
+                // 예외 처리 설정
+                .exceptionHandling(exception -> exception
+                        // 인가 실패 처리
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendRedirect("/access-denied");
+                        })
                 );
         return http.build();
     }
+
 }
