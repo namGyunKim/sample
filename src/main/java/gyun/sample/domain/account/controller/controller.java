@@ -17,7 +17,7 @@ public class controller {
     @GetMapping("/login")
     public String login(Model model) {
         CurrentAccountDTO currentAccount = utilService.getCurrentAccount();
-        model.addAttribute("currentAccount", currentAccount);
+        model.addAttribute("isLogin", !currentAccount.loginId().equals("GUEST"));
         return "account/login";
     }
 

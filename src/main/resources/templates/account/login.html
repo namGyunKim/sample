@@ -83,8 +83,8 @@
 </div>
 
 <script th:inline="javascript">
-    const loginId = [[${currentAccount.loginId}]];
-    if (loginId !== 'GUEST') {
+    const isLogin = [[${isLogin}]];
+    if (isLogin) {
         location.href = '/';
     }
 </script>
