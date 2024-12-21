@@ -3,7 +3,7 @@ package gyun.sample.domain.member.service.read;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.MemberUserListRequest;
+import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -23,7 +23,7 @@ import static gyun.sample.global.utils.UtilService.getPageable;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ReadUserService implements ReadMemberService<MemberUserListRequest> {
+public class ReadUserService implements ReadMemberService {
 
     protected final MemberRepository memberRepository;
 
@@ -33,10 +33,10 @@ public class ReadUserService implements ReadMemberService<MemberUserListRequest>
     }
 
     @Override
-    public Page<MemberListResponse> getList(MemberUserListRequest request) {
+    public Page<MemberListResponse> getList(MemberListRequestDTO request) {
         Pageable pageable = getPageable(request.page(), request.size());
         List<AccountRole> roles = List.of(AccountRole.USER);
-        Page<Member> memberList = memberRepository.getMemberUserList(request, roles, pageable);
+        Page<Member> memberList = memberRepository.getMemberList(request, roles, pageable);
 
         return memberList.map(MemberListResponse::new);
     }

@@ -2,6 +2,7 @@ package gyun.sample.domain.member.api;
 
 
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
+import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberAdminListRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
@@ -34,7 +35,7 @@ public class AdminRestController {
 
     private final RestApiController restApiController;
     private final WriteMemberService<MemberAdminCreateRequest> writeAdminService;
-    private final ReadMemberService<MemberAdminListRequest> readAdminService;
+    private final ReadMemberService readAdminService;
     private final MemberAdminCreateValidator memberAdminCreateValidator;
     private final memberAdminListValidator memberAdminListValidator;
     private final MemberAdminUpdateValidator memberAdminUpdateValidator;
@@ -65,7 +66,8 @@ public class AdminRestController {
     @Operation(summary = "관리자 목록")
     @GetMapping(value = "/list")
     public ResponseEntity<String> getAdminList(@Valid MemberAdminListRequest memberAdminListRequest, BindingResult bindingResult) {
-        return restApiController.createRestResponse(readAdminService.getList(memberAdminListRequest));
+        MemberListRequestDTO readAdminRequest = new MemberListRequestDTO(memberAdminListRequest);
+        return restApiController.createRestResponse(readAdminService.getList(readAdminRequest));
     }
 
     @Operation(summary = "관리자 상세")

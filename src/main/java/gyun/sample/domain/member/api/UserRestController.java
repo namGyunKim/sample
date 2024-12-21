@@ -2,6 +2,7 @@ package gyun.sample.domain.member.api;
 
 
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
+import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUserListRequest;
@@ -34,7 +35,7 @@ public class UserRestController {
 
     private final RestApiController restApiController;
     private final WriteMemberService<MemberUserCreateRequest> writeUserService;
-    private final ReadMemberService<MemberUserListRequest> readUserService;
+    private final ReadMemberService readUserService;
     private final MemberUserCreateValidator memberUserCreateValidator;
     private final MemberUserListValidator memberUserListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
@@ -66,7 +67,8 @@ public class UserRestController {
     @Operation(summary = "유저 목록")
     @GetMapping(value = "/list")
     public ResponseEntity<String> getUserList(@Valid MemberUserListRequest memberUserListRequest, BindingResult bindingResult) {
-        return restApiController.createRestResponse(readUserService.getList(memberUserListRequest));
+        MemberListRequestDTO memberListRequestDTO = new MemberListRequestDTO(memberUserListRequest);
+        return restApiController.createRestResponse(readUserService.getList(memberListRequestDTO));
     }
 
     @Operation(summary = "유저 상세")
