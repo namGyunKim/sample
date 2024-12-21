@@ -1,14 +1,13 @@
 package gyun.sample.domain.board.validator;
 
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.account.payload.response.TokenResponse;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.adapter.ReadBoardServiceAdapter;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.enums.BoardType;
 import gyun.sample.domain.board.payload.request.BoardInactiveRequest;
 import gyun.sample.domain.board.service.read.ReadBoardService;
-import gyun.sample.global.utils.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
+import gyun.sample.global.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -18,9 +17,8 @@ import org.springframework.validation.Validator;
 @RequiredArgsConstructor
 public class BoardInactiveValidator implements Validator {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final HttpServletRequest httpServletRequest;
     private final ReadBoardServiceAdapter readBoardServiceAdapter;
+    private final UtilService utilService;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -34,15 +32,15 @@ public class BoardInactiveValidator implements Validator {
     }
 
     private void validateRequest(BoardInactiveRequest request, Errors errors) {
-        TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
+        CurrentAccountDTO currentAccount = utilService.getCurrentAccount();
 
         if (isInvalidBoardType(request, errors)) return;
 
         ReadBoardService readBoardService = readBoardServiceAdapter.getService(request.boardType());
         Board board = readBoardService.getBoardById(request.boardId());
-        AccountRole accountRole = AccountRole.getByName(tokenResponse.role());
+        AccountRole accountRole = currentAccount.role();
 
-        if (!hasPermissionToUpdateBoard(board, tokenResponse, accountRole, request.boardType())) {
+        if (!hasPermissionToUpdateBoard(board, currentAccount, accountRole, request.boardType())) {
             errors.rejectValue("boardId", "invalid.boardId", "게시판 수정 권한이 없습니다.");
         }
 
@@ -59,16 +57,16 @@ public class BoardInactiveValidator implements Validator {
         return false;
     }
 
-    private boolean hasPermissionToUpdateBoard(Board board, TokenResponse tokenResponse, AccountRole accountRole, BoardType boardType) {
-        if (isBoardOwner(board, tokenResponse) || isAdmin(accountRole)) {
+    private boolean hasPermissionToUpdateBoard(Board board, CurrentAccountDTO currentAccountDTO, AccountRole accountRole, BoardType boardType) {
+        if (isBoardOwner(board, currentAccountDTO) || isAdmin(accountRole)) {
             return true;
         }
 
         return false;
     }
 
-    private boolean isBoardOwner(Board board, TokenResponse tokenResponse) {
-        return board.getMember().getId() == tokenResponse.id();
+    private boolean isBoardOwner(Board board, CurrentAccountDTO currentAccountDTO) {
+        return board.getMember().getId() == currentAccountDTO.id();
     }
 
     private boolean isAdmin(AccountRole accountRole) {

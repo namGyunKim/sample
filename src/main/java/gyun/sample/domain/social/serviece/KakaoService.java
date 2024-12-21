@@ -13,11 +13,12 @@ import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
-import gyun.sample.global.utils.JwtTokenProvider;
+import gyun.sample.global.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,6 @@ public class KakaoService implements SocialService<KakaoTokenRequest, AccountLog
     private final KakaoAuthClient kakaoAuthClient;
     private final KakaoApiClient kakaoApiClient;
     private final MemberRepository memberRepository;
-    private final JwtTokenProvider jwtTokenProvider;
 
 
     @Value("${social.kakao.clientId}")
@@ -99,6 +99,8 @@ public class KakaoService implements SocialService<KakaoTokenRequest, AccountLog
     @Override
     public KakaoInfoRequest logout(String accessToken) {
         try {
+//            스프링 시큐리티 로그아웃 처리
+            SecurityContextHolder.clearContext();
             return kakaoApiClient.logout("Bearer " + accessToken);
         } catch (Exception e) {
             ErrorCode errorCode = ErrorCode.KAKAO_API_LOGOUT_ERROR;
@@ -138,11 +140,13 @@ public class KakaoService implements SocialService<KakaoTokenRequest, AccountLog
         return member;
     }
 
-    // 소셜 계정 로그인
+    // 소셜 계정 로그인 rest api 방식에서 시큐리티로 수정 로그인상태로만 처리해놈
     @Override
     public AccountLoginResponse login(Member member) {
-        String accessToken = jwtTokenProvider.createAccessToken(member);
-        String refreshToken = jwtTokenProvider.createRefreshToken(member);
-        return new AccountLoginResponse(accessToken, refreshToken);
+        UtilService.forceLogin(member);
+
+        // 4) 토큰 등은 발급하지 않고 null, null 반환
+        return new AccountLoginResponse(null, null);
     }
+
 }

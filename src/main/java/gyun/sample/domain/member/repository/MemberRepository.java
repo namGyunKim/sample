@@ -38,6 +38,4 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     Optional<Member> findByIdAndActive(long id, GlobalActiveEnums active);
 
-    Optional<Member> findByRefreshTokenAndActive(String refreshToken, GlobalActiveEnums active);
-
 }

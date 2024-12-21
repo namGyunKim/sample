@@ -1,8 +1,6 @@
 package gyun.sample.global.aop;
 
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.global.utils.JwtTokenProvider;
 import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +13,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.thymeleaf.util.StringUtils;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ControllerLoggingAspect {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final ConcurrentHashMap<String, Boolean> processedRequests = new ConcurrentHashMap<>();
+    private final UtilService utilService;
 
     @Pointcut("execution(* gyun.sample.domain..*Controller.*(..)) && !@annotation(org.springframework.web.bind.annotation.InitBinder)")
     private void controllerMethods() {
@@ -44,15 +41,16 @@ public class ControllerLoggingAspect {
 
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        CurrentAccountDTO currentAccountDTO = utilService.getLoginDataOrGuest();
         String requestUri = request.getRequestURI();
 
         String uniqueRequestId = generateUniqueRequestId();
         String clientIp = UtilService.getClientIp(request);
         String httpMethod = request.getMethod();
         String koreanTime = UtilService.getKoreanTime();
-        String username = getUsername(request);
+        String username = getUsername();
         String sessionId = request.getSession().getId(); // 세션 ID 추가
-        String loginId = getLoginId(request); // 로그인 ID 추가 (로그인 사용자만 해당
+        String loginId = getLoginId(); // 로그인 ID 추가 (로그인 사용자만 해당
 
         String requestKey = generateRequestKey(clientIp, sessionId, requestUri, httpMethod); // 세션 ID 포함
         if (processedRequests.putIfAbsent(requestKey, true) != null) {
@@ -77,13 +75,13 @@ public class ControllerLoggingAspect {
         return UUID.randomUUID().toString();
     }
 
-    private String getUsername(HttpServletRequest request) {
-        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
+    private String getUsername() {
+        CurrentAccountDTO currentAccountDTO = utilService.getLoginDataOrGuest();
         return currentAccountDTO != null ? currentAccountDTO.nickName() : "비로그인 사용자";
     }
 
-    private String getLoginId(HttpServletRequest request) {
-        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
+    private String getLoginId() {
+        CurrentAccountDTO currentAccountDTO = utilService.getLoginDataOrGuest();
         return currentAccountDTO != null ? currentAccountDTO.loginId() : "비로그인 사용자";
     }
 
@@ -118,17 +116,6 @@ public class ControllerLoggingAspect {
         } else {
             log.info("[{}] 요청 파라미터가 없습니다.", uniqueRequestId);
         }
-    }
-
-    private CurrentAccountDTO getTokenResponse(HttpServletRequest httpServletRequest) {
-        TokenResponse tokenResponse;
-        String authorization = httpServletRequest.getHeader("Authorization");
-        if (!StringUtils.isEmpty(authorization)) {
-            String bearer = authorization.split(" ")[1];
-            tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
-            return new CurrentAccountDTO(tokenResponse);
-        }
-        return null;
     }
 
     private String generateRequestKey(String clientIp, String sessionId, String requestUri, String httpMethod) {

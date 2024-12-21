@@ -1,11 +1,10 @@
 package gyun.sample.domain.board.validator;
 
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.account.payload.response.TokenResponse;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.payload.request.CommentInactiveRequest;
 import gyun.sample.domain.board.service.read.ReadCommentService;
-import gyun.sample.global.utils.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
+import gyun.sample.global.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -15,9 +14,8 @@ import org.springframework.validation.Validator;
 @RequiredArgsConstructor
 public class InactiveCommentValidator implements Validator {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final HttpServletRequest httpServletRequest;
     private final ReadCommentService readCommentService;
+    private final UtilService utilService;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -31,10 +29,10 @@ public class InactiveCommentValidator implements Validator {
     }
 
     private void validateRequest(CommentInactiveRequest request, Errors errors) {
-        TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
-        AccountRole accountRole = AccountRole.getByName(tokenResponse.role());
+        CurrentAccountDTO currentAccount = utilService.getCurrentAccount();
+        AccountRole accountRole = currentAccount.role();
 
-        if (!hasPermissionToInactiveComment(request.commentId(), tokenResponse, accountRole)) {
+        if (!hasPermissionToInactiveComment(request.commentId(), currentAccount, accountRole)) {
             errors.rejectValue("commentId", "invalid.commentId", "댓글 비활성화 권한이 없습니다.");
         }
 
@@ -43,8 +41,8 @@ public class InactiveCommentValidator implements Validator {
         }
     }
 
-    private boolean hasPermissionToInactiveComment(long commentId, TokenResponse tokenResponse, AccountRole accountRole) {
-        return readCommentService.isCommentOwner(commentId, tokenResponse.id()) || isAdmin(accountRole);
+    private boolean hasPermissionToInactiveComment(long commentId, CurrentAccountDTO currentAccountDTO, AccountRole accountRole) {
+        return readCommentService.isCommentOwner(commentId, currentAccountDTO.id()) || isAdmin(accountRole);
     }
 
     private boolean isAdmin(AccountRole accountRole) {

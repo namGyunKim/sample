@@ -2,6 +2,7 @@ package gyun.sample.domain.account.payload.dto;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.TokenResponse;
+import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
 
 public record CurrentAccountDTO(
@@ -14,6 +15,10 @@ public record CurrentAccountDTO(
 
     public CurrentAccountDTO(TokenResponse tokenResponse) {
         this(tokenResponse.id(), tokenResponse.loginId(), tokenResponse.nickName(), AccountRole.valueOf(tokenResponse.role()), MemberType.valueOf(tokenResponse.memberType()));
+    }
+
+    public CurrentAccountDTO(Member member) {
+        this(member.getId(), member.getLoginId(), member.getNickName(), member.getRole(), member.getMemberType());
     }
 
     public static CurrentAccountDTO generatedGuest() {

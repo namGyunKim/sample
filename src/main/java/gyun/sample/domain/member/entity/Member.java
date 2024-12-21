@@ -66,10 +66,6 @@ public class Member extends BaseTimeEntity {
     @Comment("소셜 키")
     private String socialKey;
 
-    @Comment("JWT Refresh Token")
-    @Column(columnDefinition = "text")
-    private String refreshToken;
-
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Board> boards = new ArrayList<>();
 
@@ -130,14 +126,6 @@ public class Member extends BaseTimeEntity {
 
     public void updateProfileExtension(String extension) {
         this.imageExtension = extension;
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void invalidateRefreshToken() {
-        this.refreshToken = null;
     }
 
     public void addBoard(Board savedBoard) {

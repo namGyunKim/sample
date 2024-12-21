@@ -1,13 +1,12 @@
 package gyun.sample.domain.board.validator;
 
-import gyun.sample.domain.account.payload.response.TokenResponse;
+import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.board.adapter.ReadBoardServiceAdapter;
 import gyun.sample.domain.board.entity.Board;
 import gyun.sample.domain.board.enums.BoardType;
 import gyun.sample.domain.board.payload.request.BoardUpdateRequest;
 import gyun.sample.domain.board.service.read.ReadBoardService;
-import gyun.sample.global.utils.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
+import gyun.sample.global.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -17,9 +16,8 @@ import org.springframework.validation.Validator;
 @RequiredArgsConstructor
 public class BoardUpdateValidator implements Validator {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final HttpServletRequest httpServletRequest;
     private final ReadBoardServiceAdapter readBoardServiceAdapter;
+    private final UtilService utilService;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -36,7 +34,7 @@ public class BoardUpdateValidator implements Validator {
 
     // UpdateBoardRequest 검증 메서드입니다.
     private void validateRequest(BoardUpdateRequest request, Errors errors) {
-        TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(httpServletRequest);
+        CurrentAccountDTO currentAccount = utilService.getCurrentAccount();
 
         // 게시판 타입이 유효한지 확인합니다.
         if (isInvalidBoardType(request, errors)) return;
@@ -45,7 +43,7 @@ public class BoardUpdateValidator implements Validator {
         Board board = readBoardService.getBoardById(request.boardId());
 
         // 게시판 수정 권한이 있는지 확인합니다.
-        if (!isBoardOwner(board, tokenResponse)) {
+        if (!isBoardOwner(board, currentAccount)) {
             errors.rejectValue("boardId", "invalid.boardId", "게시판 수정 권한이 없습니다.");
         }
     }
@@ -60,7 +58,7 @@ public class BoardUpdateValidator implements Validator {
     }
 
     // 게시판 소유자인지 확인하는 메서드입니다.
-    private boolean isBoardOwner(Board board, TokenResponse tokenResponse) {
-        return board.getMember().getId() == tokenResponse.id();
+    private boolean isBoardOwner(Board board, CurrentAccountDTO currentAccountDTO) {
+        return board.getMember().getId() == currentAccountDTO.id();
     }
 }

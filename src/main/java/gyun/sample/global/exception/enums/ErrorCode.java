@@ -15,13 +15,9 @@ public enum ErrorCode {
     REQUEST_BINDING_RESULT("0001", "Request 바인딩 에러"),
 
     // === AUTH (1000) ===
-    JWT_EXPIRED("1001", "JWT 토큰 유효기간 만료"),
-    JWT_INVALID("1002", "JWT 토큰이 유효하지 않음"),
-    JWT_REFRESH_INVALID("1003", "Refresh 토큰이 유효하지 않음"),
-    ACCESS_DENIED("1004", "권한이 없습니다."),
-    PASSWORD_NOT_MATCH("1005", "비밀번호가 일치하지 않습니다."),
-    JWT_UNKNOWN_ERROR("1006", "JWT 토큰 에러"),
-    JWT_SIGNATURE_ERROR("1007", "JWT 시그니처 에러(시크릿 키)"),
+    ACCESS_DENIED("1001", "권한이 없습니다."),
+    PASSWORD_NOT_MATCH("1002", "비밀번호가 일치하지 않습니다."),
+    UNAUTHORIZED("1003", "인증되지 않은 사용자입니다."),
     // === MEMBER (1100) ===
     MEMBER_NOT_EXIST("1101", "존재하지 않는 회원입니다."),
     MEMBER_INACTIVE("1102", "비활성화된 계정입니다."),
