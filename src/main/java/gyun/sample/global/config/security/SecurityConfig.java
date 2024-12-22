@@ -50,6 +50,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf().disable() // CSRF 보안 설정 비활성화 (활성화시 웹소켓 이용하려면 추가 설정 적용 필요)
                 // 인증/인가 규칙
                 .authorizeHttpRequests(auth -> auth
                         // 로그인 페이지("/login")는 모두 접근 가능, 하지만 인증된 사용자는 리다이렉트 처리

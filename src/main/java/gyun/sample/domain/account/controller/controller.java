@@ -19,6 +19,7 @@ public class controller {
     @GetMapping("/login")
     public String login(Model model) {
         CurrentAccountDTO currentAccount = utilService.getCurrentAccount();
+        log.info("currentAccount: {}", currentAccount);
         boolean isLogin = !currentAccount.loginId().equals("GUEST");
         if (isLogin) {
             return "redirect:/";
