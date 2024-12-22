@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/layout.html :: head('로그인 페이지')"></head>
+<head th:replace="~{layout/layout.html :: head('로그인 페이지')}"></head>
 <body class="bg-light">
 
 <!-- 메인 컨테이너 -->
@@ -71,12 +71,5 @@
         });
     </script>
 </div>
-
-<script th:inline="javascript">
-    const isLogin = [[${isLogin}]];
-    if (isLogin) {
-        location.href = '/';
-    }
-</script>
 </body>
 </html>

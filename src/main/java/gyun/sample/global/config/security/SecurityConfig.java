@@ -1,6 +1,5 @@
 package gyun.sample.global.config.security;
 
-import gyun.sample.global.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +21,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final UtilService utilService;
-
+    private final CustomPersistentTokenRepository customPersistentTokenRepository;
     /**
      * 비밀번호 암호화를 위한 PasswordEncoder 빈
      */
@@ -85,10 +83,11 @@ public class SecurityConfig {
 
                 // Remember Me 설정 추가
                 .rememberMe(rememberMe -> rememberMe
-                        .key("uniqueAndSecretKey")
-                        .tokenValiditySeconds(1209600)
+                        .key("sample-remember-me-key")
+                        .tokenValiditySeconds(14 * 24 * 60 * 60) // 14일
                         .rememberMeParameter("remember-me")
                         .userDetailsService(customUserDetailsService)
+                        .tokenRepository(customPersistentTokenRepository)
                 )
 
                 // 예외 처리 설정

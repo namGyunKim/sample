@@ -171,8 +171,6 @@ public class UtilService {
             return CurrentAccountDTO.generatedGuest();
         }
 
-        log.info("authentication: {}", authentication.getAuthorities());
-
         Member member = memberRepository.findByLoginId(authentication.getName())
                 .orElse(null);
         if (member == null) {

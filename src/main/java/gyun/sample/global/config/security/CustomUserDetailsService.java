@@ -37,4 +37,21 @@ public class CustomUserDetailsService implements UserDetailsService {
                     return new UsernameNotFoundException("사용자를 찾을 수 없거나 비활성화된 계정입니다.");
                 });
     }
+
+    /**
+     * Remember Me 기능을 위해 유저를 직접 조회하는 메서드
+     *
+     * @param loginId Remember Me에서 사용된 사용자 ID
+     * @return UserDetails
+     * @throws UsernameNotFoundException 사용자를 찾을 수 없을 때 발생
+     */
+    public UserDetails loadUserForRememberMe(String loginId) throws UsernameNotFoundException {
+        log.info("Remember Me 인증 시도: {}", loginId);
+        return memberRepository.findByLoginId(loginId)
+                .map(CustomUserDetails::new)
+                .orElseThrow(() -> {
+                    log.info("Remember Me 인증 시도: {} - 실패 (사용자를 찾을 수 없음)", loginId);
+                    return new UsernameNotFoundException("Remember Me 인증 실패: 사용자를 찾을 수 없습니다.");
+                });
+    }
 }
