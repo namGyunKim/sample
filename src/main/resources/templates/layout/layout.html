@@ -13,9 +13,53 @@
 <header th:fragment="header">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="/">공통 헤더</a>
+            <a class="navbar-brand" href="/">공통 헤더 영역 (나중에 필요하면)</a>
         </div>
     </nav>
 </header>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- 사이드바 -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar" th:fragment="sidebar">
+            <div class="position-sticky">
+                <ul class="nav flex-column">
+                    <!-- 회원관리 대 카테고리 -->
+                    <li class="nav-item">
+                        <a aria-controls="member-management" aria-current="page" aria-expanded="false"
+                           class="nav-link active"
+                           data-bs-target="#member-management" href="#">
+                            회원관리
+                        </a>
+                        <div id="member-management">
+                            <ul class="nav flex-column ms-3">
+                                <!-- 회원 등록 소 카테고리 -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/admin/member/create">
+                                        회원 등록
+                                    </a>
+                                </li>
+                                <!-- 회원 목록 소 카테고리 -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/admin/member/list">
+                                        회원 목록
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<!-- 메인 타이틀 영역 -->
+<div th:fragment="main-title(titleText)">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2" th:text="${titleText}">페이지 제목</h1>
+    </div>
+</div>
+
 </body>
 </html>
