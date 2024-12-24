@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error</title>
+</head>
+<body>
+<h1>에러 발생</h1>
+<p>에러 코드: <span th:text="${errorCode}"></span></p>
+<p>에러 메시지: <span th:text="${errorMessage}"></span></p>
+<p>요청 경로: <span th:text="${path}"></span></p>
+<a class="btn btn-primary" href="/">홈으로 이동</a>
+</body>
+</html>
