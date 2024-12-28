@@ -108,8 +108,9 @@ public class ControllerLoggingAspect {
         if (parameterNames != null && parameterValues != null) {
             log.info("[{}] 요청 파라미터:", uniqueRequestId);
             for (int i = 0; i < parameterNames.length; i++) {
-                if (parameterValues[i] instanceof org.springframework.validation.BindingResult) {
-                    continue; // BindingResult는 로그에서 제외
+                // BindingResult 와 Model 은 로깅하지 않음
+                if (parameterValues[i] instanceof org.springframework.validation.BindingResult || parameterValues[i] instanceof org.springframework.ui.Model) {
+                    continue;
                 }
                 log.info("[{}] {}: {}", uniqueRequestId, parameterNames[i], parameterValues[i]);
             }
