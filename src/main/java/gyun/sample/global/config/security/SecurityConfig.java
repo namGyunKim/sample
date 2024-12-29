@@ -22,6 +22,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomPersistentTokenRepository customPersistentTokenRepository;
+
     /**
      * 비밀번호 암호화를 위한 PasswordEncoder 빈
      */
@@ -53,13 +54,19 @@ public class SecurityConfig {
                 .csrf().disable() // CSRF 보안 설정 비활성화 (활성화시 웹소켓 이용하려면 추가 설정 적용 필요)
                 // 인증/인가 규칙
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인 페이지("/login")는 모두 접근 가능, 하지만 인증된 사용자는 리다이렉트 처리
+                        // 로그인 페이지("/login")는 모두 접근 가능
                         .requestMatchers("/login").permitAll()
 
-                        // admin 경로는 ROLE_ADMIN 권한만
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // SUPER_ADMIN 권한이 필요한 모든 경로
+                        .requestMatchers(
+                                "/board/admin/**",
+                                "/item/admin/**",
+                                "/calendar/admin/**",
+                                "/member/admin/**",
+                                "/profit/admin/**")
+                        .hasRole("SUPER_ADMIN")
 
-                        // 그 외 나머지는 로그인만 되면 접근 가능
+                        // 그 외 나머지는 로그인된 사용자만 접근 가능
                         .anyRequest().authenticated()
                 )
 
@@ -94,9 +101,7 @@ public class SecurityConfig {
                 // 예외 처리 설정
                 .exceptionHandling(exception -> exception
                         // 인가 실패 처리
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.sendRedirect("/access-denied");
-                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect("/access-denied"))
                 );
         return http.build();
     }
