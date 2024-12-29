@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/s3")
@@ -34,14 +35,14 @@ public class S3Controller {
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<String> uploadFile(
-            @RequestParam MultipartFile file,
+            @RequestParam List<MultipartFile> files,
             @RequestParam UploadDirect uploadDirect,
             @CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
         try {
             S3Service s3Service = s3ServiceAdapter.getService(uploadDirect);
-            String etag = s3Service.upload(file, currentAccountDTO.id());
-            return restApiController.createSuccessRestResponse(etag);
+            List<String> eTags = s3Service.upload(files, currentAccountDTO.id());
+            return restApiController.createSuccessRestResponse(eTags);
         } catch (IOException e) {
             throw new GlobalException(ErrorCode.FILE_UPLOAD_ERROR);
         }
@@ -49,18 +50,18 @@ public class S3Controller {
 
     @Operation(summary = "파일 삭제", description = "지정된 파일을 삭제합니다.")
     @PostMapping(value = "/delete")
-    public ResponseEntity<String> deleteFile(@RequestParam long entityId,
+    public ResponseEntity<String> deleteFile(@RequestParam List<String> fileNames,
                                              @RequestParam UploadDirect uploadDirect) {
         S3Service s3Service = s3ServiceAdapter.getService(uploadDirect);
-        s3Service.deleteFile(entityId);
-        return restApiController.createSuccessRestResponse(entityId);
+        s3Service.deleteFile(fileNames);
+        return restApiController.createSuccessRestResponse(fileNames);
     }
 
     @Operation(summary = "파일 url을가져옴", description = "지정된 파일의 url을 가져옵니다.")
     @PostMapping(value = "/url")
-    public ResponseEntity<String> getFileUrl(@RequestParam long entityId,
+    public ResponseEntity<String> getFileUrl(@RequestParam String fileName,
                                              @RequestParam UploadDirect uploadDirect) {
         S3Service s3Service = s3ServiceAdapter.getService(uploadDirect);
-        return restApiController.createSuccessRestResponse(s3Service.getFileUrl(entityId));
+        return restApiController.createSuccessRestResponse(s3Service.getFileUrl(fileName));
     }
 }

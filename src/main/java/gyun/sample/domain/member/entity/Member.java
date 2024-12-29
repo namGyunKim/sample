@@ -9,7 +9,6 @@ import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
-import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -49,14 +48,6 @@ public class Member extends BaseTimeEntity {
     private AccountRole role;
 
     @Enumerated(EnumType.STRING)
-    @Comment("이미지 경로")
-    final private UploadDirect imageDirect = UploadDirect.MEMBER_PROFILE;
-
-    @Comment("이미지 확장자")
-    private String imageExtension;
-
-
-    @Enumerated(EnumType.STRING)
     @Comment("유저 타입")
     private MemberType memberType;
 
@@ -79,6 +70,8 @@ public class Member extends BaseTimeEntity {
     @OneToMany(mappedBy = "deActiveMember", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<BoardComment> deActiveComment = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<MemberImage> memberImages = new ArrayList<>();
 
 
     //    최고 관리자 리퀘스트로 생성
@@ -128,8 +121,8 @@ public class Member extends BaseTimeEntity {
         this.socialToken = accessToken;
     }
 
-    public void updateProfileExtension(String extension) {
-        this.imageExtension = extension;
+    public void addImage(MemberImage memberImage) {
+        this.memberImages.add(memberImage);
     }
 
     public void updateRefreshToken(String refreshToken) {
@@ -143,4 +136,5 @@ public class Member extends BaseTimeEntity {
     public void addBoard(Board savedBoard) {
         this.boards.add(savedBoard);
     }
+
 }

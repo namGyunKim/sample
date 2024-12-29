@@ -1,6 +1,8 @@
 package gyun.sample.domain.s3.service;
 
 import gyun.sample.domain.member.entity.Member;
+import gyun.sample.domain.member.entity.MemberImage;
+import gyun.sample.domain.member.repository.MemberImageRepository;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
@@ -40,12 +42,21 @@ public class S3MemberService implements S3Service {
     @Value("${s3.region}")
     private String region;
     private final MemberRepository memberRepository;
+    private final MemberImageRepository memberImageRepository;
     @Value("${s3.bucket-local}")
     private String localBucketName;
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
     private final UploadDirect uploadDirect = UploadDirect.MEMBER_PROFILE;
+
+
+    @PostConstruct
+    public void init() {
+        if (!"prod".equals(activeProfile)) {
+            bucketName = localBucketName;
+        }
+    }
 
     //    확장자 추출
     public static String getFileExtension(String filename) {
@@ -61,72 +72,23 @@ public class S3MemberService implements S3Service {
         return "";
     }
 
-    @PostConstruct
-    public void init() {
-        if (!"prod".equals(activeProfile)) {
-            bucketName = localBucketName;
-        }
+    @Override
+    public List<String> upload(List<MultipartFile> files, long memberId) {
+        // 결과를 리스트로 변환
+        return files.stream()
+                .map(file -> upload(file, memberId)) // 각 파일 업로드 실행
+                .toList(); // 업로드된 파일 키 리스트 반환
     }
 
     @Override
-    public String upload(MultipartFile file, long memberId) {
-        // 파일 검증 (확장자, 용량)
-        validationFile(file);
+    public void deleteFile(List<String> fileNames) {
 
-        // 엔티티 유효성 확인 후 엔티티 ID 가져오기
-        long entityId = getEntityId(memberId);
-
-        // 파일 확장자 추출
-        String fileExtension = getFileExtension(file.getOriginalFilename());
-
-        // S3 업로드 키 생성
-        final String key = generatedKeyWithUpload(entityId, fileExtension);
-
-        // S3에 업로드할 요청 객체 생성 (Content-Disposition 설정 포함)
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .contentDisposition("attachment; filename=\"" + entityId + fileExtension + "\"")
-                .build();
-
-        // 기존 파일 삭제 (존재하지 않아도 예외 없이 통과)
-        deleteFile(entityId);
-
-        // S3 업로드 시도
-        try {
-            s3Client.putObject(
-                    putObjectRequest,
-                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
-            );
-        } catch (Exception e) {
-            // S3 업로드 실패 시 예외 처리
-            // 필요하다면 로그나 특정 에러 코드로 변환 가능
-            throw new GlobalException(ErrorCode.UPLOAD_FAILED, e);
-        }
-
-        // 업로드 성공 시 DB에 확장자 정보 업데이트
-        saveExtension(entityId, fileExtension);
-
-        // 업로드 성공 후 key 반환
-        return key;
+        fileNames.forEach(this::deleteFile);
     }
 
     @Override
-    public void deleteFile(long entityId) {
-        final String key = generatedKey(entityId);
-
-
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .build();
-
-        s3Client.deleteObject(deleteObjectRequest);
-    }
-
-    @Override
-    public String getFileUrl(long entityId) {
-        final String key = generatedKey(entityId);
+    public String getFileUrl(String fileName) {
+        final String key = generatedKey(fileName);
 
 
         if (!doesObjectExist(key)) {
@@ -137,18 +99,9 @@ public class S3MemberService implements S3Service {
     }
 
     //    업로드할때 파일명을 생성하는 메서드
-    private String generatedKeyWithUpload(long entityId, String fileExtension) {
-        return uploadDirect.getValue() + "/" + entityId + fileExtension;
-    }
-
-    //    업로드가 아닌 경우 파일명을 생성하는 메서드
-// 업로드가 아닌 경우 파일명을 생성하는 메서드
-    public String generatedKey(long entityId) {
-        String extension =
-                memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
-                        .map(Member::getImageExtension)
-                        .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_INACTIVE));
-        return generatedKeyWithUpload(entityId, extension);
+    private String generatedKeyWithUpload(String originalFilename) {
+        final String UUID = java.util.UUID.randomUUID().toString();
+        return uploadDirect.getValue() + "/" + UUID + "_" + originalFilename;
     }
 
 
@@ -177,17 +130,79 @@ public class S3MemberService implements S3Service {
         }
     }
 
-    public long getEntityId(long memberId) {
+    private String generatedKey(String fileName) {
+        return uploadDirect.getValue() + "/" + fileName;
+    }
+
+    public Member getEntityId(long memberId) {
         return memberRepository.findByIdAndActive(memberId, GlobalActiveEnums.ACTIVE)
-                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST)).getId();
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
     }
 
-    public void saveExtension(long entityId, String extension) {
-        // 확장자 저장
-        Member member = memberRepository.findByIdAndActive(entityId, GlobalActiveEnums.ACTIVE)
-                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_INACTIVE));
-        member.updateProfileExtension(extension);
+    public void saveExtension(Member member, String fileName) {
+        MemberImage memberImage = new MemberImage(uploadDirect, fileName, member);
+        member.addImage(memberImage);
     }
 
+    public String upload(MultipartFile file, long memberId) {
+        // 파일 검증 (확장자, 용량)
+        validationFile(file);
+
+        // 엔티티 유효성 확인 후 엔티티 ID 가져오기
+        Member member = getEntityId(memberId);
+
+        final String originalFilename = file.getOriginalFilename();
+
+        // S3 업로드 키 생성
+        final String key = generatedKeyWithUpload(originalFilename);
+        final String returnKey = key.substring(key.indexOf("/") + 1);
+
+        // S3에 업로드할 요청 객체 생성 (Content-Disposition 설정 포함)
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .contentDisposition("attachment; filename=\"" + originalFilename + "\"")
+                .build();
+
+        // S3 업로드 시도
+        try {
+            s3Client.putObject(
+                    putObjectRequest,
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+            );
+        } catch (Exception e) {
+            // S3 업로드 실패 시 예외 처리
+            // 필요하다면 로그나 특정 에러 코드로 변환 가능
+            throw new GlobalException(ErrorCode.UPLOAD_FAILED, e);
+        }
+
+        // 업로드 성공 시 DB에 확장자 정보 업데이트
+        saveExtension(member, returnKey);
+
+        // 업로드 성공 후 key 반환
+        return returnKey;
+    }
+
+    public void deleteFile(String fileName) {
+        final String key = generatedKey(fileName);
+
+        if (!doesObjectExist(key)) {
+            throw new GlobalException(ErrorCode.FILE_NOT_FOUND);
+        }
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        s3Client.deleteObject(deleteObjectRequest);
+
+        MemberImage memberImage = memberImageRepository.findByFileNameAndUploadDirect(fileName, uploadDirect)
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_IMAGE_NOT_EXIST));
+
+        memberImageRepository.delete(memberImage);
+
+
+    }
 
 }

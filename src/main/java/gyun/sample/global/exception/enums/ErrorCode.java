@@ -26,6 +26,7 @@ public enum ErrorCode {
     MEMBER_NOT_EXIST("1101", "존재하지 않는 회원입니다."),
     MEMBER_INACTIVE("1102", "비활성화된 계정입니다."),
     PASSWORD_INVALID("1103", "비밀번호 유효성 검토"),
+    MEMBER_IMAGE_NOT_EXIST("1104", "존재하지 않는 회원 이미지입니다."),
 
     // === SOCIAL (1200) ===
     KAKAO_API_GET_CODE_ERROR("1201", "카카오 API Get Code Error"),
