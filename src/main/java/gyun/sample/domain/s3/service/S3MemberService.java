@@ -8,6 +8,7 @@ import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
+import gyun.sample.global.utils.UtilService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class S3MemberService implements S3Service {
 
     @Value("${s3.bucket}")
     private String bucketName;
+    private final UtilService utilService;
 
 
     // 허용된 확장자 리스트
@@ -43,17 +45,15 @@ public class S3MemberService implements S3Service {
     private String region;
     private final MemberRepository memberRepository;
     private final MemberImageRepository memberImageRepository;
-    @Value("${s3.bucket-local}")
-    private String localBucketName;
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
 
     private final UploadDirect uploadDirect = UploadDirect.MEMBER_PROFILE;
-
+    @Value("${s3.bucket-local}")
+    private String localBucketName;
 
     @PostConstruct
     public void init() {
-        if (!"prod".equals(activeProfile)) {
+        boolean localProfile = utilService.isLocalProfile();
+        if (localProfile) {
             bucketName = localBucketName;
         }
     }
