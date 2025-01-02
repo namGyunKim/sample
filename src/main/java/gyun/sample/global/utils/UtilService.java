@@ -194,4 +194,12 @@ public class UtilService {
     private List<AccountRole> getAllowedRoles() {
         return Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN, AccountRole.USER);
     }
+
+    // 날짜를 "yyyy년 MM월 dd일 HH:mm" 형식으로 포맷
+    public static String formattedTime(LocalDateTime localDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm");
+        return localDateTime.format(formatter);
+    }
+
+
 }
