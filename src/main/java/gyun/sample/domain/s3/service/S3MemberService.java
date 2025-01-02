@@ -8,6 +8,7 @@ import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
+import gyun.sample.global.utils.UtilService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -45,15 +46,15 @@ public class S3MemberService implements S3Service {
     private final MemberImageRepository memberImageRepository;
     @Value("${s3.bucket-local}")
     private String localBucketName;
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
 
     private final UploadDirect uploadDirect = UploadDirect.MEMBER_PROFILE;
+    private final UtilService utilService;
 
 
     @PostConstruct
     public void init() {
-        if (!"prod".equals(activeProfile)) {
+        boolean localProfile = utilService.isLocalProfile();
+        if (localProfile) {
             bucketName = localBucketName;
         }
     }
@@ -74,6 +75,11 @@ public class S3MemberService implements S3Service {
 
     @Override
     public List<String> upload(List<MultipartFile> files, long memberId) {
+        if (files == null || files.isEmpty()) {
+            return List.of();
+        }
+        if (files.get(0).getOriginalFilename().isEmpty())
+            return List.of();
         // 결과를 리스트로 변환
         return files.stream()
                 .map(file -> upload(file, memberId)) // 각 파일 업로드 실행
@@ -183,7 +189,8 @@ public class S3MemberService implements S3Service {
         return returnKey;
     }
 
-    public void deleteFile(String fileName) {
+    public void deleteFile(String fileFullName) {
+        final String fileName = extractFileNameFromUrl(fileFullName);
         final String key = generatedKey(fileName);
 
         if (!doesObjectExist(key)) {
@@ -201,8 +208,23 @@ public class S3MemberService implements S3Service {
                 .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_IMAGE_NOT_EXIST));
 
         memberImageRepository.delete(memberImage);
+    }
 
+    /**
+     * S3 URL에서 파일 이름만 추출하는 메서드
+     */
+    private String extractFileNameFromUrl(String fileUrl) {
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            throw new GlobalException(ErrorCode.FILE_NOT_FOUND);
+        }
 
+        // URL의 마지막 '/' 이후의 파일명을 추출
+        int lastSlashIndex = fileUrl.lastIndexOf('/');
+        if (lastSlashIndex == -1 || lastSlashIndex == fileUrl.length() - 1) {
+            throw new GlobalException(ErrorCode.FILE_FORMAT_INVALID);
+        }
+
+        return fileUrl.substring(lastSlashIndex + 1); // 마지막 '/' 다음부터 끝까지
     }
 
 }
