@@ -104,4 +104,10 @@ public class UtilService {
         // 정규 표현식을 사용하여 숫자 이외의 모든 문자를 빈 문자열로 대체
         return input.replaceAll("[^0-9]", "");
     }
+
+    // 날짜를 "yyyy년 MM월 dd일 HH:mm" 형식으로 포맷
+    public static String formattedTime(LocalDateTime localDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm");
+        return localDateTime.format(formatter);
+    }
 }
