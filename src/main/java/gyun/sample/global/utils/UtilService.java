@@ -22,6 +22,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -201,5 +203,12 @@ public class UtilService {
         return localDateTime.format(formatter);
     }
 
+    public String encodeFileName(String originalFilename) {
+        try {
+            return URLEncoder.encode(originalFilename, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("파일명 인코딩 실패", e);
+        }
+    }
 
 }
