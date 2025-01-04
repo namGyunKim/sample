@@ -74,6 +74,10 @@ public class S3MemberService implements S3Service {
 
     @Override
     public List<String> upload(List<MultipartFile> files, long memberId) {
+        if (files == null || files.isEmpty()) return List.of();
+
+        if (files.get(0).getOriginalFilename().isEmpty()) return List.of();
+
         // 결과를 리스트로 변환
         return files.stream()
                 .map(file -> upload(file, memberId)) // 각 파일 업로드 실행
@@ -82,6 +86,10 @@ public class S3MemberService implements S3Service {
 
     @Override
     public void deleteFile(List<String> fileNames) {
+
+        if (fileNames == null || fileNames.isEmpty()) return;
+
+        if (fileNames.get(0).isEmpty()) return;
 
         fileNames.forEach(this::deleteFile);
     }
