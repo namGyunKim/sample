@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -109,5 +111,13 @@ public class UtilService {
     public static String formattedTime(LocalDateTime localDateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm");
         return localDateTime.format(formatter);
+    }
+
+    public String encodeFileName(String originalFilename) {
+        try {
+            return URLEncoder.encode(originalFilename, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("파일명 인코딩 실패", e);
+        }
     }
 }

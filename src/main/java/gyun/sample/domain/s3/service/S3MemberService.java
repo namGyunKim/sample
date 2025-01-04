@@ -165,11 +165,13 @@ public class S3MemberService implements S3Service {
         final String key = generatedKeyWithUpload(originalFilename);
         final String returnKey = key.substring(key.indexOf("/") + 1);
 
+        final String downloadFileName = utilService.encodeFileName(originalFilename);
+
         // S3에 업로드할 요청 객체 생성 (Content-Disposition 설정 포함)
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
-                .contentDisposition("attachment; filename=\"" + originalFilename + "\"")
+                .contentDisposition("attachment; filename=\"" + downloadFileName + "\"")
                 .build();
 
         // S3 업로드 시도
