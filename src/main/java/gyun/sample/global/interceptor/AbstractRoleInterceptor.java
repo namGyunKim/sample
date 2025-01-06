@@ -6,8 +6,8 @@ import gyun.sample.global.utils.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.thymeleaf.util.StringUtils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +27,7 @@ public abstract class AbstractRoleInterceptor implements HandlerInterceptor {
         TokenResponse tokenResponse;
         String authorization = request.getHeader("Authorization");
         String bearer;
-        if (!StringUtils.isEmpty(authorization)) {
+        if (StringUtils.hasText(authorization)) {
             bearer = authorization.split(" ")[1];
             tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
             if (!getRequiredRole(AccountRole.getByName(tokenResponse.role()))) {

@@ -16,12 +16,12 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.thymeleaf.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,7 +92,7 @@ public class BindingAdvice extends RestApiControllerAdvice {
         TokenResponse tokenResponse;
         String authorization = httpServletRequest.getHeader("Authorization");
         String bearer;
-        if (!StringUtils.isEmpty(authorization)) {
+        if (StringUtils.hasText(authorization)) {
             bearer = authorization.split(" ")[1];
             tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
             return new CurrentAccountDTO(tokenResponse);

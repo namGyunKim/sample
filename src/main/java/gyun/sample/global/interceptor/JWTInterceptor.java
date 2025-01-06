@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.thymeleaf.util.StringUtils;
 
 // JWT 인터셉터
 @Component
@@ -26,7 +26,7 @@ public class JWTInterceptor implements HandlerInterceptor {
         TokenResponse tokenResponse;
         String authorization = request.getHeader("Authorization");
         String bearer;
-        if (!StringUtils.isEmpty(authorization)) {
+        if (StringUtils.hasText(authorization)) {
             bearer = authorization.split(" ")[1];
             tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
             if (tokenResponse.errorCode() != null) {

@@ -8,11 +8,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.thymeleaf.util.StringUtils;
 
 
 // 컨트롤러 메서드의 파라메터를 바인딩하는 역할
@@ -40,11 +40,10 @@ public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
         HttpServletRequest httpServletRequest = (HttpServletRequest) webRequest.getNativeRequest();
 
         String authorization= httpServletRequest.getHeader("Authorization");
-        String bearer = "";
-        if(StringUtils.isEmpty(authorization)){
+        if (!StringUtils.hasText(authorization)) {
             return CurrentAccountDTO.generatedGuest();
         }else{
-            bearer = authorization.split(" ")[1];
+            final String bearer = authorization.split(" ")[1];
             TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
             return new CurrentAccountDTO(tokenResponse);
         }

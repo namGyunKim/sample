@@ -13,9 +13,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.thymeleaf.util.StringUtils;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -123,7 +123,7 @@ public class ControllerLoggingAspect {
     private CurrentAccountDTO getTokenResponse(HttpServletRequest httpServletRequest) {
         TokenResponse tokenResponse;
         String authorization = httpServletRequest.getHeader("Authorization");
-        if (!StringUtils.isEmpty(authorization)) {
+        if (StringUtils.hasText(authorization)) {
             String bearer = authorization.split(" ")[1];
             tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
             return new CurrentAccountDTO(tokenResponse);

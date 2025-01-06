@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -60,7 +61,7 @@ public class S3MemberService implements S3Service {
 
     //    확장자 추출
     public static String getFileExtension(String filename) {
-        if (filename == null || filename.isEmpty()) {
+        if (!StringUtils.hasText(filename)) {
             return "";
         }
 
@@ -76,7 +77,7 @@ public class S3MemberService implements S3Service {
     public List<String> upload(List<MultipartFile> files, long memberId) {
         if (files == null || files.isEmpty()) return List.of();
 
-        if (files.get(0).getOriginalFilename().isEmpty()) return List.of();
+        if (!StringUtils.hasText(files.get(0).getOriginalFilename())) return List.of();
 
         // 결과를 리스트로 변환
         return files.stream()
@@ -89,7 +90,7 @@ public class S3MemberService implements S3Service {
 
         if (fileNames == null || fileNames.isEmpty()) return;
 
-        if (fileNames.get(0).isEmpty()) return;
+        if (!StringUtils.hasText(fileNames.get(0))) return;
 
         fileNames.forEach(this::deleteFile);
     }
