@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Map;
 @Tag(name = "HealthRestController", description = "서버 살아있나 확인 api")
 @RestController
 @RequiredArgsConstructor
+@RequestMapping(value = "/api")
 public class HealthRestController {
 
     private final RestApiController restApiController;

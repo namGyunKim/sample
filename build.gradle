@@ -86,6 +86,9 @@ dependencies {
     // sms
     implementation 'net.nurigo:sdk:4.2.7'
 
+//	트래픽 공격 대비
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
+
     // 필요 시 활성화
     // implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
