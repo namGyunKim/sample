@@ -9,8 +9,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
@@ -90,10 +88,6 @@ public class UtilService {
             }
         }
         return enums;
-    }
-
-    public static Pageable getPageable(int page, int size) {
-        return PageRequest.of(page - 1, size);
     }
 
     public static String getKoreanTime() {

@@ -1,12 +1,9 @@
 package gyun.sample.global.exception.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.event.ExceptionEvent;
 import gyun.sample.global.exception.GlobalException;
-import gyun.sample.global.exception.JWTInterceptorException;
-import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.payload.response.BindingResultResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,22 +20,12 @@ public class RestApiControllerAdvice extends RestApiController {
     }
 
     // 컨트롤러를 거친 이후 Event - Log
-    protected void sendLogEvent(GlobalException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(exception, account, httpServletRequest));
+    protected void sendLogEvent(GlobalException exception, HttpServletRequest httpServletRequest) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(exception, httpServletRequest));
     }
 
-    // 컨트롤러를 거치기 전 JWT 관련 이슈가 터지면 error 컨트롤러로 보내서 해당 Event - Log
-    protected void sendLogEvent(JWTInterceptorException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventWithJWT(exception, account, httpServletRequest));
+    protected void sendLogEvent(BindingResultResponse response, HttpServletRequest httpServletRequest) {
+        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventBinding(response, httpServletRequest));
     }
 
-
-    // 컨트롤러를 거치기 전 바인딩 리절트 관련 이슈가 터지면 error 컨트롤러로 보내서 해당 Event - Log
-    protected void sendLogEvent(BindingResultResponse response, CurrentAccountDTO currentAccountDTO, HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventBinding(response, currentAccountDTO, httpServletRequest));
-    }
-
-    protected void sendLogEvent(SocialException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEventWithSocial(exception, account, httpServletRequest));
-    }
 }

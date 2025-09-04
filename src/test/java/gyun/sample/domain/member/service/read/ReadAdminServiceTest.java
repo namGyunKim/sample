@@ -2,9 +2,6 @@ package gyun.sample.domain.member.service.read;
 
 import gyun.sample.domain.member.payload.request.MemberUserListRequest;
 import gyun.sample.domain.member.payload.response.MemberListResponse;
-import gyun.sample.global.enums.GlobalActiveEnums;
-import gyun.sample.global.enums.GlobalFilterEnums;
-import gyun.sample.global.enums.GlobalOrderEnums;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

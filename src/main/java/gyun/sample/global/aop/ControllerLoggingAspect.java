@@ -1,8 +1,5 @@
 package gyun.sample.global.aop;
 
-import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.global.utils.JwtTokenProvider;
 import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +10,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -26,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ControllerLoggingAspect {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final ConcurrentHashMap<String, Boolean> processedRequests = new ConcurrentHashMap<>();
 
     @Pointcut("execution(* gyun.sample.domain..*Controller.*(..)) && !@annotation(org.springframework.web.bind.annotation.InitBinder)")
@@ -78,13 +73,11 @@ public class ControllerLoggingAspect {
     }
 
     private String getUsername(HttpServletRequest request) {
-        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
-        return currentAccountDTO != null ? currentAccountDTO.nickName() : "비로그인 사용자";
+        return "비로그인 사용자";
     }
 
     private String getLoginId(HttpServletRequest request) {
-        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
-        return currentAccountDTO != null ? currentAccountDTO.loginId() : "비로그인 사용자";
+        return "비로그인 사용자";
     }
 
     private void logRequestDetails(String uniqueRequestId, String clientIp, String requestUri,
@@ -120,16 +113,6 @@ public class ControllerLoggingAspect {
         }
     }
 
-    private CurrentAccountDTO getTokenResponse(HttpServletRequest httpServletRequest) {
-        TokenResponse tokenResponse;
-        String authorization = httpServletRequest.getHeader("Authorization");
-        if (StringUtils.hasText(authorization)) {
-            String bearer = authorization.split(" ")[1];
-            tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
-            return new CurrentAccountDTO(tokenResponse);
-        }
-        return null;
-    }
 
     private String generateRequestKey(String clientIp, String sessionId, String requestUri, String httpMethod) {
         return clientIp + ":" + sessionId + ":" + requestUri + ":" + httpMethod;

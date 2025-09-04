@@ -1,17 +1,12 @@
 package gyun.sample.global.exception.advice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
-import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.exception.GlobalException;
-import gyun.sample.global.exception.JWTInterceptorException;
-import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,37 +30,18 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
 
     // Global Exception Catch
     @ExceptionHandler(value = GlobalException.class)
-    protected ResponseEntity<String> processCommonException(GlobalException commonException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
+    protected ResponseEntity<String> processCommonException(GlobalException commonException, HttpServletRequest httpServletRequest) {
         ErrorCode errorCode = commonException.getErrorCode();
         // Event - Log
-        sendLogEvent(commonException, account, httpServletRequest);
+        sendLogEvent(commonException, httpServletRequest);
         return createFailRestResponse(errorCode.getErrorResponse());
     }
 
-    // JWT Interceptor Exception Catch
-    @ExceptionHandler(value = JWTInterceptorException.class)
-    protected ResponseEntity<String> processJWTInterceptorException(JWTInterceptorException jwtInterceptorException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        ErrorCode errorCode = jwtInterceptorException.getErrorCode();
-        // Event - Log
-        sendLogEvent(jwtInterceptorException, account, httpServletRequest);
-        return createFailRestResponseWithJWT(errorCode.getErrorResponse());
-    }
-
-    // Social Exception Catch
-    @ExceptionHandler(value = SocialException.class)
-    protected ResponseEntity<String> processSocialException(SocialException socialException, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        ErrorCode errorCode = socialException.getErrorCode();
-        // Event - Log
-        sendLogEvent(socialException, account, httpServletRequest);
-        return createFailRestResponse(errorCode.getErrorResponseWithSocial(socialException.getErrorDetailMessage()));
-    }
 
     @ExceptionHandler(value = Exception.class)
-    protected ResponseEntity<String> processException(Exception exception, @CurrentAccount CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
+    protected ResponseEntity<String> processException(Exception exception, HttpServletRequest httpServletRequest) {
         ErrorCode errorCode;
-        if (exception instanceof DataAccessException) {
-            errorCode = ErrorCode.DATA_ACCESS_ERROR;
-        } else if (exception instanceof AccessDeniedException) {
+        if (exception instanceof AccessDeniedException) {
             errorCode = ErrorCode.ACCESS_DENIED;
         } else if (exception instanceof MaxUploadSizeExceededException) {
             errorCode = ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED;
@@ -83,7 +59,7 @@ public class ExceptionAdvice extends RestApiControllerAdvice {
 
         GlobalException globalException = new GlobalException(errorCode, exception);
         // Event - Log
-        sendLogEvent(globalException, account, httpServletRequest);
+        sendLogEvent(globalException, httpServletRequest);
         return createFailRestResponseWithJWT(errorCode.getErrorResponse());
     }
 }
