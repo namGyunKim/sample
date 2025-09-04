@@ -19,7 +19,7 @@ public class RememberMeToken extends BaseTimeEntity {
 
     @Id
     @Comment("유저 아이디")
-    @Column(columnDefinition = "text")
+    @Column(length = 64)
     private String series;
 
     @Column(nullable = false)
