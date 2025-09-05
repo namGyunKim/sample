@@ -24,6 +24,6 @@ public record MemberAdminCreateRequest(
         MemberType memberType) {
 
     public MemberAdminCreateRequest generatedWithUser() {
-        return new MemberAdminCreateRequest(loginId, nickName, password, AccountRole.USER, MemberType.GENERAL);
+        return new MemberAdminCreateRequest(loginId, nickName, password, AccountRole.ADMIN, MemberType.GENERAL);
     }
 }
