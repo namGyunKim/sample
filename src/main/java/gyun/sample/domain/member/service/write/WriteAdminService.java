@@ -32,7 +32,6 @@ public class WriteAdminService implements WriteMemberService<MemberAdminCreateRe
 
     @Override
     public GlobalCreateResponse createMember(MemberAdminCreateRequest request) {
-        request.generatedWithUser();
         Member createdMember = new Member(request);
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));
