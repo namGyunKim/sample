@@ -15,8 +15,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -25,7 +25,7 @@ import java.nio.file.AccessDeniedException;
 
 // 예외 처리
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice
+@ControllerAdvice
 public class ExceptionAdvice extends RestApiControllerAdvice {
 
 
