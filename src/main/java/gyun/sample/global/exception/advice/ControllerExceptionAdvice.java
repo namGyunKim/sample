@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-
-// 예외 처리
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class ControllerExceptionAdvice extends RestApiControllerAdvice {
@@ -28,17 +26,40 @@ public class ControllerExceptionAdvice extends RestApiControllerAdvice {
         super(objectMapper, applicationEventPublisher);
     }
 
-    @ExceptionHandler(value = GlobalException.class)
-    public String handleException(GlobalException exception, Model model, HttpServletRequest request, @CurrentAccount CurrentAccountDTO currentAccountDTO) {
-        ErrorCode errorCode = getErrorCodeByException(exception);
-
-        // 에러 정보를 모델에 추가
+    // 1. 직접 정의한 GlobalException 처리
+    @ExceptionHandler(GlobalException.class)
+    public String handleGlobalException(GlobalException e, Model model, HttpServletRequest request, @CurrentAccount CurrentAccountDTO account) {
+        ErrorCode errorCode = e.getErrorCode();
         model.addAttribute("errorCode", errorCode.getCode());
         model.addAttribute("errorMessage", errorCode.getErrorMessage());
         model.addAttribute("path", request.getRequestURI());
-        sendLogEvent(exception, currentAccountDTO, request);
+        // GlobalException은 직접 전달
+        sendLogEvent(e, account, request);
+        return "error/common";
+    }
 
-        return "error/common"; // 공통 에러 페이지로 이동
+    // 2. 데이터베이스 관련 예외 처리
+    @ExceptionHandler(DataAccessException.class)
+    public String handleDataAccessException(DataAccessException e, Model model, HttpServletRequest request, @CurrentAccount CurrentAccountDTO account) {
+        ErrorCode errorCode = ErrorCode.DATA_ACCESS_ERROR;
+        model.addAttribute("errorCode", errorCode.getCode());
+        model.addAttribute("errorMessage", errorCode.getErrorMessage());
+        model.addAttribute("path", request.getRequestURI());
+        // ✅ DataAccessException을 GlobalException으로 감싸서 전달
+        sendLogEvent(new GlobalException(errorCode, e), account, request);
+        return "error/common";
+    }
+
+    // 3. 그 외 예측하지 못한 모든 예외 처리 (Catch-All)
+    @ExceptionHandler(Exception.class)
+    public String handleAllUncaughtException(Exception e, Model model, HttpServletRequest request, @CurrentAccount CurrentAccountDTO account) {
+        ErrorCode errorCode = getErrorCodeByException(e);
+        model.addAttribute("errorCode", errorCode.getCode());
+        model.addAttribute("errorMessage", errorCode.getErrorMessage());
+        model.addAttribute("path", request.getRequestURI());
+        // ✅ Exception을 GlobalException으로 감싸서 전달
+        sendLogEvent(new GlobalException(errorCode, e), account, request);
+        return "error/common";
     }
 
     private ErrorCode getErrorCodeByException(Exception exception) {

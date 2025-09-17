@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 
 // 예외 발생 시, 예외 정보를 담는 이벤트 객체
@@ -45,7 +47,8 @@ public class ExceptionEvent {
 
     // 예외 발생 시, 로그인 계정 데이터를 포함한 예외 정보를 담는 이벤트 객체
     public static ExceptionEvent createExceptionEvent(GlobalException exception, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        return createExceptionEvent(exception, exception.getErrorCode(), exception.getErrorDetailMessage(), account, httpServletRequest);
+        String stackTrace = getStackTraceAsString(exception);
+        return createExceptionEvent(exception, exception.getErrorCode(), stackTrace, account, httpServletRequest);
     }
 
 
@@ -88,5 +91,14 @@ public class ExceptionEvent {
                 .append("\nlogEnd=== === === === === === === === === === === === === === === === === === === === === === === === === === logEnd\n\n");
 
         return stringBuilder.toString();
+    }
+
+    private static String getStackTraceAsString(Throwable throwable) {
+        if (throwable == null) {
+            return "";
+        }
+        StringWriter stringWriter = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
     }
 }
