@@ -1,8 +1,8 @@
 package gyun.sample.domain.s3.adapter;
 
+import gyun.sample.domain.aws.service.S3Service;
 import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.domain.s3.service.S3MemberService;
-import gyun.sample.domain.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
