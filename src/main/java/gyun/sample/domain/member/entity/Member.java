@@ -3,8 +3,6 @@ package gyun.sample.domain.member.entity;
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.board.entity.Board;
-import gyun.sample.domain.board.entity.BoardComment;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
@@ -60,15 +58,6 @@ public class Member extends BaseTimeEntity {
     @Comment("JWT Refresh Token")
     @Column(columnDefinition = "text")
     private String refreshToken;
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Board> boards = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<BoardComment> createComment = new ArrayList<>();
-
-    @OneToMany(mappedBy = "deActiveMember", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<BoardComment> deActiveComment = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<MemberImage> memberImages = new ArrayList<>();
@@ -133,8 +122,5 @@ public class Member extends BaseTimeEntity {
         this.refreshToken = null;
     }
 
-    public void addBoard(Board savedBoard) {
-        this.boards.add(savedBoard);
-    }
 
 }

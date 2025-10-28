@@ -5,8 +5,6 @@ import gyun.sample.domain.account.payload.request.AccountLoginRequest;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.social.SocialServiceAdapter;
-import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
@@ -22,13 +20,10 @@ public class WriteAccountService extends ReadAccountService {
     //    utils
     public final JwtTokenProvider jwtTokenProvider;
 
-    public final SocialServiceAdapter socialServiceAdapter;
 
-
-    public WriteAccountService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider, SocialServiceAdapter socialServiceAdapter) {
+    public WriteAccountService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
         super(memberRepository);
         this.jwtTokenProvider = jwtTokenProvider;
-        this.socialServiceAdapter = socialServiceAdapter;
     }
 
     //    로그인
@@ -52,10 +47,6 @@ public class WriteAccountService extends ReadAccountService {
     public boolean logout(CurrentAccountDTO currentAccountDTO) {
         Member member = findByLoginId(currentAccountDTO.loginId());
         member.invalidateRefreshToken();
-        if (currentAccountDTO.memberType().checkSocialType()) {
-            SocialService socialService = socialServiceAdapter.getService(member.getMemberType());
-            socialService.logout(member.getSocialToken());
-        }
         return true;
     }
 

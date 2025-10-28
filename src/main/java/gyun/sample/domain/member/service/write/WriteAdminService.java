@@ -7,8 +7,6 @@ import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadAdminService;
-import gyun.sample.domain.social.SocialServiceAdapter;
-import gyun.sample.domain.social.serviece.SocialService;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
@@ -27,7 +25,6 @@ public class WriteAdminService implements WriteMemberService<MemberAdminCreateRe
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
-    private final SocialServiceAdapter socialServiceAdapter;
     private final ReadAdminService readAdminService;
 
     @Override
@@ -56,12 +53,6 @@ public class WriteAdminService implements WriteMemberService<MemberAdminCreateRe
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
         member.deActive();
-
-        if (member.getMemberType().checkSocialType()) {
-            SocialService socialService = socialServiceAdapter.getService(member.getMemberType());
-            socialService.unlink(member.getSocialToken());
-        }
-
         return new GlobalInactiveResponse(member.getId());
     }
 }
