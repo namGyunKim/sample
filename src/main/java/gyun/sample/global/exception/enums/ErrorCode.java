@@ -43,6 +43,18 @@ public enum ErrorCode {
     BOARD_NOT_EXIST("2005", "존재하지 않는 게시글입니다."),
     QUESTION_BOARD_NOT_EXIST("2006", "존재하지 않는 질문 게시글 입니다."),
 
+
+    //      ===이미지 (5000) ===
+    INVALID_IMAGE_FILE("5001", "유효하지 않은 이미지 파일입니다."),
+    INVALID_IMAGE_DIMENSIONS("5002", "이미지 크기가 올바르지 않습니다."),
+    FILE_SIZE_EXCEEDED("5003", "파일 크기가 제한을 초과했습니다."),
+    FILE_IS_EMPTY("5004", "파일이 비어있습니다."),
+    UNSUPPORTED_FILE_EXTENSION("5005", "지원하지 않는 파일 확장자입니다."),
+    INVALID_INPUT_VALUE("5006", "유효하지 않은 입력 값입니다."),
+    FILE_UPLOAD_FAILED("5007", "파일 업로드에 실패했습니다."),
+    FILE_DOWNLOAD_FAILED("5008", "파일 다운로드에 실패했습니다."),
+    INVALID_PARAMETER("5009", "잘못된 파라미터입니다."),
+
     // === OTHER (9000) ===
     JSON_PROCESS_FAIL("9001", "Json 파일을 처리하는데 실패했습니다."),
     COUNT_FETCH_ERROR("9002", "개수 조회에 실패하였습니다."),
