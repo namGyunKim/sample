@@ -51,6 +51,12 @@ public class OriginCheckFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
+        // === Origin 헤더가 없는 요청(Swagger, Postman, Same-Origin 등)은 통과시킵니다. ===
+        if (!StringUtils.hasText(origin)) {
+            log.info("Origin 헤더가 없어 요청을 통과시킵니다.");
+            chain.doFilter(request, response);
+            return;
+        }
 
         // origin 헤더가 있고, 허용된 목록(Set)에 포함되어 있는지 확인합니다.
         if (StringUtils.hasText(origin) && allowedOrigins.contains(origin)) {
