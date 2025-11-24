@@ -6,9 +6,12 @@ import gyun.sample.domain.aws.payload.dto.S3UrlParts;
 import gyun.sample.domain.aws.service.S3Service;
 import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.enums.ErrorCode;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -38,10 +41,32 @@ public abstract class AbstractS3Service implements S3Service {
 
     protected final S3Client s3Client;
 
-    @Value("${s3.bucket}")
     protected String bucketName;
+    @Autowired
+    private Environment environment;
+    @Value("${s3.bucket}")
+    private String defaultBucketName;
+
     @Value("${aws.region}")
     protected String region;
+    @Value("${s3.bucket-local:}") // 기본값 비워둠 (없을 경우 대비)
+    private String localBucketName;
+
+    @PostConstruct
+    public void init() {
+        String[] activeProfiles = environment.getActiveProfiles();
+        boolean isLocal = Arrays.stream(activeProfiles)
+                .anyMatch(profile -> profile.equalsIgnoreCase("local"));
+
+        // 로컬 프로필이고 localBucketName이 설정되어 있으면 사용
+        if (isLocal && localBucketName != null && !localBucketName.isBlank()) {
+            this.bucketName = localBucketName;
+            log.info("로컬 프로필이 감지되어 로컬 버킷({})을 사용합니다.", this.bucketName);
+        } else {
+            this.bucketName = defaultBucketName;
+            log.info("운영 버킷({})을 사용합니다.", this.bucketName);
+        }
+    }
 
     /**
      * S3 구현체(Banner, Profile 등)에 특화된 이미지 타입 유효성 검사를 수행합니다.
