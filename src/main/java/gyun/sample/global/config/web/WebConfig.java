@@ -55,6 +55,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/**", "/webjars/**")
                 .addResourceLocations("classpath:/templates/", "classpath:/static/", "classpath:/META-INF/resources/webjars/");
     }
+
     //  리졸버
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -67,17 +68,21 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .excludePathPatterns("/api/account/jwt-error/**","/api/account/logout","/api/account/access-denied/**","/social/kakao/**")
+                .excludePathPatterns("/api/account/jwt-error/**", "/api/account/logout", "/api/account/access-denied/**", "/social/kakao/**")
                 .order(1);
+
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/api/**/login/**")
                 .excludePathPatterns("/api/account/login")
                 .order(2);
+
+
         registry.addInterceptor(superAdminInterceptor)
-                .addPathPatterns("/api/admin/create")
+                .addPathPatterns("/api/member/super_admin/**")
                 .order(3);
+
         registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/api/admin/**","/enums")
+                .addPathPatterns("/api/member/admin/**", "/enums")
                 .order(4);
     }
 

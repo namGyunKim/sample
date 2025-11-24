@@ -24,9 +24,14 @@ import static gyun.sample.global.utils.UtilService.getPageable;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ReadAdminService implements ReadMemberService {
+public class ReadAdminService extends AbstractReadMemberService {
 
     protected final MemberRepository memberRepository;
+
+    @Override
+    public List<AccountRole> getSupportedRoles() {
+        return List.of(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
+    }
 
     @Override
     public boolean existsByRole(AccountRole accountRole) {

@@ -1,6 +1,5 @@
 package gyun.sample.domain.member.service.read;
 
-import gyun.sample.domain.member.payload.request.MemberUserListRequest;
 import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;

@@ -4,9 +4,8 @@ package gyun.sample.domain.member.entity;
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
-import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
+import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
-import gyun.sample.domain.member.payload.request.MemberUserCreateRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -63,28 +62,18 @@ public class Member extends BaseTimeEntity {
     private final List<MemberImage> memberImages = new ArrayList<>();
 
 
-    //    최고 관리자 리퀘스트로 생성
-    public Member(MemberAdminCreateRequest request) {
+    // 통합된 Request로 생성 (주로 관리자가 생성할 때 사용, role이 request에 포함됨)
+    public Member(MemberCreateRequest request) {
         this.loginId = request.loginId();
         this.nickName = request.nickName();
         this.password = request.password();
-        this.role = request.role();
+        // Request에 Role이 없으면 기본 USER (Validator에서 관리자는 필수 체크함)
+        this.role = request.role() != null ? request.role() : AccountRole.USER;
         this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = request.memberType();
     }
 
-    //    일반 유저 리퀘스트로 생성
-    public Member(MemberUserCreateRequest request) {
-        this.loginId = request.loginId();
-        this.nickName = request.nickName();
-        this.password = request.password();
-        this.role = AccountRole.USER;
-        this.active = GlobalActiveEnums.ACTIVE;
-        this.memberType = request.memberType();
-    }
-
-
-    //    소셜 회원가입
+    // 소셜 회원가입 및 WriteUserService에서 사용
     public Member(String loginId, String nickName, MemberType memberType, String socialKey) {
         this.loginId = loginId;
         this.nickName = nickName;
@@ -98,6 +87,7 @@ public class Member extends BaseTimeEntity {
         this.password = password;
     }
 
+    // Dirty Checking을 위한 Update 메서드
     public void update(MemberUpdateRequest memberUpdateRequest) {
         this.nickName = memberUpdateRequest.nickName();
     }
@@ -121,6 +111,4 @@ public class Member extends BaseTimeEntity {
     public void invalidateRefreshToken() {
         this.refreshToken = null;
     }
-
-
 }

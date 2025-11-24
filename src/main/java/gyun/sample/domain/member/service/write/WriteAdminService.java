@@ -1,9 +1,8 @@
 package gyun.sample.domain.member.service.write;
 
-
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.entity.Member;
-import gyun.sample.domain.member.payload.request.MemberAdminCreateRequest;
+import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadAdminService;
@@ -21,15 +20,22 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WriteAdminService implements WriteMemberService<MemberAdminCreateRequest> {
+public class WriteAdminService extends AbstractWriteMemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final ReadAdminService readAdminService;
 
     @Override
-    public GlobalCreateResponse createMember(MemberAdminCreateRequest request) {
+    public List<AccountRole> getSupportedRoles() {
+        return List.of(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
+    }
+
+    @Override
+    public GlobalCreateResponse createMember(MemberCreateRequest request) {
+
         Member createdMember = new Member(request);
+
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));
         return new GlobalCreateResponse(member.getId());
@@ -37,6 +43,7 @@ public class WriteAdminService implements WriteMemberService<MemberAdminCreateRe
 
     @Override
     public GlobalUpdateResponse updateMember(MemberUpdateRequest memberUpdateRequest, String loginId) {
+        // Dirty Checking
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
         member.update(memberUpdateRequest);
@@ -48,7 +55,6 @@ public class WriteAdminService implements WriteMemberService<MemberAdminCreateRe
     }
 
     @Override
-    @Transactional
     public GlobalInactiveResponse deActiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);

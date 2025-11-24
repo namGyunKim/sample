@@ -1,7 +1,6 @@
 package gyun.sample.domain.member.payload.dto;
 
-import gyun.sample.domain.member.payload.request.MemberAdminListRequest;
-import gyun.sample.domain.member.payload.request.MemberUserListRequest;
+import gyun.sample.domain.member.payload.request.MemberListRequest;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.enums.GlobalFilterEnums;
 import gyun.sample.global.enums.GlobalOrderEnums;
@@ -25,11 +24,7 @@ public record MemberListRequestDTO(
         @NotNull(message = "활성화 여부를 선택해주세요.")
         GlobalActiveEnums active) {
 
-    public MemberListRequestDTO(MemberUserListRequest request) {
-        this(request.page(), request.size(), request.order(), request.searchWord(), request.filter(), request.active());
-    }
-
-    public MemberListRequestDTO(MemberAdminListRequest request) {
+    public MemberListRequestDTO(MemberListRequest request) {
         this(request.page(), request.size(), request.order(), request.searchWord(), request.filter(), request.active());
     }
 }

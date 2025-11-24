@@ -73,6 +73,7 @@ public enum ErrorCode {
     VERIFICATION_CODE_INVALID("9015", "인증 코드가 일치하지 않습니다."),
     UPLOAD_FAILED("9016", "파일 업로드에 실패하였습니다."),
     FILTER_NOT_EXIST("9017", "필터가 존재하지 않습니다."),
+    INTERNAL_SERVER_ERROR("9018", "내부 서버 오류"),
     FAILED("9999", "Unexpected Error");
 
     private static final Map<String, ErrorCode> errorMap =
