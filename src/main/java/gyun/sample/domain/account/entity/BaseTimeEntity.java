@@ -1,6 +1,8 @@
 package gyun.sample.domain.account.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,20 +23,4 @@ public abstract class BaseTimeEntity {
     @LastModifiedDate
     @Comment("수정일")
     private LocalDateTime modifiedAt;           //  수정일
-
-
-    //  생성일, 수정일 자동화
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.modifiedAt = LocalDateTime.now();
-    }
-
-
-    //  수정일 자동화
-    @PreUpdate
-    public void preUpdate() {
-        this.modifiedAt = LocalDateTime.now();
-    }
-
 }
