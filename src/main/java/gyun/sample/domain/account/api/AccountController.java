@@ -8,6 +8,7 @@ import gyun.sample.domain.account.service.WriteAccountService;
 import gyun.sample.domain.account.validator.LoginAccountValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
+import gyun.sample.global.payload.response.RestApiResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -52,8 +53,8 @@ public class AccountController {
 
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")
-    public ResponseEntity<String> login(@Valid @RequestBody AccountLoginRequest accountLoginRequest,
-                                        BindingResult bindingResult) {
+    public ResponseEntity<RestApiResponse<AccountLoginResponse>> login(@Valid @RequestBody AccountLoginRequest accountLoginRequest,
+                                                                       BindingResult bindingResult) {
         AccountLoginResponse response = writeAccountService.login(accountLoginRequest);
         return restApiController.createRestResponse(response);
     }
@@ -61,7 +62,7 @@ public class AccountController {
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "로그아웃(Refresh Token Delete)")
     @PostMapping(value = "/logout")
-    public ResponseEntity<String> logout(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
+    public ResponseEntity<RestApiResponse<Boolean>> logout(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
         boolean response = writeAccountService.logout(currentAccountDTO);
 
@@ -70,7 +71,7 @@ public class AccountController {
 
     @Operation(summary = "리프레쉬 토큰으로 JWT 토큰 재발급")
     @PostMapping(value = "/get-token-by-refresh/{refreshToken}")
-    public ResponseEntity<String> getAccessToken(@PathVariable String refreshToken) {
+    public ResponseEntity<RestApiResponse<AccountLoginResponse>> getAccessToken(@PathVariable String refreshToken) {
         AccountLoginResponse response = writeAccountService.getJwtTokenByRefreshToken(refreshToken);
         return restApiController.createSuccessRestResponse(response);
     }
@@ -78,7 +79,7 @@ public class AccountController {
     @Operation(summary = "로그인한 데이터")
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping(value = "/get-login-data")
-    public ResponseEntity<String> loginData(@CurrentAccount CurrentAccountDTO request) {
+    public ResponseEntity<RestApiResponse<LoginMemberResponse>> loginData(@CurrentAccount CurrentAccountDTO request) {
         LoginMemberResponse response = writeAccountService.getLoginData(request);
         return restApiController.createSuccessRestResponse(response);
     }

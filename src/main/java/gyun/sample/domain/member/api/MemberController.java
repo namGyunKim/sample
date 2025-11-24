@@ -6,6 +6,8 @@ import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberListRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
+import gyun.sample.domain.member.payload.response.DetailMemberResponse;
+import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.domain.member.service.MemberStrategyFactory;
 import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
@@ -17,12 +19,14 @@ import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
+import gyun.sample.global.payload.response.RestApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -43,6 +47,10 @@ public class MemberController {
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
+    // [중요] @InitBinder의 value("이름")는 컨트롤러 메서드의 파라미터 변수명(또는 @ModelAttribute 이름)과
+    // 반드시 정확히 일치해야만 해당 객체 검증 시 Validator가 동작합니다.
+    // 예: @InitBinder("memberCreateRequest") -> createMember(@RequestBody ... memberCreateRequest)
+
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -60,9 +68,9 @@ public class MemberController {
 
     @Operation(summary = "회원 생성")
     @PostMapping(value = "/create")
-    public ResponseEntity<String> createMember(
-            @Parameter(description = "Account Role (USER, ADMIN, SUPER_ADMIN)", example = "USER")
-            @PathVariable AccountRole role,
+    public ResponseEntity<RestApiResponse<GlobalCreateResponse>> createMember(
+            @Parameter(description = "Account Role", example = "USER") @PathVariable AccountRole role,
+            // @InitBinder("memberCreateRequest")와 변수명 일치 필수
             @Valid @RequestBody MemberCreateRequest memberCreateRequest,
             BindingResult bindingResult) {
 
@@ -73,20 +81,20 @@ public class MemberController {
 
     @Operation(summary = "회원 목록 조회")
     @GetMapping(value = "/list")
-    public ResponseEntity<String> getMemberList(
+    public ResponseEntity<RestApiResponse<Page<MemberListResponse>>> getMemberList(
             @PathVariable AccountRole role,
+            // @InitBinder("memberListRequest")와 변수명 일치 필수
             @Valid MemberListRequest memberListRequest,
             BindingResult bindingResult) {
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
-        // Service Layer DTO로 변환
-        MemberListRequestDTO listRequestDTO = new MemberListRequestDTO(memberListRequest);
+        var listRequestDTO = new MemberListRequestDTO(memberListRequest);
         return restApiController.createRestResponse(service.getList(listRequestDTO));
     }
 
     @Operation(summary = "회원 상세 조회")
     @GetMapping(value = "/detail/{id}")
-    public ResponseEntity<String> getMemberDetail(
+    public ResponseEntity<RestApiResponse<DetailMemberResponse>> getMemberDetail(
             @PathVariable AccountRole role,
             @PathVariable long id) {
 
@@ -96,20 +104,22 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 수정")
     @PutMapping(value = "/update")
-    public ResponseEntity<String> updateMember(
+    public ResponseEntity<RestApiResponse<GlobalUpdateResponse>> updateMember(
             @PathVariable AccountRole role,
+            // @InitBinder("memberUpdateRequest")와 변수명 일치 필수
             @Valid @RequestBody MemberUpdateRequest memberUpdateRequest,
             BindingResult bindingResult,
             @CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
         WriteMemberService service = memberStrategyFactory.getWriteService(role);
+        // Dirty Checking은 Service Layer(@Transactional) 내부에서 Entity의 상태 변경을 통해 수행됩니다.
         GlobalUpdateResponse response = service.updateMember(memberUpdateRequest, currentAccountDTO.loginId());
         return restApiController.createRestResponse(response);
     }
 
     @Operation(summary = "회원 비활성화")
     @PatchMapping(value = "/inactive")
-    public ResponseEntity<String> inactiveMember(
+    public ResponseEntity<RestApiResponse<GlobalInactiveResponse>> inactiveMember(
             @PathVariable AccountRole role,
             @CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
