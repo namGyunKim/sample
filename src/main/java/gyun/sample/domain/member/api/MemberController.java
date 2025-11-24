@@ -28,6 +28,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +69,8 @@ public class MemberController {
 
     @Operation(summary = "회원 생성")
     @PostMapping(value = "/create")
+    // 관리자 생성은 관리자만, 유저 생성은 누구나(또는 상황에 따라 조정)
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role == T(gyun.sample.domain.account.enums.AccountRole).USER")
     public ResponseEntity<RestApiResponse<GlobalCreateResponse>> createMember(
             @Parameter(description = "Account Role", example = "USER") @PathVariable AccountRole role,
             // @InitBinder("memberCreateRequest")와 변수명 일치 필수
@@ -81,6 +84,7 @@ public class MemberController {
 
     @Operation(summary = "회원 목록 조회")
     @GetMapping(value = "/list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<RestApiResponse<Page<MemberListResponse>>> getMemberList(
             @PathVariable AccountRole role,
             // @InitBinder("memberListRequest")와 변수명 일치 필수
@@ -94,6 +98,7 @@ public class MemberController {
 
     @Operation(summary = "회원 상세 조회")
     @GetMapping(value = "/detail/{id}")
+    @PreAuthorize("isAuthenticated()") // 본인 조회 로직 or 관리자 조회 로직은 서비스 내부 또는 더 상세한 SpEL로 처리 가능
     public ResponseEntity<RestApiResponse<DetailMemberResponse>> getMemberDetail(
             @PathVariable AccountRole role,
             @PathVariable long id) {
@@ -104,6 +109,7 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 수정")
     @PutMapping(value = "/update")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RestApiResponse<GlobalUpdateResponse>> updateMember(
             @PathVariable AccountRole role,
             // @InitBinder("memberUpdateRequest")와 변수명 일치 필수
@@ -119,6 +125,7 @@ public class MemberController {
 
     @Operation(summary = "회원 비활성화")
     @PatchMapping(value = "/inactive")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RestApiResponse<GlobalInactiveResponse>> inactiveMember(
             @PathVariable AccountRole role,
             @CurrentAccount CurrentAccountDTO currentAccountDTO) {

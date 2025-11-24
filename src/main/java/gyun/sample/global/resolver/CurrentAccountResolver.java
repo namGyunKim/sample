@@ -1,51 +1,48 @@
 package gyun.sample.global.resolver;
 
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
-import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.global.annotaion.CurrentAccount;
-import gyun.sample.global.utils.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
+import gyun.sample.global.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-
-// 컨트롤러 메서드의 파라메터를 바인딩하는 역할
 @Component
 @RequiredArgsConstructor
 public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
 
-    private final JwtTokenProvider jwtTokenProvider;
-
-//    private final JwtUtil jwtUtil;
-
-//    파라메터 객체의 타입이 CurrentAccount인 경우 true를 반환하고 resolveArgument() 메서드가 실행됨
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentAccount.class);
     }
 
-//    resolveArgument() 메서드에서는 HttpServletRequest 객체를 통해 Authorization 헤더를 가져옴
-
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 
-        final String GUEST = "GUEST";
-        HttpServletRequest httpServletRequest = (HttpServletRequest) webRequest.getNativeRequest();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String authorization= httpServletRequest.getHeader("Authorization");
-        if (!StringUtils.hasText(authorization)) {
+        // 인증 정보가 없거나, 익명 사용자일 경우 (Guest 처리)
+        if (authentication == null || authentication.getPrincipal().equals("anonymousUser")) {
             return CurrentAccountDTO.generatedGuest();
-        }else{
-            final String bearer = authorization.split(" ")[1];
-            TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
-            return new CurrentAccountDTO(tokenResponse);
         }
+
+        // JwtAuthenticationFilter에서 저장한 PrincipalDetails 꺼내기
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+        // PrincipalDetails -> CurrentAccountDTO 변환
+        return new CurrentAccountDTO(
+                principalDetails.getId(),
+                principalDetails.getUsername(), // loginId
+                principalDetails.getNickName(),
+                principalDetails.getRole(),
+                principalDetails.getMemberType()
+        );
     }
 }

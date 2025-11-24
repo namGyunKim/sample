@@ -17,6 +17,8 @@ java {
 // bootJar 태스크 커스터마이징
 bootJar {
     archiveFileName.set('app.jar')
+    // 중복 파일 발생 시 처리 전략 설정
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // 기본 jar 태스크 비활성화
@@ -37,7 +39,7 @@ repositories {
 // BOM 관리
 dependencyManagement {
     imports {
-        // Spring Cloud BOM (Boot 3.2.x 호환 버전)
+        // Spring Cloud BOM
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
         // AWS SDK BOM
         mavenBom "software.amazon.awssdk:bom:2.20.26"
@@ -45,23 +47,26 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Web & Core
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-aop' // AOP 필수
 
-    // DB Drivers (RuntimeOnly)
+    // JPA & DB
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // Lombok & DevTools
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-    implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
-    implementation "io.github.openfeign:feign-jackson"
 
     // Querydsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -69,42 +74,34 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    // AWS S3 (버전 BOM 관리)
+    // AWS S3
     implementation 'software.amazon.awssdk:s3'
 
-    // Swagger (Boot 3.x 호환 버전으로 변경)
+    // Swagger (Spring Doc)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
-    // password encoder (Argon2 사용을 위한 라이브러리 교체)
-    implementation 'org.springframework.security:spring-security-crypto' // Spring Security의 암호화 기능만 사용
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.77' // Argon2 구현체 포함
+    // Crypto
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
 
-    // JWT Token
-    // auth0 java-jwt (Boot 3 호환을 위해 버전 업)
+    // JWT
     implementation 'com.auth0:java-jwt:4.4.0'
-
-    // jjwt (0.9.1은 Boot 3에서 호환되지 않으므로 최신 버전 구조로 변경)
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // jaxb (javax -> jakarta 로 변경 필수)
+    // XML/JSON/Etc
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
     runtimeOnly 'com.sun.xml.bind:jaxb-impl:4.0.0'
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
+    implementation "io.github.openfeign:feign-jackson"
 
-    // p6spy query logging
+    // Logging & Utils
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
-
-    // Spring Boot Email (JavaMail)
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'net.nurigo:sdk:4.2.7' // SMS
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0' // Rate Limiting
 
-    // sms
-    implementation 'net.nurigo:sdk:4.2.7'
-
-    // 트래픽 공격 대비
-    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
-
-    // 이미지 처리 관련 webp 지원 라이브러리
+    // Image Processing
     implementation 'com.twelvemonkeys.imageio:imageio-core:3.10.1'
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
 
@@ -114,6 +111,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// QueryDSL generated 삭제 태스크
 task cleanGeneratedDir(type: Delete) {
     delete file('build/generated')
 }

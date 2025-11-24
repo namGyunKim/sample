@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -53,8 +54,10 @@ public class AccountController {
 
     @Operation(summary = "로그인")
     @PostMapping(value = "/login")
-    public ResponseEntity<RestApiResponse<AccountLoginResponse>> login(@Valid @RequestBody AccountLoginRequest accountLoginRequest,
-                                                                       BindingResult bindingResult) {
+    // SecurityConfig에서 WhiteList로 이미 열려있지만 명시적으로 permitAll 가능
+    public ResponseEntity<RestApiResponse<AccountLoginResponse>> login(
+            @Valid @RequestBody AccountLoginRequest accountLoginRequest,
+            BindingResult bindingResult) {
         AccountLoginResponse response = writeAccountService.login(accountLoginRequest);
         return restApiController.createRestResponse(response);
     }
@@ -62,6 +65,7 @@ public class AccountController {
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "로그아웃(Refresh Token Delete)")
     @PostMapping(value = "/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RestApiResponse<Boolean>> logout(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
 
         boolean response = writeAccountService.logout(currentAccountDTO);
@@ -79,9 +83,9 @@ public class AccountController {
     @Operation(summary = "로그인한 데이터")
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping(value = "/get-login-data")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RestApiResponse<LoginMemberResponse>> loginData(@CurrentAccount CurrentAccountDTO request) {
         LoginMemberResponse response = writeAccountService.getLoginData(request);
         return restApiController.createSuccessRestResponse(response);
     }
-
 }

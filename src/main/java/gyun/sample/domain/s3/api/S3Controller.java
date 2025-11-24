@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +25,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/s3")
 @RequiredArgsConstructor
-
 public class S3Controller {
 
     private final RestApiController restApiController;
@@ -34,6 +34,7 @@ public class S3Controller {
     @Operation(summary = "파일 업로드", description = "지정된 디렉토리에 파일을 업로드합니다.")
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RestApiResponse<List<ImageUploadResult>>> uploadFile(
             @RequestParam List<MultipartFile> files,
             @RequestParam UploadDirect uploadDirect,
@@ -46,10 +47,13 @@ public class S3Controller {
 
     @Operation(summary = "파일 삭제", description = "지정된 파일을 삭제합니다.")
     @PostMapping(value = "/delete")
-    @SecurityRequirement(name = "Bearer Authentication") // 인증 추가
-    public ResponseEntity<RestApiResponse<List<String>>> deleteFile(@RequestParam List<String> fileNames,
-                                                                    @RequestParam UploadDirect uploadDirect,
-                                                                    @CurrentAccount CurrentAccountDTO currentAccountDTO) { // currentAccountDTO 추가
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<RestApiResponse<List<String>>> deleteFile(
+            @RequestParam List<String> fileNames,
+            @RequestParam UploadDirect uploadDirect,
+            @CurrentAccount CurrentAccountDTO currentAccountDTO) {
+
         S3Service s3Service = s3ServiceAdapter.getService(uploadDirect);
         // deleteImages로 변경, ImageType 및 entityId 추가
         s3Service.deleteImages(fileNames, ImageType.MEMBER_PROFILE, currentAccountDTO.id());
@@ -58,10 +62,13 @@ public class S3Controller {
 
     @Operation(summary = "파일 url을가져옴", description = "지정된 파일의 url을 가져옵니다.")
     @PostMapping(value = "/url")
-    @SecurityRequirement(name = "Bearer Authentication") // 인증 추가
-    public ResponseEntity<RestApiResponse<String>> getFileUrl(@RequestParam String fileName,
-                                             @RequestParam UploadDirect uploadDirect,
-                                             @CurrentAccount CurrentAccountDTO currentAccountDTO) { // currentAccountDTO 추가
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<RestApiResponse<String>> getFileUrl(
+            @RequestParam String fileName,
+            @RequestParam UploadDirect uploadDirect,
+            @CurrentAccount CurrentAccountDTO currentAccountDTO) {
+
         S3Service s3Service = s3ServiceAdapter.getService(uploadDirect);
         // getImageUrl로 변경, ImageType 및 entityId 추가
         String imageUrl = s3Service.getImageUrl(fileName, ImageType.MEMBER_PROFILE, currentAccountDTO.id());
