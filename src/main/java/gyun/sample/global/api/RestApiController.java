@@ -11,13 +11,19 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class RestApiController {
 
-    // 실패 응답
+    // 실패 응답 (기본 UNAUTHORIZED - 기존 코드 호환성 유지)
     public <T> ResponseEntity<RestApiResponse<T>> createFailRestResponse(T data) {
+        return createFailRestResponse(data, HttpStatus.UNAUTHORIZED);
+    }
+
+    // 실패 응답 (Status Code 지정 가능 - 개선된 메소드)
+    public <T> ResponseEntity<RestApiResponse<T>> createFailRestResponse(T data, HttpStatus status) {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED) // 상황에 따라 status 파라미터화 가능
+                .status(status)
                 .body(RestApiResponse.fail(data));
     }
 
+    // JWT 에러용 (기존 유지)
     public <T> ResponseEntity<RestApiResponse<T>> createFailRestResponseWithJWT(T data) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)

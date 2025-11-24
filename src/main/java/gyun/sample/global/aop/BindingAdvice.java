@@ -15,6 +15,7 @@ import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -46,28 +47,35 @@ public class BindingAdvice extends RestApiControllerAdvice {
     public Object validationHandler(ProceedingJoinPoint joinPoint) throws Throwable {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        // RequestAttributes가 null인 경우 WebSocket에서 발생한 요청임으로 무시
+        // RequestAttributes가 null인 경우 WebSocket 등에서 발생한 요청임으로 무시
         if (requestAttributes == null) {
             return joinPoint.proceed();
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-        String type = bindingPathCreate(joinPoint.getSignature());
-        String method = joinPoint.getSignature().getName();
-        String errorCode = ErrorCode.REQUEST_BINDING_RESULT.getCode();
-        String errorMessage = ErrorCode.REQUEST_BINDING_RESULT.getErrorMessage();
-        Map<String, String> errorMap = new HashMap<>();
+
         Object[] args = joinPoint.getArgs(); // join point parameter
 
-        CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
         for (Object arg : args) {
             // 바인딩 리절트가 존재하면
             if (arg instanceof BindingResult bindingResult) {
                 if (bindingResult.hasErrors()) {
+                    String type = bindingPathCreate(joinPoint.getSignature());
+                    String method = joinPoint.getSignature().getName();
+                    String errorCode = ErrorCode.REQUEST_BINDING_RESULT.getCode();
+                    String errorMessage = ErrorCode.REQUEST_BINDING_RESULT.getErrorMessage();
+                    Map<String, String> errorMap = new HashMap<>();
+
+                    CurrentAccountDTO currentAccountDTO = getTokenResponse(request);
+
                     populateErrorMap(bindingResult, errorMap);
                     BindingResultResponse response = new BindingResultResponse(type, method, errorCode, errorMessage, errorMap);
+
+                    // 로그 이벤트 발행
                     sendLogEvent(response, currentAccountDTO, request);
-                    return restApiController.createFailRestResponse(response);
+
+                    // [수정] 유효성 검사 실패는 400 Bad Request여야 함 (기존 401 UNAUTHORIZED 수정)
+                    return restApiController.createFailRestResponse(response, HttpStatus.BAD_REQUEST);
                 }
             }
         }
@@ -92,7 +100,7 @@ public class BindingAdvice extends RestApiControllerAdvice {
         TokenResponse tokenResponse;
         String authorization = httpServletRequest.getHeader("Authorization");
         String bearer;
-        if (StringUtils.hasText(authorization)) {
+        if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
             bearer = authorization.split(" ")[1];
             tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
             return new CurrentAccountDTO(tokenResponse);
