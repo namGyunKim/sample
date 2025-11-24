@@ -24,7 +24,8 @@ import java.io.IOException;
 public class JWTInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // 개선됨: 직접 new ObjectMapper() 하지 않고 빈을 주입받아 전역 설정 유지
+    private final ObjectMapper objectMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -34,12 +35,11 @@ public class JWTInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        TokenResponse tokenResponse;
         String authorization = request.getHeader("Authorization");
 
         if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
             String bearer = authorization.split(" ")[1];
-            tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
+            TokenResponse tokenResponse = jwtTokenProvider.getTokenResponse(bearer);
 
             // 토큰 자체에 에러가 있는 경우 (만료, 변조 등)
             if (tokenResponse.errorCode() != null) {

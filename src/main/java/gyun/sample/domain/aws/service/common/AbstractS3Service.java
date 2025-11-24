@@ -22,15 +22,22 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * S3Service의 공통 로직을 구현하는 추상 클래스.
- * S3에 접근하는 구현체(Service)는 이 클래스를 상속받아 사용합니다.
+ * Java 21 스타일에 맞춰 HttpClient 등 모던 API 적용
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -48,7 +55,13 @@ public abstract class AbstractS3Service implements S3Service {
 
     @Value("${aws.region}")
     protected String region;
-    @Value("${s3.bucket-local:}") // 기본값 비워둠 (없을 경우 대비)
+
+    // Java 11+ HttpClient (재사용 권장)
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+    @Value("${s3.bucket-local:}")
     private String localBucketName;
 
     @PostConstruct
@@ -57,7 +70,6 @@ public abstract class AbstractS3Service implements S3Service {
         boolean isLocal = Arrays.stream(activeProfiles)
                 .anyMatch(profile -> profile.equalsIgnoreCase("local"));
 
-        // 로컬 프로필이고 localBucketName이 설정되어 있으면 사용
         if (isLocal && localBucketName != null && !localBucketName.isBlank()) {
             this.bucketName = localBucketName;
             log.info("로컬 프로필이 감지되어 로컬 버킷({})을 사용합니다.", this.bucketName);
@@ -67,18 +79,12 @@ public abstract class AbstractS3Service implements S3Service {
         }
     }
 
-    /**
-     * S3 구현체(Banner, Profile 등)에 특화된 이미지 타입 유효성 검사를 수행합니다.
-     *
-     * @param imageType 검사할 이미지 타입
-     */
     protected abstract void validateImageType(ImageType imageType);
 
     @Override
     public ImageUploadResult uploadImage(MultipartFile file, ImageType imageType, Long entityId) {
         String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "unknown";
         try {
-            // 구체적인 유효성 검사 로직을 하위 클래스에 위임
             validateImageType(imageType);
             return uploadToS3Internal(file.getBytes(), originalFilename, imageType, entityId);
         } catch (IOException e) {
@@ -97,50 +103,44 @@ public abstract class AbstractS3Service implements S3Service {
     @Override
     public ImageUploadResult uploadImageFromUrl(String imageUrl, ImageType imageType, Long entityId) {
         try {
-            log.info("이미지 다운로드 시도. URL: {}", imageUrl);
-            // 구체적인 유효성 검사 로직을 하위 클래스에 위임
+            log.info("이미지 다운로드 시도 (HttpClient). URL: {}", imageUrl);
             validateImageType(imageType);
 
-            // Deprecated된 new URL(String) 대신 URI를 통해 생성
-            URL url = new URI(imageUrl).toURL();
+            // Java 11+ HttpClient 사용 (Modern I/O)
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(imageUrl))
+                    .GET()
+                    .timeout(Duration.ofSeconds(5))
+                    .build();
 
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000); // 타임아웃 설정 (옵션)
-            connection.setReadTimeout(5000);
-            connection.connect();
+            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                log.error("URL에서 이미지 다운로드 실패. URL: {}, 응답 코드: {}", imageUrl, connection.getResponseCode());
+            if (response.statusCode() != 200) {
+                log.error("URL에서 이미지 다운로드 실패. URL: {}, 응답 코드: {}", imageUrl, response.statusCode());
                 throw new GlobalException(ErrorCode.FILE_DOWNLOAD_FAILED);
             }
 
-            // Content-Type 가져오기
-            String contentType = connection.getContentType();
-
-            byte[] fileBytes;
-            try (InputStream inputStream = connection.getInputStream()) {
-                fileBytes = inputStream.readAllBytes();
-            }
+            byte[] fileBytes = response.body();
+            // 헤더 값 조회 시 대소문자 무관하게 처리됨
+            String contentType = response.headers().firstValue("Content-Type").orElse(null);
 
             String originalFilename = extractOriginalFilenameFromUrl(imageUrl);
 
-            // 파일명에 확장자가 없는 경우, Content-Type을 기반으로 확장자 추가
             if (getFileExtension(originalFilename).isEmpty()) {
                 String extension = getExtensionFromContentType(contentType);
                 if (extension != null) {
                     originalFilename = originalFilename + extension;
-                    log.info("확장자가 없는 파일입니다. Content-Type({}) 기반으로 확장자를 추가합니다. 변경된 파일명: {}", contentType, originalFilename);
                 } else {
-                    // 기본값으로 png 설정 (ApkCombo 등 대부분 아이콘은 png/webp)
                     originalFilename = originalFilename + ".png";
-                    log.warn("확장자가 없고 Content-Type({})도 불명확하여 기본 확장자(.png)를 추가합니다. 변경된 파일명: {}", contentType, originalFilename);
                 }
             }
 
             return uploadToS3Internal(fileBytes, originalFilename, imageType, entityId);
 
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             log.error("URL에서 이미지를 읽는 중 오류 발생: {}", imageUrl, e);
             throw new GlobalException(ErrorCode.FILE_DOWNLOAD_FAILED, "URL에서 이미지 다운로드 실패: " + imageUrl);
         }
@@ -185,12 +185,11 @@ public abstract class AbstractS3Service implements S3Service {
 
     @Override
     public ImageUploadResult cloneImageFromUrl(String sourceS3Url, ImageType destinationImageType, Long destinationEntityId) {
+        // 기존 로직 유지 (S3 CopyObject 활용)
         log.info("S3-to-S3 복사 시작. Source URL: {}, DestType: {}, DestEntityId: {}",
                 sourceS3Url, destinationImageType.name(), destinationEntityId);
 
-        // 구체적인 유효성 검사 로직을 하위 클래스에 위임
         validateImageType(destinationImageType);
-
         S3UrlParts source = parseS3Url(sourceS3Url);
 
         HeadObjectResponse headResponse;
@@ -202,20 +201,14 @@ public abstract class AbstractS3Service implements S3Service {
                     .build();
             headResponse = s3Client.headObject(headRequest);
             originalFilename = extractFilenameFromContentDisposition(headResponse.contentDisposition());
-            log.info("원본 파일명 추출 성공: {}", originalFilename);
-        } catch (NoSuchKeyException e) {
-            log.error("S3 복사 실패. 원본 파일을 찾을 수 없습니다: {}", source.getObjectKey());
-            throw new GlobalException(ErrorCode.FILE_NOT_FOUND, "Source S3 file not found: " + source.getObjectKey());
         } catch (Exception e) {
-            log.error("S3 원본 파일 메타데이터 조회 실패: {}", source.getObjectKey(), e);
-            throw new GlobalException(ErrorCode.FILE_DOWNLOAD_FAILED, "Failed to read source S3 metadata.");
+            throw new GlobalException(ErrorCode.FILE_NOT_FOUND, "Source S3 file not found or inaccessible.");
         }
 
         String finalFileName = generateFinalUploadFileName(destinationImageType, originalFilename);
         String destinationKey = generateS3Key(finalFileName, destinationImageType, destinationEntityId);
 
         if (doesObjectExist(destinationKey)) {
-            log.warn("S3에 동일한 파일이 이미 존재하여 복사를 건너뜁니다. Key: {}", destinationKey);
             return createImageUploadResult(finalFileName, null, null);
         }
 
@@ -233,10 +226,8 @@ public abstract class AbstractS3Service implements S3Service {
                     .build();
 
             s3Client.copyObject(copyRequest);
-            log.info("S3-to-S3 복사 성공. DestKey: {}", destinationKey);
 
         } catch (Exception e) {
-            log.error("S3-to-S3 복사 실패. Source: {}, Dest: {}", source.getObjectKey(), destinationKey, e);
             throw new GlobalException(ErrorCode.FILE_UPLOAD_FAILED, "S3-to-S3 copy failed.");
         }
 
@@ -250,7 +241,7 @@ public abstract class AbstractS3Service implements S3Service {
                 .collect(Collectors.toList());
     }
 
-    // === 공통 헬퍼 메서드 (Protected) ===
+    // === Protected Helper Methods ===
 
     protected ImageUploadResult uploadToS3Internal(byte[] fileBytes, String originalFilename, ImageType imageType, Long entityId) {
         validateFile(fileBytes, originalFilename, imageType);
@@ -260,20 +251,19 @@ public abstract class AbstractS3Service implements S3Service {
 
         Integer width = null;
         Integer height = null;
+
+        // 이미지 크기 읽기 (ByteArrayInputStream은 close()가 no-op이므로 try-with-resources 필수는 아니지만 관례상 유지)
         try (InputStream is = new ByteArrayInputStream(fileBytes)) {
             BufferedImage image = ImageIO.read(is);
             if (image != null) {
                 width = image.getWidth();
                 height = image.getHeight();
-            } else {
-                log.warn("이미지 데이터를 읽을 수 없어 크기를 측정할 수 없습니다: {}", originalFilename);
             }
         } catch (IOException e) {
-            log.error("S3 업로드 중 이미지 크기 측정 실패: {}", originalFilename, e);
+            log.warn("이미지 크기 측정 실패: {}", originalFilename);
         }
 
         if (doesObjectExist(s3Key)) {
-            log.warn("S3에 동일한 파일이 이미 존재하여 업로드를 건너뜁니다. Key: {}", s3Key);
             return createImageUploadResult(finalFileName, width, height);
         }
 
@@ -289,7 +279,7 @@ public abstract class AbstractS3Service implements S3Service {
 
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(fileBytes));
         } catch (Exception e) {
-            log.error("S3 파일 업로드 실패: {}, entityId: {}", originalFilename, entityId, e);
+            log.error("S3 파일 업로드 실패: {}", e.getMessage());
             throw new GlobalException(ErrorCode.FILE_UPLOAD_FAILED);
         }
 
@@ -298,8 +288,8 @@ public abstract class AbstractS3Service implements S3Service {
 
     protected S3UrlParts parseS3Url(String s3Url) {
         try {
-            // Deprecated된 new URL(String) 대신 URI를 통해 생성
-            URL url = new URI(s3Url).toURL();
+            URI uri = URI.create(s3Url);
+            URL url = uri.toURL();
             String host = url.getHost();
             String path = url.getPath();
             String key = path.substring(1);
@@ -309,24 +299,16 @@ public abstract class AbstractS3Service implements S3Service {
             if (s3Index != -1) {
                 bucket = host.substring(0, s3Index);
             } else {
-                log.error("S3 URL 형식을 파싱할 수 없습니다. 호스트가 예상과 다릅니다: {}", host);
-                throw new IllegalArgumentException("Invalid S3 URL format. Cannot parse bucket.");
-            }
-
-            if (!bucket.equals(bucketName)) {
-                log.warn("S3 URL의 버킷({})이 현재 설정된 버킷({})과 다릅니다.", bucket, bucketName);
+                throw new IllegalArgumentException("Invalid S3 URL format.");
             }
             return new S3UrlParts(bucket, key);
-
         } catch (Exception e) {
-            log.error("S3 URL 파싱 실패: {}", s3Url, e);
             throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE, "Invalid S3 URL");
         }
     }
 
     protected String extractFilenameFromContentDisposition(String contentDisposition) {
         if (contentDisposition == null) {
-            log.warn("Content-Disposition이 null입니다. 임시 파일명을 사용합니다.");
             return "cloned-file-" + System.currentTimeMillis();
         }
 
@@ -334,14 +316,10 @@ public abstract class AbstractS3Service implements S3Service {
         int startIndex = contentDisposition.indexOf(prefix);
         if (startIndex != -1) {
             String encodedName = contentDisposition.substring(startIndex + prefix.length());
-            if (encodedName.endsWith("\"")) {
-                encodedName = encodedName.substring(0, encodedName.length() - 1);
-            }
+            if (encodedName.endsWith("\"")) encodedName = encodedName.substring(0, encodedName.length() - 1);
             try {
                 return URLDecoder.decode(encodedName, StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                log.warn("Content-Disposition (RFC 5987) 파일명 디코딩 실패: {}", contentDisposition, e);
-            }
+            } catch (Exception e) { /* ignore */ }
         }
 
         String fnPrefix = "filename=";
@@ -352,119 +330,67 @@ public abstract class AbstractS3Service implements S3Service {
             if (name.endsWith("\"")) name = name.substring(0, name.length() - 1);
             return name.replace("+", "%20");
         }
-
-        log.warn("Content-Disposition에서 파일명을 추출하지 못했습니다: {}. 임시 파일명을 사용합니다.", contentDisposition);
         return "cloned-file-" + System.currentTimeMillis();
     }
 
     protected ImageUploadResult createImageUploadResult(String fileName, Integer width, Integer height) {
-        String widthStr = (width != null) ? String.valueOf(width) : null;
-        String heightStr = (height != null) ? String.valueOf(height) : null;
-        return new ImageUploadResult(fileName, widthStr, heightStr);
+        return new ImageUploadResult(fileName,
+                width != null ? String.valueOf(width) : null,
+                height != null ? String.valueOf(height) : null);
     }
 
     protected String generateFinalUploadFileName(ImageType imageType, String originalFilename) {
-        // 원본 파일명에서 모든 공백 문자(스페이스, 탭 등)를 제거합니다.
-        String cleanOriginalFilename = originalFilename.replaceAll("\\s", "");
-        return imageType.name() + "_" + cleanOriginalFilename;
+        return imageType.name() + "_" + originalFilename.replaceAll("\\s", "");
     }
 
     protected void validateFile(byte[] fileBytes, String originalFilename, ImageType imageType) {
-        if (fileBytes == null || fileBytes.length == 0) {
-            log.warn("{}: 파일이 비어있어 유효성 검사에 실패했습니다.", originalFilename);
-            throw new GlobalException(ErrorCode.FILE_IS_EMPTY);
-        }
+        if (fileBytes == null || fileBytes.length == 0) throw new GlobalException(ErrorCode.FILE_IS_EMPTY);
 
         String fileExtension = getFileExtension(originalFilename);
-
-        // ImageType의 isExtensionAllowed 메서드를 호출하여 확장자 검증
-        // (확장자가 없는 경우 위에서 Content-Type으로 채워넣었으므로 안전합니다)
         imageType.isExtensionAllowed(fileExtension);
 
-        if (fileBytes.length > imageType.getMaxSize()) {
-            log.warn("{}: 파일 크기 {}가 제한 크기 {}를 초과했습니다.",
-                    originalFilename, fileBytes.length, imageType.getMaxSize());
-            throw new GlobalException(ErrorCode.FILE_SIZE_EXCEEDED);
-        }
+        if (fileBytes.length > imageType.getMaxSize()) throw new GlobalException(ErrorCode.FILE_SIZE_EXCEEDED);
 
         if (imageType.getWidth() != null || imageType.getHeight() != null) {
             try {
                 BufferedImage image = ImageIO.read(new ByteArrayInputStream(fileBytes));
-                if (image == null) {
-                    log.warn("{}: 이미지 데이터를 읽을 수 없습니다. 유효한 이미지 파일이 아닐 수 있습니다.", originalFilename);
-                    throw new GlobalException(ErrorCode.INVALID_IMAGE_FILE);
-                }
+                if (image == null) throw new GlobalException(ErrorCode.INVALID_IMAGE_FILE);
 
-                if (imageType.getWidth() != null && image.getWidth() != imageType.getWidth()) {
-                    log.warn("{}: 넓이가 유효하지 않습니다. 현재: {}, 필요: {}",
-                            originalFilename, image.getWidth(), imageType.getWidth());
-                    throw new GlobalException(ErrorCode.INVALID_IMAGE_DIMENSIONS);
-                }
-                if (imageType.getHeight() != null && image.getHeight() != imageType.getHeight()) {
-                    log.warn("{}: 높이가 유효하지 않습니다. 현재: {}, 필요: {}",
-                            originalFilename, image.getHeight(), imageType.getHeight());
+                if ((imageType.getWidth() != null && image.getWidth() != imageType.getWidth()) ||
+                        (imageType.getHeight() != null && image.getHeight() != imageType.getHeight())) {
                     throw new GlobalException(ErrorCode.INVALID_IMAGE_DIMENSIONS);
                 }
             } catch (IOException e) {
-                log.error("{} 파일 유효성 검사 중 이미지 읽기 오류 발생.", originalFilename, e);
                 throw new GlobalException(ErrorCode.INVALID_IMAGE_FILE);
             }
         }
     }
 
     protected String getFileExtension(String filename) {
-        if (filename == null) {
-            return "";
-        }
-
-        String cleanFilename = filename;
-        int queryIndex = cleanFilename.indexOf('?');
-        if (queryIndex != -1) {
-            cleanFilename = cleanFilename.substring(0, queryIndex);
-        }
-
-        int lastDotIndex = cleanFilename.lastIndexOf('.');
-        if (lastDotIndex == -1 || lastDotIndex == cleanFilename.length() - 1) {
-            return "";
-        }
-
-        return cleanFilename.substring(lastDotIndex + 1).toLowerCase();
+        if (filename == null) return "";
+        String clean = filename.split("\\?")[0];
+        int lastDot = clean.lastIndexOf('.');
+        if (lastDot == -1 || lastDot == clean.length() - 1) return "";
+        return clean.substring(lastDot + 1).toLowerCase();
     }
 
-    /**
-     * Content-Type 헤더를 기반으로 파일 확장자를 반환합니다.
-     */
     protected String getExtensionFromContentType(String contentType) {
         if (contentType == null) return null;
-
-        // 세미콜론 제거 (ex: image/png; charset=utf-8)
-        String mimeType = contentType.split(";")[0].trim().toLowerCase();
-
-        switch (mimeType) {
-            case "image/jpeg":
-            case "image/jpg":
-                return ".jpg";
-            case "image/png":
-                return ".png";
-            case "image/webp":
-                return ".webp";
-            case "image/gif":
-                return ".gif";
-            case "image/bmp":
-                return ".bmp";
-            case "image/svg+xml":
-                return ".svg";
-            default:
-                return null;
-        }
+        String mime = contentType.split(";")[0].trim().toLowerCase();
+        return switch (mime) {
+            case "image/jpeg", "image/jpg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            case "image/gif" -> ".gif";
+            case "image/bmp" -> ".bmp";
+            case "image/svg+xml" -> ".svg";
+            default -> null;
+        };
     }
 
     protected boolean doesObjectExist(String key) {
         try {
-            s3Client.headObject(HeadObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .build());
+            s3Client.headObject(HeadObjectRequest.builder().bucket(bucketName).key(key).build());
             return true;
         } catch (NoSuchKeyException e) {
             return false;
@@ -472,10 +398,8 @@ public abstract class AbstractS3Service implements S3Service {
     }
 
     protected String generateS3Key(String fileName, ImageType imageType, Long entityId) {
-        String basePath = imageType.getPath();
-        if (basePath.endsWith("/")) {
-            basePath = basePath.substring(0, basePath.length() - 1);
-        }
+        String basePath = imageType.getPath().endsWith("/") ?
+                imageType.getPath().substring(0, imageType.getPath().length() - 1) : imageType.getPath();
         String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
         return String.format("%s/%d/%s", basePath, entityId, encodedFileName);
     }
@@ -483,37 +407,22 @@ public abstract class AbstractS3Service implements S3Service {
     protected String extractOriginalFilenameFromUrl(String imageUrl) {
         try {
             String targetUrl = imageUrl;
-            // Deprecated된 new URL(String) 대신 URI를 통해 생성
-            URL initialUrl = new URI(imageUrl).toURL();
-            String query = initialUrl.getQuery();
+            URI uri = URI.create(imageUrl);
+            String query = uri.getQuery();
 
             if (query != null && query.contains("src=")) {
                 targetUrl = Arrays.stream(query.split("&"))
                         .filter(p -> p.startsWith("src="))
                         .map(p -> p.substring(4))
                         .findFirst()
-                        .map(src -> {
-                            try {
-                                return URLDecoder.decode(src, StandardCharsets.UTF_8);
-                            } catch (Exception e) {
-                                return src;
-                            }
-                        })
+                        .map(src -> URLDecoder.decode(src, StandardCharsets.UTF_8))
                         .orElse(imageUrl);
             }
-
-            // Path만 필요한 경우 URI.getPath() 사용 (URL.getPath() 대신)
-            String path = new URI(targetUrl).getPath();
+            String path = URI.create(targetUrl).getPath();
             return path.substring(path.lastIndexOf('/') + 1);
-
         } catch (Exception e) {
-            log.warn("URL에서 파일명을 추출하는 데 실패했습니다. URL: {}. 폴백 로직을 사용합니다.", imageUrl, e);
-            String urlWithoutQuery = imageUrl;
-            int queryIndex = imageUrl.indexOf('?');
-            if (queryIndex != -1) {
-                urlWithoutQuery = imageUrl.substring(0, queryIndex);
-            }
-            return urlWithoutQuery.substring(urlWithoutQuery.lastIndexOf('/') + 1);
+            String clean = imageUrl.split("\\?")[0];
+            return clean.substring(clean.lastIndexOf('/') + 1);
         }
     }
 }
