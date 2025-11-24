@@ -40,7 +40,7 @@ public abstract class AbstractS3Service implements S3Service {
 
     @Value("${s3.bucket}")
     protected String bucketName;
-    @Value("${s3.region}")
+    @Value("${aws.region}")
     protected String region;
 
     /**
@@ -79,6 +79,8 @@ public abstract class AbstractS3Service implements S3Service {
             URL url = new URL(imageUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000); // 타임아웃 설정 (옵션)
+            connection.setReadTimeout(5000);
             connection.connect();
 
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -86,12 +88,28 @@ public abstract class AbstractS3Service implements S3Service {
                 throw new GlobalException(ErrorCode.FILE_DOWNLOAD_FAILED);
             }
 
+            // Content-Type 가져오기
+            String contentType = connection.getContentType();
+
             byte[] fileBytes;
             try (InputStream inputStream = connection.getInputStream()) {
                 fileBytes = inputStream.readAllBytes();
             }
 
             String originalFilename = extractOriginalFilenameFromUrl(imageUrl);
+
+            // 파일명에 확장자가 없는 경우, Content-Type을 기반으로 확장자 추가
+            if (getFileExtension(originalFilename).isEmpty()) {
+                String extension = getExtensionFromContentType(contentType);
+                if (extension != null) {
+                    originalFilename = originalFilename + extension;
+                    log.info("확장자가 없는 파일입니다. Content-Type({}) 기반으로 확장자를 추가합니다. 변경된 파일명: {}", contentType, originalFilename);
+                } else {
+                    // 기본값으로 png 설정 (ApkCombo 등 대부분 아이콘은 png/webp)
+                    originalFilename = originalFilename + ".png";
+                    log.warn("확장자가 없고 Content-Type({})도 불명확하여 기본 확장자(.png)를 추가합니다. 변경된 파일명: {}", contentType, originalFilename);
+                }
+            }
 
             return uploadToS3Internal(fileBytes, originalFilename, imageType, entityId);
 
@@ -318,7 +336,9 @@ public abstract class AbstractS3Service implements S3Service {
     }
 
     protected String generateFinalUploadFileName(ImageType imageType, String originalFilename) {
-        return imageType.name() + "_" + originalFilename;
+        // 원본 파일명에서 모든 공백 문자(스페이스, 탭 등)를 제거합니다.
+        String cleanOriginalFilename = originalFilename.replaceAll("\\s", "");
+        return imageType.name() + "_" + cleanOriginalFilename;
     }
 
     protected void validateFile(byte[] fileBytes, String originalFilename, ImageType imageType) {
@@ -328,11 +348,10 @@ public abstract class AbstractS3Service implements S3Service {
         }
 
         String fileExtension = getFileExtension(originalFilename);
-        if (imageType.getAllowedExtensions().stream().noneMatch(ext -> ext.equalsIgnoreCase(fileExtension))) {
-            log.warn("{}: 지원하지 않는 파일 확장자 '{}'입니다. 허용된 확장자: {}",
-                    originalFilename, fileExtension, imageType.getAllowedExtensions());
-            throw new GlobalException(ErrorCode.UNSUPPORTED_FILE_EXTENSION);
-        }
+
+        // ImageType의 isExtensionAllowed 메서드를 호출하여 확장자 검증
+        // (확장자가 없는 경우 위에서 Content-Type으로 채워넣었으므로 안전합니다)
+        imageType.isExtensionAllowed(fileExtension);
 
         if (fileBytes.length > imageType.getMaxSize()) {
             log.warn("{}: 파일 크기 {}가 제한 크기 {}를 초과했습니다.",
@@ -384,6 +403,33 @@ public abstract class AbstractS3Service implements S3Service {
         return cleanFilename.substring(lastDotIndex + 1).toLowerCase();
     }
 
+    /**
+     * Content-Type 헤더를 기반으로 파일 확장자를 반환합니다.
+     */
+    protected String getExtensionFromContentType(String contentType) {
+        if (contentType == null) return null;
+
+        // 세미콜론 제거 (ex: image/png; charset=utf-8)
+        String mimeType = contentType.split(";")[0].trim().toLowerCase();
+
+        switch (mimeType) {
+            case "image/jpeg":
+            case "image/jpg":
+                return ".jpg";
+            case "image/png":
+                return ".png";
+            case "image/webp":
+                return ".webp";
+            case "image/gif":
+                return ".gif";
+            case "image/bmp":
+                return ".bmp";
+            case "image/svg+xml":
+                return ".svg";
+            default:
+                return null;
+        }
+    }
 
     protected boolean doesObjectExist(String key) {
         try {

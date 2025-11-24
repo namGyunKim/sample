@@ -69,4 +69,20 @@ public enum ImageType {
             throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE, "회원 업로드에 허용되지 않는 이미지 타입입니다: " + type);
         }
     }
+
+    public void isExtensionAllowed(String extension) {
+        if (extension == null || extension.isBlank()) {
+            // null이나 공백일 경우 예외를 던짐
+            throw new GlobalException(ErrorCode.UNSUPPORTED_FILE_EXTENSION, "파일 확장자가 없습니다.");
+        }
+        // 대소문자 구분 없이 비교
+        boolean match = this.allowedExtensions.stream()
+                .anyMatch(allowed -> allowed.equalsIgnoreCase(extension));
+
+        if (!match) {
+            // ErrorCode 변경 및 메시지 포맷팅
+            String allowed = String.join(", ", this.allowedExtensions);
+            throw new GlobalException(ErrorCode.UNSUPPORTED_FILE_EXTENSION, "허용되지 않는 파일 확장자입니다. (" + extension + "). 허용된 확장자: " + allowed);
+        }
+    }
 }

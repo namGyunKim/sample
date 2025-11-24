@@ -1,18 +1,25 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.0.7'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.5'
 }
 
 group = 'com.sample'
 version = '0.0.1'
 
-// bootJar 태스크 커스터마이징
-bootJar {
-    archiveFileName.set('app.jar') // 생성될 JAR 파일 이름을 'app.jar'로 설정
+// Java 21 설정
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
-// 기본 jar 태스크 비활성화 (선택 사항)
+// bootJar 태스크 커스터마이징
+bootJar {
+    archiveFileName.set('app.jar')
+}
+
+// 기본 jar 태스크 비활성화
 jar {
     enabled = false
 }
@@ -30,8 +37,8 @@ repositories {
 // BOM 관리
 dependencyManagement {
     imports {
-        // Spring Cloud BOM
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2022.0.3"
+        // Spring Cloud BOM (Boot 3.2.x 호환 버전)
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
         // AWS SDK BOM
         mavenBom "software.amazon.awssdk:bom:2.20.26"
     }
@@ -44,15 +51,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // DB Drivers (RuntimeOnly)
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
     implementation "io.github.openfeign:feign-jackson"
-
 
     // WebSocket and STOMP
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -66,16 +75,24 @@ dependencies {
     // AWS S3 (버전 BOM 관리)
     implementation 'software.amazon.awssdk:s3'
 
-    // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+    // Swagger (Boot 3.x 호환 버전으로 변경)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
     // password encoder
     implementation 'org.mindrot:jbcrypt:0.4'
 
     // JWT Token
-    implementation 'com.auth0:java-jwt:3.18.2'
-    implementation 'io.jsonwebtoken:jjwt:0.9.1'
-    implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    // auth0 java-jwt (Boot 3 호환을 위해 버전 업)
+    implementation 'com.auth0:java-jwt:4.4.0'
+
+    // jjwt (0.9.1은 Boot 3에서 호환되지 않으므로 최신 버전 구조로 변경)
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    // jaxb (javax -> jakarta 로 변경 필수)
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    runtimeOnly 'com.sun.xml.bind:jaxb-impl:4.0.0'
 
     // p6spy query logging
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
@@ -86,11 +103,13 @@ dependencies {
     // sms
     implementation 'net.nurigo:sdk:4.2.7'
 
-//	트래픽 공격 대비
+    // 트래픽 공격 대비
     implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
 
-    // 필요 시 활성화
-    // implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//    이미지 처리 관련 webp 지원 라이브러리
+    implementation 'com.twelvemonkeys.imageio:imageio-core:3.10.1'
+    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
+
 }
 
 tasks.named('test') {

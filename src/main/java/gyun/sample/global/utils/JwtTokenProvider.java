@@ -6,7 +6,11 @@ import gyun.sample.domain.account.payload.response.TokenResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.global.exception.enums.ErrorCode;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 // JWT 토큰 생성 및 검증 유틸
@@ -35,24 +41,28 @@ public class JwtTokenProvider {
 
     private final MemberRepository memberRepository;
 
+    // SecretKey 객체 생성 메소드
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
+
     /**
      * Access 토큰 생성
      */
     public String createAccessToken(Member member) {
         Date now = new Date();
-        Claims claims = Jwts.claims().setSubject(TokenType.ACCESS.name());
         Date expireDate = getExpireDate(TokenType.ACCESS);
 
-        claims.put("id", member.getId());
-        claims.put("loginId", member.getLoginId());
-        claims.put("role", member.getRole());
-        claims.put("nickName", member.getNickName());
-        claims.put("memberType", member.getMemberType());
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .subject(TokenType.ACCESS.name())
+                .claim("id", member.getId())
+                .claim("loginId", member.getLoginId())
+                .claim("role", member.getRole())
+                .claim("nickName", member.getNickName())
+                .claim("memberType", member.getMemberType())
+                .issuedAt(now)
+                .expiration(expireDate)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -62,20 +72,18 @@ public class JwtTokenProvider {
     @Transactional
     public String createRefreshToken(Member member) {
         Date now = new Date();
-        Claims claims = Jwts.claims().setSubject(TokenType.REFRESH.name());
         Date expireDate = getExpireDate(TokenType.REFRESH);
 
-        claims.put("id", member.getId());
-        claims.put("loginId", member.getLoginId());
-        claims.put("role", member.getRole());
-        claims.put("nickName", member.getNickName());
-        claims.put("memberType", member.getMemberType());
-
         String refreshToken = Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .subject(TokenType.REFRESH.name())
+                .claim("id", member.getId())
+                .claim("loginId", member.getLoginId())
+                .claim("role", member.getRole())
+                .claim("nickName", member.getNickName())
+                .claim("memberType", member.getMemberType())
+                .issuedAt(now)
+                .expiration(expireDate)
+                .signWith(getSigningKey())
                 .compact();
 
         member.updateRefreshToken(refreshToken);
@@ -85,7 +93,7 @@ public class JwtTokenProvider {
     private Date getExpireDate(TokenType tokenType) {
         Date now = new Date();
         final long expirationTime = tokenType == TokenType.ACCESS ? accessExpirationTime : refreshExpirationTime;
-        return new Date(now.getTime() + expirationTime * 1000 * 60 * 60);
+        return new Date(now.getTime() + expirationTime); // 이미 properties에서 밀리초 단위라면 * 1000 불필요, 확인 필요 (설정파일엔 3600000 등으로 되어있어 그대로 사용)
     }
 
     /**
@@ -94,13 +102,15 @@ public class JwtTokenProvider {
     private ClaimsWithErrorCodeDTO getTokenClaims(String token) {
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
             return new ClaimsWithErrorCodeDTO(claims, null);
         } catch (ExpiredJwtException e) {
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_EXPIRED);
-        } catch (SignatureException e) {
+        } catch (io.jsonwebtoken.security.SignatureException e) { // 패키지 명시
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_SIGNATURE_ERROR);
         } catch (JwtException e) {
             return new ClaimsWithErrorCodeDTO(null, ErrorCode.JWT_INVALID);

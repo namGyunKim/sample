@@ -43,4 +43,3 @@ public interface S3Service {
      */
     List<ImageUploadResult> cloneImagesFromUrls(List<String> sourceS3Urls, ImageType destinationImageType, Long destinationEntityId);
 }
-
