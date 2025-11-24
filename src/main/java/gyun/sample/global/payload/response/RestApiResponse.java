@@ -1,21 +1,21 @@
 package gyun.sample.global.payload.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-
-// REST API 응답
-@Data
-@Builder
+// REST API 공통 응답
+@Getter
 public class RestApiResponse {
 
-    private boolean success;
-    private Object data;
+    private final boolean success;
+    private final Object data;
+
+    // 생성자 private
+    private RestApiResponse(boolean success, Object data) {
+        this.success = success;
+        this.data = data;
+    }
 
     public static RestApiResponse createResponse(boolean success, Object data) {
-        return RestApiResponse.builder()
-                .success(success)
-                .data(data)
-                .build();
+        return new RestApiResponse(success, data);
     }
 }
