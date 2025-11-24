@@ -1,10 +1,8 @@
 package gyun.sample.global.config.web;
 
-import gyun.sample.global.config.converter.GenericEnumConverterFactory;
 import gyun.sample.global.resolver.CurrentAccountResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -20,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final GenericEnumConverterFactory genericEnumConverterFactory;
     private final CurrentAccountResolver currentAccountResolver;
 
     @Override
@@ -33,11 +30,5 @@ public class WebConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         // @CurrentAccount 어노테이션 처리를 위한 리졸버 등록
         argumentResolvers.add(currentAccountResolver);
-    }
-
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        // Enum 대소문자 구분 없이 변환하는 팩토리 등록
-        registry.addConverterFactory(genericEnumConverterFactory);
     }
 }

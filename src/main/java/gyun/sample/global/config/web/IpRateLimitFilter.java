@@ -2,8 +2,8 @@ package gyun.sample.global.config.web;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.ConsumptionProbe;
+import io.github.bucket4j.Refill;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,8 +22,11 @@ public class IpRateLimitFilter implements Filter {
 
     // 새로운 버킷을 생성하는 메서드, 각 IP별로 1분에 200개의 요청을 허용
     private Bucket createNewBucket() {
-        return Bucket4j.builder()
-                .addLimit(Bandwidth.simple(200, Duration.ofMinutes(1)))
+        Refill refill = Refill.greedy(200, Duration.ofMinutes(1));
+        Bandwidth limit = Bandwidth.classic(200, refill);
+
+        return Bucket.builder()
+                .addLimit(limit)
                 .build();
     }
 
