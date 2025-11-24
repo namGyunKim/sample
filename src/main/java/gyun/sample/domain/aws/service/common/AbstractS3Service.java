@@ -22,10 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -41,11 +38,13 @@ public abstract class AbstractS3Service implements S3Service {
 
     protected final S3Client s3Client;
 
-    protected String bucketName;
     @Autowired
     private Environment environment;
+
     @Value("${s3.bucket}")
     private String defaultBucketName;
+
+    protected String bucketName;
 
     @Value("${aws.region}")
     protected String region;
@@ -101,7 +100,10 @@ public abstract class AbstractS3Service implements S3Service {
             log.info("이미지 다운로드 시도. URL: {}", imageUrl);
             // 구체적인 유효성 검사 로직을 하위 클래스에 위임
             validateImageType(imageType);
-            URL url = new URL(imageUrl);
+
+            // Deprecated된 new URL(String) 대신 URI를 통해 생성
+            URL url = new URI(imageUrl).toURL();
+
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000); // 타임아웃 설정 (옵션)
@@ -138,7 +140,7 @@ public abstract class AbstractS3Service implements S3Service {
 
             return uploadToS3Internal(fileBytes, originalFilename, imageType, entityId);
 
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             log.error("URL에서 이미지를 읽는 중 오류 발생: {}", imageUrl, e);
             throw new GlobalException(ErrorCode.FILE_DOWNLOAD_FAILED, "URL에서 이미지 다운로드 실패: " + imageUrl);
         }
@@ -296,7 +298,8 @@ public abstract class AbstractS3Service implements S3Service {
 
     protected S3UrlParts parseS3Url(String s3Url) {
         try {
-            URL url = new URL(s3Url);
+            // Deprecated된 new URL(String) 대신 URI를 통해 생성
+            URL url = new URI(s3Url).toURL();
             String host = url.getHost();
             String path = url.getPath();
             String key = path.substring(1);
@@ -480,7 +483,8 @@ public abstract class AbstractS3Service implements S3Service {
     protected String extractOriginalFilenameFromUrl(String imageUrl) {
         try {
             String targetUrl = imageUrl;
-            URL initialUrl = new URL(imageUrl);
+            // Deprecated된 new URL(String) 대신 URI를 통해 생성
+            URL initialUrl = new URI(imageUrl).toURL();
             String query = initialUrl.getQuery();
 
             if (query != null && query.contains("src=")) {
@@ -498,7 +502,8 @@ public abstract class AbstractS3Service implements S3Service {
                         .orElse(imageUrl);
             }
 
-            String path = new URL(targetUrl).getPath();
+            // Path만 필요한 경우 URI.getPath() 사용 (URL.getPath() 대신)
+            String path = new URI(targetUrl).getPath();
             return path.substring(path.lastIndexOf('/') + 1);
 
         } catch (Exception e) {
