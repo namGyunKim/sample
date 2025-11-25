@@ -70,22 +70,15 @@ public class WriteUserService extends AbstractWriteMemberService {
         // Dirty Checking
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
 
-        // 변경 내용 추적 (간단히 비밀번호 변경 여부만 확인 예시)
-        boolean isPasswordChanged = false;
-        if (memberUpdateRequest.password() != null && !memberUpdateRequest.password().isBlank()) {
-            member.updatePassword(passwordEncoder.encode(memberUpdateRequest.password()));
-            isPasswordChanged = true;
-        }
-
+        // 닉네임 등 정보 업데이트
         member.update(memberUpdateRequest);
 
         // [추가] 정보 수정 로그 이벤트 발행
-        String details = isPasswordChanged ? "비밀번호 및 정보 수정" : "정보 수정";
         eventPublisher.publishEvent(MemberActivityEvent.of(
                 member.getLoginId(),
                 member.getId(),
                 LogType.UPDATE,
-                details,
+                "회원 정보 수정",
                 UtilService.getClientIp(httpServletRequest)
         ));
 

@@ -51,11 +51,10 @@ public class WriteAdminService extends AbstractWriteMemberService {
         // Dirty Checking
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
+
+        // 정보 업데이트 (비밀번호 변경 로직 제거됨)
         member.update(memberUpdateRequest);
 
-        if (memberUpdateRequest.password() != null && !memberUpdateRequest.password().isBlank()) {
-            member.updatePassword(passwordEncoder.encode(memberUpdateRequest.password()));
-        }
         return new GlobalUpdateResponse(member.getId());
     }
 

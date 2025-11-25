@@ -157,7 +157,7 @@ public class MemberController {
         Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
 
         if (!model.containsAttribute("memberUpdateRequest")) {
-            model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(member.getNickName(), null));
+            model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(member.getNickName()));
         }
         model.addAttribute("currentMember", new DetailMemberResponse(member));
         model.addAttribute("role", role);
