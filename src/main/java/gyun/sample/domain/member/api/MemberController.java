@@ -30,6 +30,11 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * 타임리프 뷰를 반환하는 컨트롤러
+ * - @Controller 어노테이션을 사용하므로 BindingAdvice(AOP)가 적용되지 않습니다.
+ * - 따라서 BindingResult를 직접 확인하여 에러 발생 시 입력 폼으로 되돌려보냅니다.
+ */
 @Slf4j
 @Tag(name = "MemberController", description = "회원 관리 (전략 패턴 적용)")
 @Controller
@@ -43,7 +48,7 @@ public class MemberController {
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
-    // Validator 등록: @InitBinder 이름은 @ModelAttribute 이름과 반드시 일치해야 함
+    // Validator 등록 (변수명 일치 필수)
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -76,8 +81,15 @@ public class MemberController {
     public String createMember(
             @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
-            BindingResult bindingResult, // AOP 감지 및 처리
-            RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult, // AOP 미적용: 직접 처리
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        // 유효성 검사 실패 시: 입력 폼으로 다시 이동 (에러 메시지 포함)
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("role", role);
+            return "member/create";
+        }
 
         WriteMemberService service = memberStrategyFactory.getWriteService(role);
         service.createMember(memberCreateRequest);
@@ -95,7 +107,16 @@ public class MemberController {
             BindingResult bindingResult,
             Model model) {
 
+        // 목록 조회 검색 조건 에러 시 처리
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("role", role);
+            model.addAttribute("request", memberListRequest);
+            model.addAttribute("memberPage", Page.empty());
+            return "member/list";
+        }
+
         ReadMemberService service = memberStrategyFactory.getReadService(role);
+        // Record -> DTO 변환
         var listRequestDTO = new MemberListRequestDTO(memberListRequest);
         Page<MemberListResponse> memberPage = service.getList(listRequestDTO);
 
@@ -132,6 +153,7 @@ public class MemberController {
             Model model) {
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
+        // JPA 더티 체킹을 사용하므로 엔티티 조회 후 DTO 변환하여 뷰에 전달
         Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
 
         if (!model.containsAttribute("memberUpdateRequest")) {
@@ -151,7 +173,18 @@ public class MemberController {
             @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
             BindingResult bindingResult,
             @AuthenticationPrincipal PrincipalDetails principal,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        // 유효성 검사 실패 시 수정 페이지로 복귀
+        if (bindingResult.hasErrors()) {
+            ReadMemberService service = memberStrategyFactory.getReadService(role);
+            Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
+
+            model.addAttribute("currentMember", new DetailMemberResponse(member));
+            model.addAttribute("role", role);
+            return "member/update";
+        }
 
         WriteMemberService service = memberStrategyFactory.getWriteService(role);
         service.updateMember(memberUpdateRequest, principal.getUsername());

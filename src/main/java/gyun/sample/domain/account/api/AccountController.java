@@ -9,7 +9,6 @@ import gyun.sample.global.annotaion.CurrentAccount;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,8 +28,7 @@ public class AccountController {
     private final WriteAccountService writeAccountService;
     private final LoginAccountValidator loginAccountValidator;
 
-    // AOP에서 BindingResult를 처리하므로, 여기서는 @InitBinder만 남깁니다.
-    // Spring Security 폼 로그인을 사용할 경우, 이 Binder는 Controller 메서드가 호출될 때만 작동합니다.
+    // AOP에서 BindingResult를 감지하므로 파라미터에는 추가해야 합니다.
     @InitBinder("accountLoginRequest")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(loginAccountValidator);
@@ -58,15 +56,22 @@ public class AccountController {
     /**
      * 로그인 처리 (POST)
      * - 실제 처리는 Spring Security(UsernamePasswordAuthenticationFilter)가 가로채서 수행합니다.
-     * - 따라서 이 메서드 본문은 실행되지 않으나, 문서화 및 구조 유지를 위해 남겨둡니다.
-     * - 유효성 검사는 Security Config의 UserDetailsService(PrincipalDetailsService)에서 수행됩니다.
+     * - AOP BindingAdvice 설정을 준수하여, 형식적으로 BindingResult를 체크하는 로직을 포함합니다.
+     * - 만약 Security 설정이 변경되어 요청이 이곳에 도달하더라도, 에러가 있으면 폼으로 돌려보냅니다.
      */
     @Operation(summary = "로그인 처리 (Spring Security 위임)")
     @PostMapping(value = "/login")
     public String login(
             @Valid @ModelAttribute("accountLoginRequest") AccountLoginRequest accountLoginRequest,
-            BindingResult bindingResult) {
-        // Spring Security가 요청을 가로채므로 이 코드는 도달하지 않습니다.
+            BindingResult bindingResult,
+            Model model) {
+
+        // BindingAdvice가 View 요청에 대해 proceed() 하므로, 에러 발생 시 컨트롤러가 처리해야 함
+        if (bindingResult.hasErrors()) {
+            return "account/login";
+        }
+
+        // Spring Security가 요청을 가로채므로 정상적인 경우 이 코드는 도달하지 않습니다.
         return "redirect:/";
     }
 

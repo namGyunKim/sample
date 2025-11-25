@@ -8,7 +8,6 @@ import gyun.sample.global.exception.GlobalException;
 import gyun.sample.global.exception.JWTInterceptorException;
 import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
-import gyun.sample.global.exception.payload.response.ErrorResult;
 import gyun.sample.global.payload.response.RestApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +49,8 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(BindingException.class)
     public Object handleBindingException(BindingException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        // 바인딩 에러는 상세 메시지에 필드별 에러 내용을 포함
+        // BindingAdvice(AOP)에서 던진 예외를 처리
+        // 상세 메시지에 필드별 에러 내용(Map.toString)이 포함됨
         return processException(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, e.getErrorDetailMessage(), account, request);
     }
 
@@ -100,7 +100,7 @@ public class ExceptionAdvice {
     // =================================================================================
 
     private Object processException(Exception e, ErrorCode errorCode, HttpStatus status, String detailMessage, CurrentAccountDTO account, HttpServletRequest request) {
-        // 1. 로그 이벤트 발행
+        // 1. 로그 이벤트 발행 (비동기 리스너가 처리하여 DB 적재 등 수행)
         applicationEventPublisher.publishEvent(
                 ExceptionEvent.createExceptionEvent(e, errorCode, detailMessage, account, request)
         );
@@ -113,11 +113,13 @@ public class ExceptionAdvice {
         String acceptHeader = request.getHeader("Accept");
         boolean isJsonRequest = acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE);
 
+        // JSON 요청이면 RestApiResponse 반환
         if (isJsonRequest) {
             return ResponseEntity
                     .status(status)
                     .body(RestApiResponse.fail(errorCode.getErrorResponse()));
         } else {
+            // 일반 브라우저 요청이면 HTML 에러 페이지 반환
             ModelAndView mav = new ModelAndView("error/error");
             mav.setStatus(status);
             mav.addObject("code", errorCode.getCode());

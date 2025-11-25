@@ -12,40 +12,33 @@ import org.springframework.validation.FieldError;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
- * BindingResult AOP 처리
- * - 컨트롤러 메서드 실행 전 BindingResult를 검사
- * - 에러 발생 시 BindingException 던짐 -> ExceptionAdvice에서 처리
- * - 주의: Thymeleaf 폼 검증 시, 이 방식은 에러 페이지로 이동하게 됩니다.
- * 인라인 에러 메시지를 원한다면 컨트롤러 내부에서 hasErrors()를 직접 체크해야 하지만,
- * 베이스 프로젝트 원칙상 AOP로 일괄 처리합니다.
+ * REST API 요청에 대한 유효성 검사 결과(BindingResult)를 가로채는 Aspect
+ * - @RestController가 붙은 클래스에만 적용됩니다.
+ * - 일반 @Controller(View 반환)는 이 로직을 타지 않고 직접 BindingResult를 핸들링합니다.
  */
 @Slf4j
 @Aspect
 @Component
 public class BindingAdvice {
 
-    @Around("execution(* gyun.sample..*Controller.*(..))")
+    // 포인트컷: @RestController 어노테이션이 붙은 클래스의 모든 메서드
+    @Around("@within(org.springframework.web.bind.annotation.RestController)")
     public Object validationHandler(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
         for (Object arg : args) {
             if (arg instanceof BindingResult bindingResult) {
+                // 에러가 존재하면 즉시 예외 발생 -> ExceptionAdvice에서 JSON 응답 처리
                 if (bindingResult.hasErrors()) {
-                    Map<String, String> errorMap = bindingResult.getFieldErrors().stream()
-                            .collect(Collectors.toMap(
-                                    FieldError::getField,
-                                    error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid Value",
-                                    (existing, replacement) -> existing // 중복 키 발생 시 기존 값 유지
-                            ));
+                    Map<String, String> errorMap = new HashMap<>();
 
-                    log.warn("========== Validation Error ==========");
-                    errorMap.forEach((field, message) -> log.warn("Field: [{}], Message: [{}]", field, message));
-                    log.warn("======================================");
+                    for (FieldError error : bindingResult.getFieldErrors()) {
+                        errorMap.put(error.getField(), error.getDefaultMessage());
+                        log.warn("API Validation Error - Field: [{}], Message: [{}]", error.getField(), error.getDefaultMessage());
+                    }
 
-                    // 예외 발생 -> ExceptionAdvice에서 포착
                     throw new BindingException(ErrorCode.REQUEST_BINDING_RESULT, errorMap.toString());
                 }
             }
