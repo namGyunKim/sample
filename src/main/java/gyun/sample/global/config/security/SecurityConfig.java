@@ -25,18 +25,18 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true) // @PreAuthorize 활성화
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final CustomAuthSuccessHandler customAuthSuccessHandler;
 
-    // 공개 URL 목록
     private static final String[] PUBLIC_URLS = {
             "/", "/account/login", "/error", "/login",
             "/api/health", "/api/sms/**", "/social/**",
-            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+            "/css/**", "/js/**", "/images/**", "/favicon.ico"
     };
 
     @Bean
@@ -62,16 +62,15 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 정적 자원(css, js, images, webjars, favicon) 자동 허용
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/sw.js")).permitAll() // Service Worker
+                        .requestMatchers(new AntPathRequestMatcher("/sw.js")).permitAll()
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/account/login")
                         .loginProcessingUrl("/login")
-                        .usernameParameter("loginId") // 로그인 폼의 name 속성과 일치
+                        .usernameParameter("loginId") // HTML input name과 일치해야 함
                         .passwordParameter("password")
                         .successHandler(customAuthSuccessHandler)
                         .failureUrl("/account/login?error")
