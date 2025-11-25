@@ -17,12 +17,19 @@ import gyun.sample.domain.member.validator.MemberUserUpdateValidator;
 import gyun.sample.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -47,6 +54,9 @@ public class MemberController {
     private final MemberCreateValidator memberCreateValidator;
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
+
+    // 세션 수동 갱신을 위한 Repository
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     // Validator 등록 (변수명 일치 필수)
     @InitBinder("memberCreateRequest")
@@ -174,6 +184,8 @@ public class MemberController {
             BindingResult bindingResult,
             @AuthenticationPrincipal PrincipalDetails principal,
             RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
+            HttpServletResponse response,
             Model model) {
 
         // 유효성 검사 실패 시 수정 페이지로 복귀
@@ -186,8 +198,27 @@ public class MemberController {
             return "member/update";
         }
 
-        WriteMemberService service = memberStrategyFactory.getWriteService(role);
-        service.updateMember(memberUpdateRequest, principal.getUsername());
+        // 1. 정보 수정 실행
+        WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
+        writeService.updateMember(memberUpdateRequest, principal.getUsername());
+
+        // 2. [중요] SecurityContext의 인증 정보 갱신
+        // DB에서 변경된 최신 정보를 조회하여 세션을 업데이트합니다.
+        ReadMemberService readService = memberStrategyFactory.getReadService(role);
+        Member updatedMember = readService.getByLoginIdAndRole(principal.getUsername(), role);
+
+        // 새로운 Principal 생성 및 인증 객체 교체
+        PrincipalDetails newPrincipal = new PrincipalDetails(updatedMember);
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                newPrincipal,
+                newPrincipal.getPassword(),
+                newPrincipal.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+        // [추가] 변경된 Authentication을 세션에 명시적으로 저장 (Spring Security 6 필수)
+        securityContextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
 
         redirectAttributes.addFlashAttribute("message", "정보가 수정되었습니다.");
         return "redirect:/account/profile";
