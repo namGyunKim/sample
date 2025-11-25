@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.StopWatch;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -131,6 +132,7 @@ public class ControllerLoggingAspect {
 
     /**
      * 로깅에서 제외할 타입 필터링
+     * DataBinder(WebDataBinder)는 순환 참조 에러를 유발하므로 제외
      */
     private boolean isLoggable(Object arg) {
         return arg != null &&
@@ -138,6 +140,7 @@ public class ControllerLoggingAspect {
                 !(arg instanceof HttpServletResponse) &&
                 !(arg instanceof Model) &&
                 !(arg instanceof BindingResult) &&
+                !(arg instanceof DataBinder) && // WebDataBinder 포함
                 !(arg instanceof MultipartFile) &&
                 !(arg instanceof MultipartFile[]);
     }
