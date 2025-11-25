@@ -12,6 +12,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +24,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -48,17 +47,28 @@ public class ControllerLoggingAspect {
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String requestId = UUID.randomUUID().toString().substring(0, 8);
+
+        // [수정] 별도의 UUID 생성 대신, Filter에서 생성한 MDC의 Trace ID를 사용합니다.
+        // 만약 Filter를 타지 않는 경우(테스트 등)를 대비해 없으면 생성합니다.
+        String traceId = MDC.get("traceId");
+        if (traceId == null) {
+            traceId = UUID.randomUUID().toString().substring(0, 8);
+            MDC.put("traceId", traceId);
+        }
+
         String ip = UtilService.getClientIp(request);
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String loginId = getLoginIdFromSecurityContext();
 
-        // 파라미터 정보 추출 (보기 좋게 포맷팅)
+        // 파라미터 정보 추출
         String params = getFormattedParams(joinPoint);
 
+        // [수정] 로그 출력 시 TraceID는 로깅 패턴(%X{traceId})에 의해 자동으로 출력되도록 설정할 예정이므로,
+        // 메시지 본문에서는 중복을 피하거나 명시적으로 필요할 때만 포함합니다.
+        // 여기서는 명확한 구분을 위해 포함시킵니다.
         log.info("\n[REQ] [{}] \nIP      : {} \nUser    : {} \nMethod  : {} \nURI     : {} \nParams  : {}",
-                requestId, ip, loginId, method, uri, params);
+                traceId, ip, loginId, method, uri, params);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -68,15 +78,12 @@ public class ControllerLoggingAspect {
             result = joinPoint.proceed();
         } finally {
             stopWatch.stop();
-            log.info("\n[RES] [{}] Time: {}ms", requestId, stopWatch.getTotalTimeMillis());
+            log.info("\n[RES] [{}] Time: {}ms", traceId, stopWatch.getTotalTimeMillis());
         }
 
         return result;
     }
 
-    /**
-     * 요청 파라미터를 보기 좋게 JSON 형태 등으로 변환
-     */
     private String getFormattedParams(ProceedingJoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         if (args == null || args.length == 0) {
@@ -84,7 +91,6 @@ public class ControllerLoggingAspect {
         }
 
         try {
-            // 로깅에 적합하지 않은 객체 필터링 (Request, Response, Model, BindingResult, File 등)
             Map<String, Object> loggableArgs = new HashMap<>();
             String[] parameterNames = ((org.aspectj.lang.reflect.CodeSignature) joinPoint.getSignature()).getParameterNames();
 
@@ -101,8 +107,6 @@ public class ControllerLoggingAspect {
                 return "None (Filtered)";
             }
 
-            // ObjectMapper를 사용하여 JSON Pretty Print
-            // (주의: 순환 참조나 Lazy Loading 이슈가 있는 엔티티는 DTO로 변환되어 들어오는 것이 안전함)
             return "\n" + objectMapper.enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(loggableArgs);
 
         } catch (Exception e) {

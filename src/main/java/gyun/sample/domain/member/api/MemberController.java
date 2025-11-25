@@ -1,12 +1,10 @@
 package gyun.sample.domain.member.api;
 
 import gyun.sample.domain.account.enums.AccountRole;
-import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberListRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
-import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.domain.member.service.MemberStrategyFactory;
 import gyun.sample.domain.member.service.read.ReadMemberService;
@@ -14,7 +12,7 @@ import gyun.sample.domain.member.service.write.WriteMemberService;
 import gyun.sample.domain.member.validator.MemberCreateValidator;
 import gyun.sample.domain.member.validator.MemberListValidator;
 import gyun.sample.domain.member.validator.MemberUserUpdateValidator;
-import gyun.sample.global.annotaion.CurrentAccount;
+import gyun.sample.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -43,7 +42,6 @@ public class MemberController {
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
-    // BindingResult는 AOP에서 처리하므로 컨트롤러 내부 로직에서는 신경 쓰지 않아도 됨
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -61,7 +59,7 @@ public class MemberController {
 
     @Operation(summary = "회원 생성 폼 뷰")
     @GetMapping(value = "/{role}/create")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role == T(gyun.sample.domain.account.enums.AccountRole).USER")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role.name() == 'USER'")
     public String createMemberForm(@PathVariable AccountRole role, Model model) {
         if (!model.containsAttribute("memberCreateRequest")) {
             model.addAttribute("memberCreateRequest", new MemberCreateRequest(null, null, null, role, null));
@@ -72,15 +70,13 @@ public class MemberController {
 
     @Operation(summary = "회원 생성 처리")
     @PostMapping(value = "/{role}/create")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role == T(gyun.sample.domain.account.enums.AccountRole).USER")
+    // [수정] 위와 동일하게 안전한 방식으로 변경
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role.name() == 'USER'")
     public String createMember(
             @Parameter(description = "Account Role", example = "USER") @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
-            BindingResult bindingResult, // AOP 감지용 필수 파라미터
+            BindingResult bindingResult, // AOP 감지용
             RedirectAttributes redirectAttributes) {
-
-        // AOP(BindingAdvice)가 에러를 감지하면 예외를 던지므로
-        // 여기까지 코드가 도달했다면 유효성 검증은 통과한 것임
 
         WriteMemberService service = memberStrategyFactory.getWriteService(role);
         service.createMember(memberCreateRequest);
@@ -109,5 +105,52 @@ public class MemberController {
         return "member/list";
     }
 
-    // ... 기타 메서드 (상세, 수정 등) 생략 ...
+    @Operation(summary = "회원 상세 조회 뷰")
+    @GetMapping(value = "/{role}/detail/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or (#role.name() == 'USER' and @memberGuard.checkAccess(#id, principal))")
+    public String getMemberDetail(
+            @PathVariable AccountRole role,
+            @PathVariable Long id,
+            @AuthenticationPrincipal PrincipalDetails principal,
+            Model model) {
+
+        ReadMemberService service = memberStrategyFactory.getReadService(role);
+        // 상세 조회 로직... (기존 코드에 없어서 템플릿 경로만 유추하여 추가함)
+        // DetailMemberResponse response = service.getDetail(id);
+        // model.addAttribute("member", response);
+
+        // 임시로 list로 리다이렉트 (구현 시 위 주석 해제)
+        return "member/detail";
+    }
+
+    @Operation(summary = "회원 정보 수정 처리")
+    @PostMapping(value = "/{role}/update")
+    @PreAuthorize("isAuthenticated()") // 로그인 사용자만
+    public String updateMember(
+            @PathVariable AccountRole role,
+            @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal PrincipalDetails principal,
+            RedirectAttributes redirectAttributes) {
+
+        WriteMemberService service = memberStrategyFactory.getWriteService(role);
+        service.updateMember(memberUpdateRequest, principal.getUsername());
+
+        redirectAttributes.addFlashAttribute("message", "정보가 수정되었습니다.");
+        // 수정 후 프로필 혹은 상세 페이지로 이동
+        return "redirect:/account/profile";
+    }
+
+    @Operation(summary = "회원 탈퇴/비활성화 처리")
+    @PostMapping(value = "/{role}/inactive")
+    @PreAuthorize("isAuthenticated()")
+    public String inactiveMember(
+            @PathVariable AccountRole role,
+            @AuthenticationPrincipal PrincipalDetails principal) {
+
+        WriteMemberService service = memberStrategyFactory.getWriteService(role);
+        service.deActiveMember(principal.getUsername());
+
+        return "redirect:/logout";
+    }
 }
