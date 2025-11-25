@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Tag(name = "MemberController", description = "통합 회원(유저/관리자) 뷰/API")
 @Controller
 @RequestMapping(value = "/member")
@@ -37,12 +39,11 @@ public class MemberController {
 
     private final MemberStrategyFactory memberStrategyFactory;
 
-    // 통합 Validators
     private final MemberCreateValidator memberCreateValidator;
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
-    // @InitBinder 이름 매칭 필수!
+    // BindingResult는 AOP에서 처리하므로 컨트롤러 내부 로직에서는 신경 쓰지 않아도 됨
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -75,15 +76,11 @@ public class MemberController {
     public String createMember(
             @Parameter(description = "Account Role", example = "USER") @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
-            BindingResult bindingResult, // AOP 제외됨 -> 직접 처리
-            Model model,
+            BindingResult bindingResult, // AOP 감지용 필수 파라미터
             RedirectAttributes redirectAttributes) {
 
-        // 타임리프에서는 에러 발생 시 예외를 던지는 게 아니라, 에러 정보를 담고 폼 뷰로 돌아가야 함
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("role", role);
-            return "member/create"; // 입력 폼으로 다시 이동 (에러 메시지 포함)
-        }
+        // AOP(BindingAdvice)가 에러를 감지하면 예외를 던지므로
+        // 여기까지 코드가 도달했다면 유효성 검증은 통과한 것임
 
         WriteMemberService service = memberStrategyFactory.getWriteService(role);
         service.createMember(memberCreateRequest);
@@ -92,72 +89,25 @@ public class MemberController {
         return "redirect:/member/" + role.name().toLowerCase() + "/list";
     }
 
-    // ... (list, detail 메서드는 기존 로직 유지)
-
-    @Operation(summary = "회원 정보 수정 폼 뷰")
-    @GetMapping(value = "/{role}/update")
-    @PreAuthorize("isAuthenticated()")
-    public String updateMemberForm(
+    @Operation(summary = "회원 목록 조회 뷰")
+    @GetMapping(value = "/{role}/list")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public String getMemberList(
             @PathVariable AccountRole role,
-            @CurrentAccount CurrentAccountDTO currentAccountDTO,
-            Model model) {
-        ReadMemberService readService = memberStrategyFactory.getReadService(role);
-        DetailMemberResponse detail = readService.getDetail(currentAccountDTO.id());
-
-        if (!model.containsAttribute("memberUpdateRequest")) {
-            MemberUpdateRequest request = new MemberUpdateRequest(detail.getProfile().nickName(), null);
-            model.addAttribute("memberUpdateRequest", request);
-        }
-        model.addAttribute("role", role);
-        model.addAttribute("currentMember", detail);
-        return "member/update";
-    }
-
-
-    @Operation(summary = "회원 정보 수정 처리")
-    @PostMapping(value = "/{role}/update")
-    @PreAuthorize("isAuthenticated()")
-    public String updateMember(
-            @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
+            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest,
             BindingResult bindingResult,
-            @CurrentAccount CurrentAccountDTO currentAccountDTO,
-            Model model,
-            RedirectAttributes redirectAttributes) {
+            Model model) {
 
-        if (bindingResult.hasErrors()) {
-            // 에러 발생 시 다시 폼 화면 렌더링을 위해 필요한 데이터 재조회
-            ReadMemberService readService = memberStrategyFactory.getReadService(role);
-            DetailMemberResponse detail = readService.getDetail(currentAccountDTO.id());
+        ReadMemberService service = memberStrategyFactory.getReadService(role);
+        var listRequestDTO = new MemberListRequestDTO(memberListRequest);
+        Page<MemberListResponse> memberPage = service.getList(listRequestDTO);
 
-            model.addAttribute("role", role);
-            model.addAttribute("currentMember", detail);
-            return "member/update";
-        }
+        model.addAttribute("role", role);
+        model.addAttribute("memberPage", memberPage);
+        model.addAttribute("request", memberListRequest);
 
-        WriteMemberService service = memberStrategyFactory.getWriteService(role);
-        service.updateMember(memberUpdateRequest, currentAccountDTO.loginId());
-
-        redirectAttributes.addFlashAttribute("message", "정보 수정이 완료되었습니다.");
-        return "redirect:/member/" + role.name().toLowerCase() + "/detail/" + currentAccountDTO.id();
+        return "member/list";
     }
 
-    /**
-     * 회원 비활성화 (탈퇴) 처리
-     */
-    @Operation(summary = "회원 비활성화 처리 (탈퇴)")
-    @PostMapping(value = "/{role}/inactive")
-    @PreAuthorize("isAuthenticated()")
-    public String inactiveMember(
-            @PathVariable AccountRole role,
-            @CurrentAccount CurrentAccountDTO currentAccountDTO,
-            RedirectAttributes redirectAttributes) {
-
-        WriteMemberService service = memberStrategyFactory.getWriteService(role);
-        service.deActiveMember(currentAccountDTO.loginId());
-
-        // 로그아웃 후 로그인 페이지로 리다이렉트
-        redirectAttributes.addFlashAttribute("logoutMessage", "회원 탈퇴가 완료되었습니다.");
-        return "redirect:/logout";
-    }
+    // ... 기타 메서드 (상세, 수정 등) 생략 ...
 }

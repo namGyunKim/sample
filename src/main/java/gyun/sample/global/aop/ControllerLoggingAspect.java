@@ -1,8 +1,11 @@
 package gyun.sample.global.aop;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import gyun.sample.global.security.PrincipalDetails;
 import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,11 +16,18 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 import org.springframework.util.StopWatch;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -25,11 +35,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ControllerLoggingAspect {
 
-    // [제거] JWT Token Provider 제거
-    // private final JwtTokenProvider jwtTokenProvider;
+    private final ObjectMapper objectMapper;
 
-
-    @Pointcut("execution(* gyun.sample.domain..*Controller.*(..))")
+    @Pointcut("execution(* gyun.sample..*Controller.*(..))")
     private void controllerMethods() {
     }
 
@@ -44,10 +52,13 @@ public class ControllerLoggingAspect {
         String ip = UtilService.getClientIp(request);
         String method = request.getMethod();
         String uri = request.getRequestURI();
-        // [수정] JWT 대신 Spring Security Context에서 loginId 가져오기
         String loginId = getLoginIdFromSecurityContext();
 
-        log.info("[REQ] [{}] IP:{} | User:{} | {} {}", requestId, ip, loginId, method, uri);
+        // 파라미터 정보 추출 (보기 좋게 포맷팅)
+        String params = getFormattedParams(joinPoint);
+
+        log.info("\n[REQ] [{}] \nIP      : {} \nUser    : {} \nMethod  : {} \nURI     : {} \nParams  : {}",
+                requestId, ip, loginId, method, uri, params);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -57,31 +68,69 @@ public class ControllerLoggingAspect {
             result = joinPoint.proceed();
         } finally {
             stopWatch.stop();
-            log.info("[RES] [{}] Time:{}ms", requestId, stopWatch.getTotalTimeMillis());
+            log.info("\n[RES] [{}] Time: {}ms", requestId, stopWatch.getTotalTimeMillis());
         }
 
         return result;
     }
 
     /**
-     * Spring Security Context에서 현재 로그인된 사용자의 loginId를 가져옵니다.
+     * 요청 파라미터를 보기 좋게 JSON 형태 등으로 변환
      */
+    private String getFormattedParams(ProceedingJoinPoint joinPoint) {
+        Object[] args = joinPoint.getArgs();
+        if (args == null || args.length == 0) {
+            return "No Parameters";
+        }
+
+        try {
+            // 로깅에 적합하지 않은 객체 필터링 (Request, Response, Model, BindingResult, File 등)
+            Map<String, Object> loggableArgs = new HashMap<>();
+            String[] parameterNames = ((org.aspectj.lang.reflect.CodeSignature) joinPoint.getSignature()).getParameterNames();
+
+            for (int i = 0; i < args.length; i++) {
+                Object arg = args[i];
+                String paramName = parameterNames != null ? parameterNames[i] : "arg" + i;
+
+                if (isLoggable(arg)) {
+                    loggableArgs.put(paramName, arg);
+                }
+            }
+
+            if (loggableArgs.isEmpty()) {
+                return "None (Filtered)";
+            }
+
+            // ObjectMapper를 사용하여 JSON Pretty Print
+            // (주의: 순환 참조나 Lazy Loading 이슈가 있는 엔티티는 DTO로 변환되어 들어오는 것이 안전함)
+            return "\n" + objectMapper.enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(loggableArgs);
+
+        } catch (Exception e) {
+            return "Failed to parse parameters: " + e.getMessage();
+        }
+    }
+
+    private boolean isLoggable(Object arg) {
+        return arg != null &&
+                !(arg instanceof HttpServletRequest) &&
+                !(arg instanceof HttpServletResponse) &&
+                !(arg instanceof Model) &&
+                !(arg instanceof BindingResult) &&
+                !(arg instanceof MultipartFile) &&
+                !(arg instanceof MultipartFile[]);
+    }
+
     private String getLoginIdFromSecurityContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
             return "GUEST";
         }
-
         Object principal = authentication.getPrincipal();
-
         if (principal instanceof PrincipalDetails principalDetails) {
-            return principalDetails.getUsername(); // loginId 반환
+            return principalDetails.getUsername();
         } else if (principal instanceof String principalString) {
-            // 익명 사용자일 경우 "anonymousUser" 등이 반환될 수 있음
             return principalString.equals("anonymousUser") ? "GUEST" : principalString;
         }
-
         return "UNKNOWN";
     }
 }

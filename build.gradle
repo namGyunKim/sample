@@ -7,21 +7,17 @@ plugins {
 group = 'com.sample'
 version = '0.0.1'
 
-// Java 21 설정
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
-// bootJar 태스크 커스터마이징
 bootJar {
     archiveFileName.set('app.jar')
-    // 중복 파일 발생 시 처리 전략 설정
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// 기본 jar 태스크 비활성화
 jar {
     enabled = false
 }
@@ -30,19 +26,15 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    // JWT/Redis 의존성 제거에 따라 불필요한 설정 제거
 }
 
 repositories {
     mavenCentral()
 }
 
-// BOM 관리
 dependencyManagement {
     imports {
-        // Spring Cloud BOM (OpenFeign 사용을 위해 유지)
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
-        // AWS SDK BOM
         mavenBom "software.amazon.awssdk:bom:2.20.26"
     }
 }
@@ -50,25 +42,23 @@ dependencyManagement {
 dependencies {
     // Web & Core
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    // Thymeleaf Starter 추가
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect' // 레이아웃 다이얼렉트
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-aop' // AOP 필수
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     // JPA & DB
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    //    mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'org.postgresql:postgresql'
 
-    // Redis (JWT 미사용이지만, 다른 용도로 사용될 가능성을 고려해 일단 유지. 만약 블랙리스트 외 용도가 없다면 삭제 권장)
+    // Redis (세션용이 아닌 캐싱/RateLimiting 등 보조 용도)
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // Thymeleaf Security 통합
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     testImplementation 'org.springframework.security:spring-security-test'
 
     // Lombok & DevTools
@@ -86,18 +76,13 @@ dependencies {
     // AWS S3
     implementation 'software.amazon.awssdk:s3'
 
-    // Swagger (Spring Doc)
+    // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
     // Crypto
     implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
 
-    // JWT 관련 의존성 제거 (세션 기반으로 전환)
-    // implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-    // runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    // runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
-
-    // XML/JSON/Etc (Social/Feign 관련)
+    // XML/JSON/Etc
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
     runtimeOnly 'com.sun.xml.bind:jaxb-impl:4.0.0'
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
@@ -106,24 +91,22 @@ dependencies {
     // Logging & Utils
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'net.nurigo:sdk:4.2.7' // SMS
-    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0' // Rate Limiting
+    implementation 'net.nurigo:sdk:4.2.7'
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
 
     // Image Processing
     implementation 'com.twelvemonkeys.imageio:imageio-core:3.10.1'
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
 
-    // JAXB API (일부 라이브러리에서 여전히 필요할 수 있어 유지)
+    // JAXB API
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
     runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
-
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
 
-// QueryDSL generated 삭제 태스크
 task cleanGeneratedDir(type: Delete) {
     delete file('build/generated')
 }
