@@ -17,9 +17,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 
 // JWT 토큰 생성 및 검증 유틸
@@ -149,5 +151,49 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return TokenResponse.generatedGuest(ErrorCode.JWT_INVALID);
         }
+    }
+
+    /**
+     * Request Header에서 "Bearer "를 제거한 Access Token 문자열을 추출합니다.
+     *
+     * @param request HttpServletRequest
+     * @return Access Token 문자열, 없으면 null
+     */
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    /**
+     * 토큰의 남은 유효 기간(Duration)을 반환합니다.
+     *
+     * @param token Access Token
+     * @return 남은 유효 기간 (Duration), 만료되었거나 유효하지 않으면 null
+     */
+    public Duration getRemainingTime(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            long expirationTimeMillis = claims.getExpiration().getTime();
+            long nowMillis = new Date().getTime();
+
+            if (expirationTimeMillis > nowMillis) {
+                return Duration.ofMillis(expirationTimeMillis - nowMillis);
+            }
+        } catch (ExpiredJwtException e) {
+            // 이미 만료된 토큰 (남은 시간 0으로 처리하거나 null 처리)
+            return Duration.ZERO;
+        } catch (JwtException e) {
+            // 기타 JWT 에러 (서명 오류 등)
+            log.warn("Failed to get remaining time for token: {}", e.getMessage());
+        }
+        return null;
     }
 }

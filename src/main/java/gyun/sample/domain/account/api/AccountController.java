@@ -9,10 +9,12 @@ import gyun.sample.domain.account.validator.LoginAccountValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.api.RestApiController;
 import gyun.sample.global.payload.response.RestApiResponse;
+import gyun.sample.global.utils.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
     //    utils
     private final RestApiController restApiController;
+    private final JwtTokenProvider jwtTokenProvider;
     //    service
     private final WriteAccountService writeAccountService;
 
@@ -63,12 +66,16 @@ public class AccountController {
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
-    @Operation(summary = "로그아웃(Refresh Token Delete)")
+    @Operation(summary = "로그아웃(Access/Refresh Token 무효화)")
     @PostMapping(value = "/logout")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<RestApiResponse<Boolean>> logout(@CurrentAccount CurrentAccountDTO currentAccountDTO) {
+    // HttpServletRequest를 받아 Access Token을 추출하여 블랙리스트에 추가합니다.
+    public ResponseEntity<RestApiResponse<Boolean>> logout(
+            @CurrentAccount CurrentAccountDTO currentAccountDTO,
+            HttpServletRequest request) {
 
-        boolean response = writeAccountService.logout(currentAccountDTO);
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        boolean response = writeAccountService.logout(currentAccountDTO, accessToken);
 
         return restApiController.createSuccessRestResponse(response);
     }
