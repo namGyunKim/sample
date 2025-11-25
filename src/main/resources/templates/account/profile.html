@@ -62,13 +62,15 @@
                 </a>
 
                 <div class="flex space-x-3">
-                    <form method="post" th:action="@{/member/user/inactive}" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+                    <!-- 탈퇴 버튼 URL 수정: ID 포함 -->
+                    <form method="post" th:action="@{/member/{role}/inactive/{id}(role='user', id=${member.id})}" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
                         <button type="submit" class="px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
                             회원 탈퇴
                         </button>
                     </form>
+                    <!-- 수정 링크 -->
                     <a class="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
-                       th:href="@{/member/user/update}">
+                       th:href="@{/member/{role}/update/{id}(role='user', id=${member.id})}">
                         정보 수정
                     </a>
                 </div>

@@ -2,7 +2,8 @@
 <html lang="ko"
       layout:decorate="~{layout/default}"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>회원 상세 정보</title>
 </head>
@@ -14,10 +15,10 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900">회원 상세 정보</h3>
                 <p class="mt-1 max-w-2xl text-sm text-gray-500">개인 정보 및 계정 상태</p>
             </div>
-            <!-- 수정 버튼: 자신의 계정이거나 관리자일 경우 표시 -->
-            <div>
+            <!-- 수정 버튼: 권한에 따라 표시 (본인, 슈퍼관리자, 또는 관리자가 일반회원 조회 시) -->
+            <div th:if="${#authentication.principal.id == member.profile.id} or ${#authorization.expression('hasRole(''SUPER_ADMIN'')')} or (${#authorization.expression('hasRole(''ADMIN'')')} and ${member.profile.role.name() == 'USER'})">
                 <a class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                   th:href="@{/member/{role}/update(role=${role})}">
+                   th:href="@{/member/{role}/update/{id}(role=${role}, id=${member.profile.id})}">
                     정보 수정
                 </a>
             </div>
@@ -80,12 +81,13 @@
             목록으로
         </a>
 
-        <!-- 탈퇴 버튼 -->
-        <form method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까?');"
-              th:action="@{/member/{role}/inactive(role=${role})}">
+        <!-- 탈퇴 버튼: 권한에 따라 표시 (본인, 슈퍼관리자, 또는 관리자가 일반회원 조회 시) -->
+        <form method="post" onsubmit="return confirm('정말로 탈퇴/비활성화 처리하시겠습니까?');"
+              th:action="@{/member/{role}/inactive/{id}(role=${role}, id=${member.profile.id})}"
+              th:if="${#authentication.principal.id == member.profile.id} or ${#authorization.expression('hasRole(''SUPER_ADMIN'')')} or (${#authorization.expression('hasRole(''ADMIN'')')} and ${member.profile.role.name() == 'USER'})">
             <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     type="submit">
-                회원 탈퇴
+                <span th:text="${#authentication.principal.id == member.profile.id} ? '회원 탈퇴' : '강제 탈퇴'">회원 탈퇴</span>
             </button>
         </form>
     </div>

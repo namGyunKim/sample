@@ -23,6 +23,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,11 +38,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- * 타임리프 뷰를 반환하는 컨트롤러
- * - @Controller 어노테이션을 사용하므로 BindingAdvice(AOP)가 적용되지 않습니다.
- * - 따라서 BindingResult를 직접 확인하여 에러 발생 시 입력 폼으로 되돌려보냅니다.
- */
 @Slf4j
 @Tag(name = "MemberController", description = "회원 관리 (전략 패턴 적용)")
 @Controller
@@ -50,15 +46,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MemberController {
 
     private final MemberStrategyFactory memberStrategyFactory;
-
     private final MemberCreateValidator memberCreateValidator;
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
-    // 세션 수동 갱신을 위한 Repository
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
-    // Validator 등록 (변수명 일치 필수)
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -91,11 +84,10 @@ public class MemberController {
     public String createMember(
             @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
-            BindingResult bindingResult, // AOP 미적용: 직접 처리
+            BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
 
-        // 유효성 검사 실패 시: 입력 폼으로 다시 이동 (에러 메시지 포함)
         if (bindingResult.hasErrors()) {
             model.addAttribute("role", role);
             return "member/create";
@@ -117,7 +109,6 @@ public class MemberController {
             BindingResult bindingResult,
             Model model) {
 
-        // 목록 조회 검색 조건 에러 시 처리
         if (bindingResult.hasErrors()) {
             model.addAttribute("role", role);
             model.addAttribute("request", memberListRequest);
@@ -126,7 +117,6 @@ public class MemberController {
         }
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
-        // Record -> DTO 변환
         var listRequestDTO = new MemberListRequestDTO(memberListRequest);
         Page<MemberListResponse> memberPage = service.getList(listRequestDTO);
 
@@ -154,32 +144,40 @@ public class MemberController {
         return "member/detail";
     }
 
+    // [수정] URL에 대상 ID({id})를 포함하도록 변경하여, 관리자가 다른 회원을 수정할 수 있도록 함
     @Operation(summary = "회원 정보 수정 폼")
-    @GetMapping(value = "/{role}/update")
+    @GetMapping(value = "/{role}/update/{id}")
     @PreAuthorize("isAuthenticated()")
     public String updateMemberForm(
             @PathVariable AccountRole role,
+            @PathVariable Long id,
             @AuthenticationPrincipal PrincipalDetails principal,
             Model model) {
 
+        // 1. 수정 대상 회원 조회
         ReadMemberService service = memberStrategyFactory.getReadService(role);
-        // JPA 더티 체킹을 사용하므로 엔티티 조회 후 DTO 변환하여 뷰에 전달
-        Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
+        DetailMemberResponse targetMember = service.getDetail(id);
+
+        // 2. 수정 권한 체크 (본인, 슈퍼관리자, 관리자->유저)
+        checkUpdatePermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
 
         if (!model.containsAttribute("memberUpdateRequest")) {
-            model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(member.getNickName()));
+            model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(targetMember.getProfile().nickName()));
         }
-        model.addAttribute("currentMember", new DetailMemberResponse(member));
+        model.addAttribute("currentMember", targetMember);
         model.addAttribute("role", role);
+        model.addAttribute("targetId", id); // 폼 Action URL 생성을 위해 ID 전달
 
         return "member/update";
     }
 
+    // [수정] URL에 대상 ID({id})를 포함하여 처리
     @Operation(summary = "회원 정보 수정 처리")
-    @PostMapping(value = "/{role}/update")
+    @PostMapping(value = "/{role}/update/{id}")
     @PreAuthorize("isAuthenticated()")
     public String updateMember(
             @PathVariable AccountRole role,
+            @PathVariable Long id,
             @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
             BindingResult bindingResult,
             @AuthenticationPrincipal PrincipalDetails principal,
@@ -188,52 +186,97 @@ public class MemberController {
             HttpServletResponse response,
             Model model) {
 
-        // 유효성 검사 실패 시 수정 페이지로 복귀
-        if (bindingResult.hasErrors()) {
-            ReadMemberService service = memberStrategyFactory.getReadService(role);
-            Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
+        ReadMemberService readService = memberStrategyFactory.getReadService(role);
+        DetailMemberResponse targetMember = readService.getDetail(id);
 
-            model.addAttribute("currentMember", new DetailMemberResponse(member));
+        // 1. 수정 권한 체크
+        checkUpdatePermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("currentMember", targetMember);
             model.addAttribute("role", role);
+            model.addAttribute("targetId", id);
             return "member/update";
         }
 
-        // 1. 정보 수정 실행
+        // 2. 정보 수정 실행 (WriteService는 loginId를 식별자로 사용)
         WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
-        writeService.updateMember(memberUpdateRequest, principal.getUsername());
+        writeService.updateMember(memberUpdateRequest, targetMember.getProfile().loginId());
 
-        // 2. [중요] SecurityContext의 인증 정보 갱신
-        // DB에서 변경된 최신 정보를 조회하여 세션을 업데이트합니다.
-        ReadMemberService readService = memberStrategyFactory.getReadService(role);
-        Member updatedMember = readService.getByLoginIdAndRole(principal.getUsername(), role);
-
-        // 새로운 Principal 생성 및 인증 객체 교체
-        PrincipalDetails newPrincipal = new PrincipalDetails(updatedMember);
-        Authentication newAuth = new UsernamePasswordAuthenticationToken(
-                newPrincipal,
-                newPrincipal.getPassword(),
-                newPrincipal.getAuthorities()
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(newAuth);
-
-        // [추가] 변경된 Authentication을 세션에 명시적으로 저장 (Spring Security 6 필수)
-        securityContextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
+        // 3. 세션 갱신 (본인이 본인 정보를 수정한 경우에만 수행)
+        if (principal.getId().equals(id)) {
+            Member updatedMember = readService.getByLoginIdAndRole(principal.getUsername(), role);
+            PrincipalDetails newPrincipal = new PrincipalDetails(updatedMember);
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    newPrincipal,
+                    newPrincipal.getPassword(),
+                    newPrincipal.getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            securityContextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
+        }
 
         redirectAttributes.addFlashAttribute("message", "정보가 수정되었습니다.");
-        return "redirect:/account/profile";
+
+        // 본인이면 프로필로, 관리자가 타인을 수정한 경우 해당 유저 상세 페이지로 이동
+        if (principal.getId().equals(id)) {
+            return "redirect:/account/profile";
+        } else {
+            return "redirect:/member/" + role.name().toLowerCase() + "/detail/" + id;
+        }
+    }
+
+    /**
+     * 수정/탈퇴 권한 체크 로직
+     */
+    private void checkUpdatePermission(PrincipalDetails principal, AccountRole targetRole, Long targetId) {
+        // 1. 본인인 경우 허용
+        if (principal.getId().equals(targetId)) {
+            return;
+        }
+
+        // 2. 슈퍼 관리자는 모든 회원(관리자 포함) 수정 가능
+        if (principal.getRole() == AccountRole.SUPER_ADMIN) {
+            return;
+        }
+
+        // 3. 관리자는 일반 회원만 수정 가능
+        if (principal.getRole() == AccountRole.ADMIN && targetRole == AccountRole.USER) {
+            return;
+        }
+
+        // 그 외에는 권한 없음
+        throw new AccessDeniedException("권한이 없습니다.");
     }
 
     @Operation(summary = "회원 탈퇴/비활성화")
-    @PostMapping(value = "/{role}/inactive")
+    @PostMapping(value = "/{role}/inactive/{id}")
     @PreAuthorize("isAuthenticated()")
     public String inactiveMember(
             @PathVariable AccountRole role,
-            @AuthenticationPrincipal PrincipalDetails principal) {
+            @PathVariable Long id,
+            @AuthenticationPrincipal PrincipalDetails principal,
+            RedirectAttributes redirectAttributes) {
 
-        WriteMemberService service = memberStrategyFactory.getWriteService(role);
-        service.deActiveMember(principal.getUsername());
+        // 1. 대상 회원 조회 (권한 체크를 위해 Role 등 정보 필요)
+        ReadMemberService readService = memberStrategyFactory.getReadService(role);
+        DetailMemberResponse targetMember = readService.getDetail(id);
 
-        return "redirect:/logout";
+        // 2. 탈퇴 권한 체크 (수정과 동일한 로직 사용)
+        checkUpdatePermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
+
+        // 3. 탈퇴 처리 (대상 회원의 LoginId 사용)
+        WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
+        writeService.deActiveMember(targetMember.getProfile().loginId());
+
+        // 4. 결과 처리
+        if (principal.getId().equals(id)) {
+            // 본인이 탈퇴한 경우 로그아웃
+            return "redirect:/logout";
+        } else {
+            // 관리자가 타인을 탈퇴시킨 경우 목록으로 이동
+            redirectAttributes.addFlashAttribute("message", "회원이 탈퇴/비활성화 처리되었습니다.");
+            return "redirect:/member/" + role.name().toLowerCase() + "/list";
+        }
     }
 }

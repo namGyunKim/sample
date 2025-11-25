@@ -16,8 +16,9 @@
 
     <div class="bg-white shadow-lg rounded-lg border border-gray-100 overflow-hidden">
         <div class="p-8">
+            <!-- Form Action에 targetId 포함 -->
             <form class="space-y-6" method="post"
-                  th:action="@{/member/{role}/update(role=${role})}"
+                  th:action="@{/member/{role}/update/{id}(role=${role}, id=${targetId})}"
                   th:object="${memberUpdateRequest}">
 
                 <!-- 글로벌 에러 메시지 -->
@@ -59,8 +60,9 @@
                 </div>
 
                 <div class="pt-4 flex items-center justify-end space-x-3 border-t border-gray-100 mt-6">
+                    <!-- 취소 버튼: 본인이면 프로필로, 아니면 상세로 -->
                     <a class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                       th:href="@{/account/profile}">
+                       th:href="${#authentication.principal.id == targetId} ? @{/account/profile} : @{/member/{role}/detail/{id}(role=${role}, id=${targetId})}">
                         취소
                     </a>
                     <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

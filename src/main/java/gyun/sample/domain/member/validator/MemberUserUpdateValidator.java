@@ -1,17 +1,19 @@
 package gyun.sample.domain.member.validator;
 
-import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.member.service.read.ReadMemberService;
-import gyun.sample.global.security.PrincipalDetails;
+import gyun.sample.global.exception.GlobalException;
+import gyun.sample.global.exception.enums.ErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.servlet.HandlerMapping;
+
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -19,10 +21,7 @@ import org.springframework.validation.Validator;
 public class MemberUserUpdateValidator implements Validator {
 
     private final MemberRepository memberRepository;
-    private final ReadMemberService readUserService; // ReadUserService는 ReadMemberService의 구현체로 주입됩니다.
-
-    // [제거] JWT 관련 필드 제거
-    // private final HttpServletRequest httpServletRequest;
+    private final HttpServletRequest httpServletRequest;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -31,33 +30,40 @@ public class MemberUserUpdateValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        // CreateMemberRequest 검증
         MemberUpdateRequest request = (MemberUpdateRequest) target;
         validateMemberRequest(request, errors);
     }
 
-
     private void validateMemberRequest(MemberUpdateRequest request, Errors errors) {
-        // [수정] JWT 대신 Spring Security Context에서 현재 로그인된 사용자의 loginId를 가져옴
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentLoginId = null;
+        // URL Path Variable에서 대상 ID 추출 (/member/{role}/update/{id})
+        Map<?, ?> pathVariables = (Map<?, ?>) httpServletRequest.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
-        if (authentication != null && authentication.getPrincipal() instanceof PrincipalDetails principalDetails) {
-            currentLoginId = principalDetails.getUsername();
-        }
-
-        if (currentLoginId == null) {
-            // 인증 정보가 없는 경우 (Security Config에서 막겠지만, 혹시 모를 상황에 대비)
-            errors.reject("auth.required", "로그인 정보가 필요합니다.");
+        String idStr = (String) pathVariables.get("id");
+        if (idStr == null) {
+            // ID가 없는 경우 (혹시 모를 예외 상황)
+            errors.reject("id.required", "대상 회원 ID가 없습니다.");
             return;
         }
 
-        // 닉네임 중복 검사 (본인 닉네임 제외)
-        if (memberRepository.existsByNickNameAndLoginIdNot(request.nickName(), currentLoginId)) {
+        Long targetId;
+        try {
+            targetId = Long.parseLong(idStr);
+        } catch (NumberFormatException e) {
+            errors.reject("id.invalid", "유효하지 않은 회원 ID입니다.");
+            return;
+        }
+
+        // 대상 회원 조회 (존재 여부 확인)
+        Member targetMember = memberRepository.findById(targetId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.MEMBER_NOT_EXIST));
+
+        // 닉네임 중복 검사 (수정 대상 회원의 본인 닉네임은 제외하고 검사해야 함)
+        if (memberRepository.existsByNickNameAndLoginIdNot(request.nickName(), targetMember.getLoginId())) {
             errors.rejectValue("nickName", "nickName.duplicate", "이미 등록된 닉네임입니다.");
         }
 
-        // 현재 로그인된 사용자가 User 역할로 존재하는지 확인 (비즈니스 로직에 기반한 검증)
-        readUserService.getByLoginIdAndRole(currentLoginId, AccountRole.USER);
+        // [삭제됨] 기존 로직: readUserService.getByLoginIdAndRole(currentLoginId, AccountRole.USER);
+        // 이유: 관리자가 유저를 수정할 때, 관리자는 USER 권한이 없으므로 이 검증에서 실패함.
+        // 권한 체크(@PreAuthorize)와 타겟 존재 여부 확인으로 충분함.
     }
 }
