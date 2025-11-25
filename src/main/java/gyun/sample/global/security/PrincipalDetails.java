@@ -11,6 +11,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/*
+ * Spring Security에서 사용하는 인증 객체 구현체입니다.
+ * 타임리프에서 sec:authentication="principal.nickName" 처럼
+ * 이 클래스의 필드나 Getter 메서드에 직접 접근할 수 있습니다.
+ */
 @Getter
 public class PrincipalDetails implements UserDetails {
 
@@ -20,23 +25,9 @@ public class PrincipalDetails implements UserDetails {
         this.member = member;
     }
 
-    // 권한 반환 (ROLE_ prefix 붙여서 반환)
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        // Enum 이름 그대로 사용하거나 "ROLE_"을 붙여서 사용 (Security 설정에 따름)
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
-        return authorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return member.getPassword();
-    }
-
-    @Override
-    public String getUsername() {
-        return member.getLoginId();
+    // 타임리프에서 principal.nickName으로 호출될 때 사용됩니다.
+    public String getNickName() {
+        return member.getNickName();
     }
 
     public Long getId() {
@@ -51,32 +42,41 @@ public class PrincipalDetails implements UserDetails {
         return member.getMemberType();
     }
 
-    public String getNickName() {
-        return member.getNickName();
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+        return authorities;
     }
 
-    // 계정 만료 여부 (true: 만료 안됨)
+    @Override
+    public String getPassword() {
+        return member.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return member.getLoginId();
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    // 계정 잠김 여부 (true: 잠기지 않음)
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    // 비밀번호 만료 여부 (true: 만료 안됨)
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    // 계정 활성화 여부 (true: 활성화)
     @Override
     public boolean isEnabled() {
-        // GlobalActiveEnums 체크 로직을 여기에 넣을 수 있음
+        // 필요하다면 member.getActive() == GlobalActiveEnums.ACTIVE 체크를 추가할 수 있습니다.
         return true;
     }
 }

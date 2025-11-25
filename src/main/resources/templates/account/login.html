@@ -13,42 +13,64 @@
         <!-- 헤더 영역 -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-                <i class="fa-solid fa-user-shield text-2xl text-blue-600"></i>
+                <i class="fa-solid fa-right-to-bracket text-2xl text-blue-600"></i>
             </div>
             <h1 class="text-2xl font-bold text-gray-900">로그인</h1>
             <p class="text-sm text-gray-500 mt-2">서비스 이용을 위해 로그인해주세요.</p>
         </div>
 
-        <!-- 에러 메시지 -->
-        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6 text-sm flex items-center" role="alert"
-             th:if="${errorMessage}">
-            <i class="fa-solid fa-triangle-exclamation mr-3"></i>
-            <span th:text="${errorMessage}">메시지 내용</span>
+        <!-- 알림 메시지 -->
+        <div th:if="${errorMessage}" class="mb-4 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded text-sm flex items-center">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i>
+            <span th:text="${errorMessage}">에러 메시지</span>
+        </div>
+        <div th:if="${logoutMessage}" class="mb-4 bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded text-sm flex items-center">
+            <i class="fa-solid fa-circle-check mr-2"></i>
+            <span th:text="${logoutMessage}">로그아웃 메시지</span>
         </div>
 
-        <!-- 로그아웃 메시지 -->
-        <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6 text-sm flex items-center" role="alert"
-             th:if="${logoutMessage}">
-            <i class="fa-solid fa-check-circle mr-3"></i>
-            <span th:text="${logoutMessage}">로그아웃되었습니다.</span>
-        </div>
+        <!-- 로그인 폼 -->
+        <!-- Spring Security Config의 .loginProcessingUrl("/login") 설정에 맞춰 action을 지정합니다. -->
+        <form class="space-y-6" method="post" th:action="@{/login}">
+            <div>
+                <label for="loginId" class="block text-sm font-medium text-gray-700">아이디</label>
+                <input type="text" id="loginId" name="loginId" required
+                       class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                       placeholder="아이디를 입력하세요">
+            </div>
 
-        <!-- 소셜 로그인 버튼 영역 -->
-        <div class="space-y-4">
-            <a class="flex items-center justify-center w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150 ease-in-out group"
-               th:href="@{/social/google/login}">
-                <!-- 구글 로고 -->
-                <img alt="Google Logo" class="w-5 h-5 mr-3"
-                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/512px-Google_%22G%22_logo.svg.png">
-                <span class="group-hover:text-gray-900">Google로 계속하기</span>
-            </a>
-        </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">비밀번호</label>
+                <input type="password" id="password" name="password" required
+                       class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                       placeholder="비밀번호를 입력하세요">
+            </div>
 
-        <!-- 하단 안내 -->
-        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-            <p class="text-xs text-gray-400">
-                로그인 시 <a href="#" class="text-blue-600 hover:underline">이용약관</a> 및 <a href="#" class="text-blue-600 hover:underline">개인정보처리방침</a>에 동의하게 됩니다.
-            </p>
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150">
+                    로그인
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <a th:href="@{/social/google/login}"
+                   class="w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150">
+                    <i class="fa-brands fa-google text-red-500 mr-2"></i>
+                    <span class="text-gray-700">Google 로그인</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>

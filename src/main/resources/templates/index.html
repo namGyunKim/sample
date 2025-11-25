@@ -9,114 +9,53 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <!-- 환영 섹션 -->
-    <div class="text-center py-16 px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-            <span class="block xl:inline">Welcome to</span>
-            <span class="block text-blue-600 xl:inline">Base Project</span>
+    <!-- 히어로 섹션 -->
+    <div class="text-center py-16">
+        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl mb-4">
+            <span class="block">Base Project</span>
+            <span class="block text-blue-600">with Thymeleaf</span>
         </h1>
         <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            스프링 부트 3.2와 타임리프를 기반으로 한 베이스 프로젝트입니다.<br>
-            Google 계정으로 간편하게 시작해보세요.
+            Spring Boot 3.2, Security, JPA, QueryDSL을 기반으로 한<br>
+            확장 가능한 웹 애플리케이션 베이스 프로젝트입니다.
         </p>
     </div>
 
-    <!-- 로그인 상태일 때 표시 -->
-    <div class="max-w-4xl mx-auto mb-12" sec:authorize="isAuthenticated()">
-        <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
-            <div class="px-4 py-5 sm:p-6 flex items-center justify-between">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-green-100 rounded-full p-3">
-                        <i class="fa-solid fa-user-check text-green-600 text-xl"></i>
-                    </div>
-                    <!-- [수정] w-0 클래스 제거: Flex 컨테이너 내에서 텍스트가 강제로 줄바꿈되는 현상 방지 -->
-                    <div class="ml-5 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">로그인 정보</dt>
-                            <dd>
-                                <div class="text-lg font-medium text-gray-900">
-                                    <span sec:authentication="principal.nickName">User</span>님, 안녕하세요!
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
+    <!-- 로그인 사용자 전용 섹션 -->
+    <div class="max-w-4xl mx-auto mt-8" sec:authorize="isAuthenticated()">
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-blue-100">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    👋 환영합니다, <span class="text-blue-600" sec:authentication="principal.nickName">사용자</span>님!
+                </h3>
+                <div class="mt-2 max-w-xl text-sm text-gray-500">
+                    <p>현재 로그인된 권한은 <strong sec:authentication="principal.role">ROLE</strong> 입니다.</p>
                 </div>
-                <div class="ml-5 flex-shrink-0">
-                    <a class="font-medium text-blue-600 hover:text-blue-500" th:href="@{/account/profile}">
-                        내 프로필 보기 <i class="fa-solid fa-arrow-right ml-1"></i>
+                <div class="mt-5">
+                    <a class="text-sm font-medium text-blue-600 hover:text-blue-500" th:href="@{/account/profile}">
+                        내 정보 확인하기 &rarr;
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 비로그인 상태일 때 표시 (회원가입 버튼 제거) -->
-    <div class="max-w-4xl mx-auto mb-12" sec:authorize="!isAuthenticated()">
-        <div class="bg-blue-50 overflow-hidden shadow rounded-lg border border-blue-100">
-            <div class="px-4 py-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-4">
-                <div>
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">서비스 이용을 원하시나요?</h3>
-                    <div class="mt-2 max-w-xl text-sm text-gray-500">
-                        <p>Google 계정으로 별도의 가입 절차 없이 바로 이용 가능합니다.</p>
-                    </div>
+    <!-- 비로그인 사용자 섹션 -->
+    <div class="max-w-4xl mx-auto mt-8" sec:authorize="!isAuthenticated()">
+        <div class="bg-gray-50 overflow-hidden shadow rounded-lg border border-gray-200">
+            <div class="px-4 py-5 sm:p-6 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">지금 시작해보세요</h3>
+                <div class="mt-2 text-sm text-gray-500">
+                    <p>로그인하여 더 많은 기능을 이용할 수 있습니다.</p>
                 </div>
-                <div class="flex space-x-3">
-                    <a class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                       th:href="@{/social/google/login}">
-                        <i class="fa-brands fa-google mr-2"></i> Google로 시작하기
+                <div class="mt-5 flex justify-center gap-4">
+                    <a th:href="@{/account/login}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        로그인
                     </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 기능 카드 예시 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <!-- 카드 1 -->
-            <div class="relative rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                <div class="flex-shrink-0">
-                    <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <i class="fa-solid fa-users text-indigo-600"></i>
-                    </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <a href="#" class="focus:outline-none">
-                        <span class="absolute inset-0" aria-hidden="true"></span>
-                        <p class="text-sm font-medium text-gray-900">커뮤니티</p>
-                        <p class="text-sm text-gray-500 truncate">자유롭게 소통하세요.</p>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 카드 2 -->
-            <div class="relative rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                <div class="flex-shrink-0">
-                    <div class="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
-                        <i class="fa-solid fa-bullhorn text-pink-600"></i>
-                    </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <a href="#" class="focus:outline-none">
-                        <span class="absolute inset-0" aria-hidden="true"></span>
-                        <p class="text-sm font-medium text-gray-900">공지사항</p>
-                        <p class="text-sm text-gray-500 truncate">새로운 소식을 확인하세요.</p>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 카드 3 -->
-            <div class="relative rounded-lg border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                <div class="flex-shrink-0">
-                    <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                        <i class="fa-solid fa-circle-question text-green-600"></i>
-                    </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <a href="#" class="focus:outline-none">
-                        <span class="absolute inset-0" aria-hidden="true"></span>
-                        <p class="text-sm font-medium text-gray-900">고객센터</p>
-                        <p class="text-sm text-gray-500 truncate">무엇이든 물어보세요.</p>
+                    <a th:href="@{/member/user/create}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+                        회원가입
                     </a>
                 </div>
             </div>
