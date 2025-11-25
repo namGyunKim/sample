@@ -29,7 +29,8 @@
                     👋 환영합니다, <span class="text-blue-600" sec:authentication="principal.nickName">사용자</span>님!
                 </h3>
                 <div class="mt-4 max-w-xl text-sm text-gray-500">
-                    <p>현재 귀하의 권한 등급은 <strong class="text-gray-700 bg-gray-100 px-2 py-0.5 rounded" sec:authentication="principal.role">ROLE</strong> 입니다.</p>
+                    <!-- role.value를 호출하여 'USER' 대신 '사용자' 출력 -->
+                    <p>현재 귀하의 권한 등급은 <strong class="text-gray-700 bg-gray-100 px-2 py-0.5 rounded" sec:authentication="principal.role.value">ROLE</strong> 입니다.</p>
                 </div>
                 <div class="mt-8">
                     <a class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
