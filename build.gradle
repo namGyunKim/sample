@@ -101,6 +101,8 @@ dependencies {
     // JAXB API
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
     runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
+
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 }
 
 tasks.named('test') {
