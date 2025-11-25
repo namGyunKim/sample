@@ -30,13 +30,14 @@ public class MemberLogEventListener {
             MemberLog logEntity = new MemberLog(
                     event.loginId(),
                     event.memberId(),
+                    event.executorId(), // 추가된 수행자 ID
                     event.logType(),
                     event.details(),
                     event.clientIp()
             );
             memberLogRepository.save(logEntity);
 
-            log.info("[Activity Log] User: {}, Action: {}", event.loginId(), event.logType());
+            log.info("[Activity Log] Target: {}, Executor: {}, Action: {}", event.loginId(), event.executorId(), event.logType());
         } catch (Exception e) {
             log.error("로그 저장 중 오류 발생: {}", e.getMessage(), e);
         }

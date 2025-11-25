@@ -39,17 +39,16 @@ public class SocialController {
     private final GoogleSocialService googleSocialService;
     private final ApplicationEventPublisher eventPublisher;
 
-    // [추가] Spring Security 6에서는 수동으로 만든 SecurityContext를 세션에 저장하기 위해 Repository가 필요합니다.
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
-    @Operation(summary = "구글 로그인 리다이렉트 URL 요청", description = "구글 로그인 페이지로 이동합니다.")
+    @Operation(summary = "구글 로그인 리다이렉트 URL 요청")
     @GetMapping("/google/login")
     public RedirectView googleLogin() {
         String url = socialServiceFactory.getService(MemberType.GOOGLE).getLoginRedirectUrl();
         return new RedirectView(url);
     }
 
-    @Operation(summary = "구글 로그인 콜백", description = "Google 리다이렉션으로 호출되며, 성공 시 세션을 발급하고 메인 페이지로 리다이렉트합니다.")
+    @Operation(summary = "구글 로그인 콜백")
     @GetMapping("/google/redirect")
     public String googleRedirect(@RequestParam String code, HttpServletRequest request, HttpServletResponse response) {
 
@@ -63,18 +62,17 @@ public class SocialController {
                     principalDetails.getAuthorities()
             );
 
-            // 1. SecurityContext 생성 및 Authentication 설정
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
             SecurityContextHolder.setContext(securityContext);
 
-            // 2. [중요] SecurityContext를 세션에 명시적으로 저장 (Spring Security 6 필수)
             securityContextRepository.saveContext(securityContext, request, response);
 
-            // [추가] 소셜 로그인 로그 이벤트 발행
+            // 소셜 로그인 로그 이벤트 발행
             eventPublisher.publishEvent(MemberActivityEvent.of(
                     member.getLoginId(),
                     member.getId(),
+                    member.getLoginId(), // executorId = 본인
                     LogType.LOGIN,
                     "GOOGLE 소셜 로그인 성공",
                     UtilService.getClientIp(request)

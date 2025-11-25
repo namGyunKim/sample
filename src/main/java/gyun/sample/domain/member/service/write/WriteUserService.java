@@ -17,11 +17,14 @@ import gyun.sample.domain.social.google.service.GoogleSocialService;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
+import gyun.sample.global.security.PrincipalDetails;
 import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +40,8 @@ public class WriteUserService extends AbstractWriteMemberService {
     private final ReadUserService readUserService;
     private final S3ServiceAdapter s3ServiceAdapter;
     private final GoogleSocialService googleSocialService;
-    private final ApplicationEventPublisher eventPublisher; // [추가] 이벤트 발행기
-    private final HttpServletRequest httpServletRequest; // [추가] IP 획득용
+    private final ApplicationEventPublisher eventPublisher;
+    private final HttpServletRequest httpServletRequest;
 
     @Override
     public List<AccountRole> getSupportedRoles() {
@@ -47,16 +50,20 @@ public class WriteUserService extends AbstractWriteMemberService {
 
     @Override
     public GlobalCreateResponse createMember(MemberCreateRequest request) {
+        // 회원가입은 보통 수행자가 본인이거나 비로그인 상태(시스템)일 수 있음
+        // 여기서는 비로그인 상태에서 가입하므로 executorId를 생성된 회원의 ID로 하거나 "SYSTEM"으로 처리
+        // 하지만 관리자가 생성해주는 경우도 있으므로 SecurityContext 확인
 
         Member createdMember = new Member(request.loginId(), request.nickName(), request.memberType(), null);
-
         Member member = memberRepository.save(createdMember);
         member.updatePassword(passwordEncoder.encode(request.password()));
 
-        // [추가] 회원가입 로그 이벤트 발행
+        String executorId = getExecutorId(member.getLoginId()); // 본인 가입 시 본인 ID
+
         eventPublisher.publishEvent(MemberActivityEvent.of(
                 member.getLoginId(),
                 member.getId(),
+                executorId,
                 LogType.JOIN,
                 "일반 회원 가입",
                 UtilService.getClientIp(httpServletRequest)
@@ -67,16 +74,15 @@ public class WriteUserService extends AbstractWriteMemberService {
 
     @Override
     public GlobalUpdateResponse updateMember(MemberUpdateRequest memberUpdateRequest, String loginId) {
-        // Dirty Checking
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
-
-        // 닉네임 등 정보 업데이트
         member.update(memberUpdateRequest);
 
-        // [추가] 정보 수정 로그 이벤트 발행
+        String executorId = getExecutorId(member.getLoginId()); // 현재 로그인한 사람
+
         eventPublisher.publishEvent(MemberActivityEvent.of(
                 member.getLoginId(),
                 member.getId(),
+                executorId,
                 LogType.UPDATE,
                 "회원 정보 수정",
                 UtilService.getClientIp(httpServletRequest)
@@ -108,15 +114,26 @@ public class WriteUserService extends AbstractWriteMemberService {
             member.getMemberImages().clear();
         }
 
-        // [추가] 탈퇴 로그 이벤트 발행
+        String executorId = getExecutorId(member.getLoginId());
+
         eventPublisher.publishEvent(MemberActivityEvent.of(
                 member.getLoginId(),
                 member.getId(),
+                executorId,
                 LogType.INACTIVE,
-                "회원 탈퇴 요청",
+                "회원 탈퇴/비활성화 처리",
                 UtilService.getClientIp(httpServletRequest)
         ));
 
         return new GlobalInactiveResponse(member.getId());
+    }
+
+    // 현재 로그인한 사용자 ID 가져오기, 없으면 defaultId 반환
+    private String getExecutorId(String defaultId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof PrincipalDetails principal) {
+            return principal.getUsername();
+        }
+        return defaultId; // 로그인 정보가 없으면(회원가입 등) 대상자 본인으로 간주
     }
 }

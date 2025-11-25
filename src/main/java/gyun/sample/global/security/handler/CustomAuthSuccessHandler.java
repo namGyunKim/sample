@@ -27,15 +27,17 @@ public class CustomAuthSuccessHandler implements AuthenticationSuccessHandler {
         PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
 
         // 2. 로그인 로그 이벤트 발행
+        // 로그인 주체(executor)는 본인임
         eventPublisher.publishEvent(MemberActivityEvent.of(
                 principal.getUsername(),
                 principal.getId(),
+                principal.getUsername(), // executorId = 본인
                 LogType.LOGIN,
                 "일반 로그인 성공",
                 UtilService.getClientIp(request)
         ));
 
-        // 3. 메인 페이지로 리다이렉트 (기존 defaultSuccessUrl("/", true) 역할 대체)
+        // 3. 메인 페이지로 리다이렉트
         response.sendRedirect("/");
     }
 }

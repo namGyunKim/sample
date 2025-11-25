@@ -19,11 +19,14 @@ public class MemberLog extends BaseTimeEntity {
     @Column(name = "log_id")
     private Long id;
 
-    @Comment("로그인 아이디 (탈퇴 후에도 기록 유지를 위해 문자열 저장)")
+    @Comment("대상 회원 로그인 아이디 (탈퇴 후에도 기록 유지를 위해 문자열 저장)")
     private String loginId;
 
-    @Comment("회원 고유 ID (참조용)")
+    @Comment("대상 회원 고유 ID (참조용)")
     private Long memberId;
+
+    @Comment("작업 수행자 로그인 아이디") // 추가됨
+    private String executorId;
 
     @Enumerated(EnumType.STRING)
     @Comment("활동 유형")
@@ -35,10 +38,11 @@ public class MemberLog extends BaseTimeEntity {
     @Comment("요청 IP")
     private String clientIp;
 
-    // 생성자
-    public MemberLog(String loginId, Long memberId, LogType logType, String details, String clientIp) {
+    // 생성자 수정
+    public MemberLog(String loginId, Long memberId, String executorId, LogType logType, String details, String clientIp) {
         this.loginId = loginId;
         this.memberId = memberId;
+        this.executorId = executorId; // 추가됨
         this.logType = logType;
         this.details = details;
         this.clientIp = clientIp;
