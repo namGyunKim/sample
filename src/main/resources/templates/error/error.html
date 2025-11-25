@@ -1,28 +1,35 @@
 <!DOCTYPE html>
-<html lang="ko" layout:decorate="~{layout/default}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org">
-<head><title>에러 발생</title></head>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>에러 발생</title>
+</head>
 <body>
-<div class="text-center" layout:fragment="content">
-    <h1 class="text-6xl font-extrabold text-red-600"
-        th:text="${#response.status}&quot;&gt;500&lt;/h1&gt;&lt;p class=&quot;text-xl font-medium text-gray-700 mt-4&quot;&gt;오류가 발생했습니다.&lt;/p&gt;&lt;p class=&quot;text-lg text-gray-500 mt-2&quot; th:text=&quot;${message ?: '요청을 처리하는 동안 문제가 발생했습니다.'}">
-        요청을 처리하는 동안 문제가 발생했습니다.</p>
-        <div class="mt-8 bg-gray-50 p-6 rounded-lg max-w-lg mx-auto text-left">
-            <p class="text-sm font-semibold text-gray-800">오류 상세 정보:</p>
-            <ul class="text-sm text-gray-600 mt-2 space-y-1">
-                <li><strong>Code:</strong> <span th:text="${code ?: 'N/A'}">N/A</span></li>
-                <li><strong>Time:</strong> <span
-                        th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></li>
-                <li><strong>Path:</strong> <span th:text="${path ?: 'N/A'}">N/A</span></li>
-            </ul>
-        </div>
+<div layout:fragment="content" class="text-center">
+    <!-- #response.status 대신 Model에 담긴 status 사용 -->
+    <h1 class="text-6xl font-extrabold text-red-600" th:text="${status ?: 500}">500</h1>
+    <p class="text-xl font-medium text-gray-700 mt-4">오류가 발생했습니다.</p>
+    <p class="text-lg text-gray-500 mt-2" th:text="${message ?: '요청을 처리하는 동안 문제가 발생했습니다.'}">
+        요청을 처리하는 동안 문제가 발생했습니다.
+    </p>
 
-        <div class="mt-8">
-            <a class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-               th:href="@{/}">
-                홈으로 돌아가기
-            </a>
-        </div>
+    <div class="mt-8 bg-gray-50 p-6 rounded-lg max-w-lg mx-auto text-left">
+        <p class="text-sm font-semibold text-gray-800">오류 상세 정보:</p>
+        <ul class="text-sm text-gray-600 mt-2 space-y-1">
+            <!-- 비즈니스 에러 코드 (ex: 1101) -->
+            <li><strong>Code:</strong> <span th:text="${code ?: 'N/A'}">N/A</span></li>
+            <li><strong>Time:</strong> <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></li>
+            <li><strong>Path:</strong> <span th:text="${path ?: 'N/A'}">N/A</span></li>
+        </ul>
+    </div>
+
+    <div class="mt-8">
+        <a th:href="@{/}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            홈으로 돌아가기
+        </a>
+    </div>
 </div>
 </body>
 </html>

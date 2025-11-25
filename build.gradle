@@ -59,7 +59,8 @@ dependencies {
 
     // JPA & DB
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
+    //    mysql
+    runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'org.postgresql:postgresql'
 
     // Redis (JWT 미사용이지만, 다른 용도로 사용될 가능성을 고려해 일단 유지. 만약 블랙리스트 외 용도가 없다면 삭제 권장)

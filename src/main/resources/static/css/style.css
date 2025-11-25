@@ -1,0 +1,8 @@
+@charset "UTF-8";
+
+/* 기본 스타일 초기화 및 Tailwind 커스텀 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* 추가적인 전역 스타일 정의 */

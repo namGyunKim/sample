@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>회원 정보 수정</title>
+</head>
+<body>
+<div class="max-w-2xl mx-auto" layout:fragment="content">
+    <h2 class="text-2xl font-bold mb-6">내 정보 수정</h2>
+
+    <form class="space-y-6" method="post" th:action="@{/member/{role}/update(role=${role})}" th:object="${memberUpdateRequest}">
+
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert" th:if="${#fields.hasErrors('*')}">
+            <strong class="font-bold">입력 오류!</strong>
+            <ul class="mt-2 list-disc list-inside text-sm">
+                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+            </ul>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">로그인 아이디 (변경 불가)</label>
+            <input class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm text-gray-500 cursor-not-allowed"
+                   disabled th:value="${currentMember.profile.loginId}" type="text">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="nickName">닉네임</label>
+            <input class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                   id="nickName" th:field="*{nickName}" type="text">
+            <p class="mt-1 text-xs text-red-500" th:errors="*{nickName}" th:if="${#fields.hasErrors('nickName')}"></p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="password">새 비밀번호 (변경 시에만 입력)</label>
+            <input class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                   id="password" th:field="*{password}" type="password" placeholder="변경하려면 입력하세요">
+            <p class="mt-1 text-xs text-gray-500">비워두면 기존 비밀번호가 유지됩니다.</p>
+            <p class="mt-1 text-xs text-red-500" th:errors="*{password}" th:if="${#fields.hasErrors('password')}"></p>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4">
+            <a class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+               th:href="@{/member/{role}/detail/{id}(role=${role}, id=${currentMember.profile.id})}">취소</a>
+            <button class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    type="submit">
+                수정 저장
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

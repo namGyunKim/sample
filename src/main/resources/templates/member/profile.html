@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>내 프로필</title>
+</head>
+<body>
+<div class="max-w-3xl mx-auto" layout:fragment="content">
+    <h2 class="text-2xl font-bold mb-6">내 프로필</h2>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">기본 정보</h3>
+        </div>
+        <div class="border-t border-gray-200">
+            <dl>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">로그인 아이디</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" th:text="${member.loginId}">user</dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">닉네임</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" th:text="${member.nickName}">Nick</dd>
+                </div>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">계정 권한</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" th:text="${member.role}">USER</dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">가입 유형</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" th:text="${member.memberType}">GENERAL</dd>
+                </div>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">상태</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                              th:text="${member.active}">ACTIVE</span>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-6 flex space-x-3">
+        <a class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+           th:href="@{/}">홈으로</a>
+        <!-- 상세 정보 수정 페이지로 연결 (MemberController 활용) -->
+        <!-- 주의: 여기서는 member.id가 필요하지만 LoginMemberResponse에 id가 없으면 추가 필요.
+             현재 코드상 LoginMemberResponse에 id가 없으므로, WriteAccountService에서 DTO 수정 필요할 수 있음.
+             임시로 목록으로 이동하도록 설정하거나, MemberController의 로직을 사용 -->
+    </div>
+</div>
+</body>
+</html>

@@ -9,12 +9,15 @@ import gyun.sample.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,14 +25,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Tag(name = "SocialController", description = "소셜 로그인 뷰/API")
-@Controller // @RestController -> @Controller로 변경
+@Controller
 @RequestMapping("/social")
 @RequiredArgsConstructor
 @Slf4j
 public class SocialController {
 
     private final SocialServiceFactory socialServiceFactory;
-    private final GoogleSocialService googleSocialService; // 구글 서비스 직접 주입
+    private final GoogleSocialService googleSocialService;
+
+    // [추가] Spring Security 6에서는 명시적으로 세션에 저장하기 위해 Repository가 필요함
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     /**
      * 구글 로그인 요청 URL로 리다이렉트
@@ -43,39 +49,38 @@ public class SocialController {
 
     /**
      * Google OAuth 2.0 인증 Code를 받아 세션을 발급하는 Endpoint
-     * 이 엔드포인트는 Google 설정의 redirectUri와 일치해야 합니다.
-     * 성공 시 메인 페이지로 리다이렉트하며 세션이 발급됩니다.
      */
     @Operation(summary = "구글 로그인 콜백", description = "Google 리다이렉션으로 호출되며, 성공 시 세션을 발급하고 메인 페이지로 리다이렉트합니다.")
     @GetMapping("/google/redirect")
-    public String googleRedirect(@RequestParam String code, HttpServletRequest request) {
+    public String googleRedirect(@RequestParam String code, HttpServletRequest request, HttpServletResponse response) {
 
         try {
-            // 1. 소셜 로그인 처리 및 Member 객체 가져오기 (회원가입/로그인 완료)
+            // 1. 소셜 로그인 처리 및 Member 객체 가져오기
             Member member = googleSocialService.getMemberBySocialCode(code);
 
-            // 2. Spring Security 세션 수동 생성
+            // 2. Spring Security 세션 수동 생성 준비
             PrincipalDetails principalDetails = new PrincipalDetails(member);
-
-            // 3. Authentication 객체 생성 (principal, credentials, authorities)
-            // 소셜 로그인은 이미 검증되었으므로 credentials(비밀번호)는 null로 설정
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     principalDetails,
                     null,
                     principalDetails.getAuthorities()
             );
 
-            // 4. SecurityContext에 Authentication 객체 설정 (세션 생성)
+            // 3. SecurityContext 생성 및 설정
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
             SecurityContextHolder.setContext(securityContext);
 
-            log.info("Google 소셜 로그인 성공 및 세션 등록: {}", member.getLoginId());
-            return "redirect:/"; // 성공 시 메인 페이지로 리다이렉트
+            // [중요] 4. 세션에 SecurityContext 저장 (Spring Security 6 필수)
+            // 이 코드가 없으면 리다이렉트 후 로그인 상태가 유지되지 않습니다.
+            securityContextRepository.saveContext(securityContext, request, response);
+
+            log.info("Google 소셜 로그인 성공 및 세션 등록 완료: {}", member.getLoginId());
+            return "redirect:/";
 
         } catch (GlobalException e) {
             log.error("소셜 로그인 실패: {}", e.getErrorDetailMessage());
-            return "redirect:/account/login?error=social"; // 실패 시 로그인 페이지로 리다이렉트
+            return "redirect:/account/login?error=social";
         } catch (Exception e) {
             log.error("예상치 못한 소셜 로그인 오류: {}", e.getMessage(), e);
             return "redirect:/account/login?error=unknown";
