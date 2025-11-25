@@ -87,8 +87,8 @@ public class AccountController {
     @Operation(summary = "로그인한 데이터 (뷰)")
     @GetMapping(value = "/profile")
     @PreAuthorize("isAuthenticated()")
-    public String loginData(@CurrentAccount CurrentAccountDTO request, Model model) {
-        LoginMemberResponse response = writeAccountService.getLoginData(request);
+    public String loginData(@CurrentAccount CurrentAccountDTO currentAccountDTO, Model model) {
+        LoginMemberResponse response = writeAccountService.getLoginData(currentAccountDTO);
         model.addAttribute("member", response);
         return "account/profile";
     }
