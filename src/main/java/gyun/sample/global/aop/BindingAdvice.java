@@ -14,16 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * REST API 요청에 대한 유효성 검사 결과(BindingResult)를 가로채는 Aspect
- * - @RestController가 붙은 클래스에만 적용됩니다.
- * - 일반 @Controller(View 반환)는 이 로직을 타지 않고 직접 BindingResult를 핸들링합니다.
+ * API 요청(@RestController)에 대한 유효성 검사 결과를 가로채는 AOP
+ * - RestController에서는 BindingResult를 파라미터로 선언만 해두면, 이 AOP가 에러 유무를 판단하여 예외를 던집니다.
+ * - 일반 Controller(View 반환)는 이 로직을 타지 않도록 포인트컷을 설정했습니다.
  */
 @Slf4j
 @Aspect
 @Component
 public class BindingAdvice {
 
-    // 포인트컷: @RestController 어노테이션이 붙은 클래스의 모든 메서드
+    // 포인트컷: @RestController 어노테이션이 붙은 클래스의 모든 메서드만 대상으로 함
     @Around("@within(org.springframework.web.bind.annotation.RestController)")
     public Object validationHandler(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
@@ -39,6 +39,7 @@ public class BindingAdvice {
                         log.warn("API Validation Error - Field: [{}], Message: [{}]", error.getField(), error.getDefaultMessage());
                     }
 
+                    // JSON 응답을 위한 커스텀 예외 발생
                     throw new BindingException(ErrorCode.REQUEST_BINDING_RESULT, errorMap.toString());
                 }
             }

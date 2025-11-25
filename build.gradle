@@ -92,7 +92,6 @@ dependencies {
     // Logging & Utils
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'net.nurigo:sdk:4.2.7'
     implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
 
     // Image Processing

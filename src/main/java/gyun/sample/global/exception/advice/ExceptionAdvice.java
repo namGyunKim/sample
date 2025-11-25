@@ -27,8 +27,9 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
- * 전역 예외 처리 (JSON API 및 Thymeleaf 뷰 공통 처리)
- * - Accept 헤더를 감지하여 JSON 또는 HTML로 응답을 분기합니다.
+ * 전역 예외 처리 핸들러
+ * - API 요청(JSON)과 View 요청(HTML)을 구분하여 응답합니다.
+ * - 이벤트 발행을 통해 로그를 비동기로 저장합니다.
  */
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -49,8 +50,7 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(BindingException.class)
     public Object handleBindingException(BindingException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        // BindingAdvice(AOP)에서 던진 예외를 처리
-        // 상세 메시지에 필드별 에러 내용(Map.toString)이 포함됨
+        // BindingAdvice(AOP)에서 던진 예외 처리
         return processException(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, e.getErrorDetailMessage(), account, request);
     }
 
@@ -75,7 +75,7 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public Object handleNoResourceFoundException(NoResourceFoundException e, HttpServletRequest request) {
-        // 정적 자원 404는 로그 이벤트 발행 제외 (노이즈 감소)
+        // 정적 자원 404는 로그 이벤트 발행 제외 (불필요한 로그 방지)
         return createResponse(ErrorCode.PAGE_NOT_EXIST, HttpStatus.NOT_FOUND, request);
     }
 
@@ -105,7 +105,7 @@ public class ExceptionAdvice {
                 ExceptionEvent.createExceptionEvent(e, errorCode, detailMessage, account, request)
         );
 
-        // 2. 응답 생성 (JSON vs View)
+        // 2. 응답 생성 (JSON vs View 분기)
         return createResponse(errorCode, status, request);
     }
 
@@ -113,13 +113,13 @@ public class ExceptionAdvice {
         String acceptHeader = request.getHeader("Accept");
         boolean isJsonRequest = acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE);
 
-        // JSON 요청이면 RestApiResponse 반환
+        // JSON 요청이면 RestApiResponse 반환 (API)
         if (isJsonRequest) {
             return ResponseEntity
                     .status(status)
                     .body(RestApiResponse.fail(errorCode.getErrorResponse()));
         } else {
-            // 일반 브라우저 요청이면 HTML 에러 페이지 반환
+            // 일반 브라우저 요청이면 HTML 에러 페이지 반환 (타임리프)
             ModelAndView mav = new ModelAndView("error/error");
             mav.setStatus(status);
             mav.addObject("code", errorCode.getCode());
