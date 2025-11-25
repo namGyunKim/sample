@@ -1,122 +1,68 @@
 <!DOCTYPE html>
 <html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title layout:title-document="샘플 프로젝트">샘플 프로젝트</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE | Sample App">Base Project</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }
-    </style>
-    <th:block layout:fragment="css"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#64748B',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col text-gray-800">
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
 
-<!-- 상단 네비게이션 -->
-<header class="bg-white shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <!-- 로고 및 메뉴 -->
-            <div class="flex">
-                <div class="flex-shrink-0 flex items-center">
-                    <a class="text-2xl font-bold text-blue-600 tracking-tighter hover:text-blue-700" th:href="@{/}">
-                        <i class="fa-solid fa-layer-group mr-2"></i>BASE
-                    </a>
-                </div>
-                <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
-                    <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        커뮤니티
-                    </a>
-                    <!-- 관리자 메뉴 (권한 체크) -->
-                    <div class="relative group flex items-center h-full" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
-                        <button class="text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium h-full focus:outline-none">
-                            회원 관리 <i class="fa-solid fa-chevron-down ml-1 text-xs"></i>
-                        </button>
-                        <div class="absolute left-0 top-full pt-2 w-48 hidden group-hover:block animate-fade-in">
-                            <div class="bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                                <a th:href="@{/member/user/list}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">일반 회원</a>
-                                <a th:href="@{/member/admin/list}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">관리자 회원</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Header Fragment -->
+<nav class="bg-white shadow-sm sticky top-0 z-50" th:replace="~{fragments/header :: header}"></nav>
 
-            <!-- 우측 사용자 메뉴 -->
-            <div class="flex items-center">
-                <!-- 로그인 안 했을 때 -->
-                <div sec:authorize="!isAuthenticated()" class="space-x-3">
-                    <a th:href="@{/account/login}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md shadow-sm transition">로그인</a>
-                </div>
-
-                <!-- 로그인 했을 때 -->
-                <div sec:authorize="isAuthenticated()" class="flex items-center relative group h-full">
-                    <button class="flex items-center space-x-2 text-sm focus:outline-none h-full">
-                        <span class="bg-blue-100 text-blue-600 rounded-full h-8 w-8 flex items-center justify-center font-bold">
-                            <!-- 닉네임 첫 글자 표시 -->
-                            <span th:text="${#strings.substring(#authentication.principal.nickName, 0, 1)}">U</span>
-                        </span>
-                        <div class="hidden md:block text-left">
-                            <!-- PrincipalDetails의 getNickName() 호출 -->
-                            <p class="text-sm font-medium text-gray-700" sec:authentication="principal.nickName">User</p>
-                            <!-- role.value를 사용하여 한글 권한명 출력 -->
-                            <p class="text-xs text-gray-500" sec:authentication="principal.role.value">Role</p>
-                        </div>
-                        <i class="fa-solid fa-caret-down text-gray-400 ml-1"></i>
-                    </button>
-
-                    <!-- 드롭다운 메뉴 -->
-                    <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block z-50">
-                        <div class="bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                            <div class="px-4 py-3 border-b border-gray-100">
-                                <p class="text-sm text-gray-500">로그인 계정</p>
-                                <p class="text-sm font-medium text-gray-900 truncate" sec:authentication="name">id</p>
-                            </div>
-                            <a th:href="@{/account/profile}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fa-regular fa-id-badge mr-2 w-4"></i>내 프로필
-                            </a>
-                            <a th:href="@{/member/user/update}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fa-solid fa-user-pen mr-2 w-4"></i>정보 수정
-                            </a>
-                            <div class="border-t border-gray-100 my-1"></div>
-                            <a th:href="@{/logout}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                <i class="fa-solid fa-right-from-bracket mr-2 w-4"></i>로그아웃
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 animate-fade-in">
+    <!-- Flash Messages (알림창) -->
+    <div th:if="${message}" class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-3 shadow-sm">
+        <i class="fa-solid fa-circle-check"></i>
+        <span th:text="${message}">처리되었습니다.</span>
     </div>
-</header>
-
-<!-- 컨텐츠 영역 -->
-<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div layout:fragment="content">
-        <!-- 페이지별 컨텐츠 -->
+    <div th:if="${errorMessage}" class="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center gap-3 shadow-sm">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span th:text="${errorMessage}">오류가 발생했습니다.</span>
     </div>
+
+    <div layout:fragment="content"></div>
 </main>
 
-<!-- 푸터 -->
-<footer class="bg-white border-t border-gray-200">
-    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0">
-            <p class="text-base text-gray-400">&copy; <span th:text="${#dates.year(#dates.createNow())}">2025</span> Sample Project. All rights reserved.</p>
-        </div>
-        <div class="flex space-x-6">
-            <a href="#" class="text-gray-400 hover:text-gray-500"><span class="sr-only">GitHub</span><i class="fa-brands fa-github text-xl"></i></a>
-            <a href="#" class="text-gray-400 hover:text-gray-500"><span class="sr-only">Instagram</span><i class="fa-brands fa-instagram text-xl"></i></a>
-        </div>
-    </div>
-</footer>
+<!-- Footer Fragment -->
+<footer class="bg-white border-t border-gray-200 mt-auto" th:replace="~{fragments/footer :: footer}"></footer>
 
+<!-- Scripts -->
+<script>
+    // 모바일 메뉴 토글 스크립트
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+
+    if(btn && menu) {
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+    }
+</script>
 <th:block layout:fragment="script"></th:block>
 </body>
 </html>
