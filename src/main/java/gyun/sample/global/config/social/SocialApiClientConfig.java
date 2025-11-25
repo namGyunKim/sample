@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class KakaoApiClientConfig {
+public class SocialApiClientConfig {
 
     @Bean
     public Decoder feignDecoder(ObjectProvider<HttpMessageConverterCustomizer> customizers) {

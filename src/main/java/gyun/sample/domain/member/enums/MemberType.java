@@ -1,6 +1,7 @@
 package gyun.sample.domain.member.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import gyun.sample.domain.account.enums.AccountRole;
 import lombok.Getter;
 
 import java.util.stream.Stream;
@@ -9,11 +10,7 @@ import java.util.stream.Stream;
 public enum MemberType {
 
     GENERAL("일반"),
-    KAKAO("카카오"),
-    NAVER("네이버"),
     GOOGLE("구글"),
-    FACEBOOK("페이스북"),
-    APPLE("애플"),
     GUEST("손님"),
     ALL("전체");
 
@@ -43,7 +40,11 @@ public enum MemberType {
     }
 
     public boolean checkSocialType() {
-        return this == KAKAO || this == NAVER || this == GOOGLE || this == FACEBOOK || this == APPLE;
+        return this == GOOGLE;
     }
 
+    // 소셜 타입의 기본 권한을 반환하는 메서드 추가
+    public AccountRole getDefaultRole() {
+        return AccountRole.USER;
+    }
 }

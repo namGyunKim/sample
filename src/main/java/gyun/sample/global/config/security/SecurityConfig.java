@@ -51,7 +51,7 @@ public class SecurityConfig {
             "/api/health",
             "/", // IndexController
             "/api/sms/**",
-            "/social/**"
+            "/social/**" // [수정] 모든 소셜 관련 경로는 허용
     };
     private final JwtTokenProvider jwtTokenProvider;
     private final PrincipalDetailsService principalDetailsService;

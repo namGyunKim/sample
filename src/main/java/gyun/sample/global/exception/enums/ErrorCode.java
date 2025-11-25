@@ -34,6 +34,9 @@ public enum ErrorCode {
     KAKAO_API_GET_INFORMATION_ERROR("1203", "카카오 API Get Information Error"),
     KAKAO_API_LOGOUT_ERROR("1204", "카카오 API Logout Error"),
     KAKAO_API_UNLINK_ERROR("1205", "카카오 API Unlink Error"),
+    GOOGLE_API_GET_CODE_ERROR("1206", "구글 API Get Code Error"),
+    GOOGLE_API_GET_TOKEN_ERROR("1207", "구글 API Get Token Error"),
+    GOOGLE_API_GET_INFORMATION_ERROR("1208", "구글 API Get Information Error"),
 
     // === BOARD (2000) ===
     COMMENT_NOT_EXIST("2001", "존재하지 않는 댓글입니다."),

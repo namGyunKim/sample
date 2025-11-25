@@ -24,7 +24,7 @@ public class SwaggerConfig {
 
     @Bean
     public GroupedOpenApi openApi() {
-        String[] paths = {"/api/**","/enums"};
+        String[] paths = {"/api/**", "/social/**"};
         return GroupedOpenApi.builder()
                 .group("api v1")
                 .pathsToMatch(paths)
