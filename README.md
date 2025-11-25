@@ -1,186 +1,172 @@
-Spring Boot 3.2 + Thymeleaf Base Project
+Spring Boot Base Project
 
-이 프로젝트는 Spring Boot 3.2.5와 Java 21을 기반으로 하는 Monolithic Web Application 베이스 프로젝트입니다.
-SSR(Server-Side Rendering) 기술인 Thymeleaf를 사용하며, Spring Security(Session 기반) 인증 방식을 채택하고 있습니다.
+This project is a robust Spring Boot 3.2 starter template designed for rapid development of scalable web applications. It integrates essential features such as authentication (Social Login), file storage (AWS S3), messaging (Email, SMS), and database interactions using JPA and QueryDSL.
 
-확장성과 유지보수성을 고려하여 전략 패턴(Strategy Pattern), AOP 기반 유효성 검사, Dirty Checking 등을 적극적으로 활용합니다.
+🚀 Key Features
+
+Authentication & Security:
+
+Spring Security integration.
+
+Social Login support (Google OAuth2).
+
+Custom authentication success handlers.
+
+Member Management:
+
+Role-based access control (USER, ADMIN, SUPER_ADMIN).
+
+Member CRUD with Strategy Pattern.
+
+Profile image management.
+
+Infrastructure & Storage:
+
+AWS S3: Image upload and management.
+
+Redis: Session storage and caching.
+
+Messaging:
+
+Email: Async email sending via SMTP.
+
+SMS: Verification code sending service (CoolSMS).
+
+Database & ORM:
+
+Spring Data JPA & QueryDSL for dynamic queries.
+
+Auditing (CreatedAt, ModifiedAt, CreatedBy, ModifiedBy).
+
+P6Spy: Pretty SQL logging for development.
+
+Logging & Monitoring:
+
+MDC Logging (Trace ID tracking).
+
+AOP-based controller logging.
+
+Activity logging (Login, Update, etc.).
+
+View:
+
+Server-side rendering with Thymeleaf & Tailwind CSS.
 
 🛠 Tech Stack
 
-Environment
+Java: 21
 
-Java: 21 (LTS)
+Framework: Spring Boot 3.2
 
-Spring Boot: 3.2.5
+Database: MySQL / PostgreSQL
+
+Cache/Session: Redis
+
+ORM: JPA (Hibernate), QueryDSL
+
+Template Engine: Thymeleaf
 
 Build Tool: Gradle
 
-Core & Web
+⚙️ Configuration
 
-Spring WebMVC: Servlet 기반 웹 프레임워크
+Copy the application-dummy.yml file to src/main/resources/application.yml.
 
-Thymeleaf: 템플릿 엔진 (+ Layout Dialect, Security Extras)
+Fill in the required environment variables or direct values in the YAML file.
 
-Spring Security: 인증 및 권한 관리 (Session Based)
+# Example
+datasource:
+url: jdbc:mysql://localhost:3306/your_db
+username: root
+password: your_password
 
-Validation: Bean Validation (Jakarta Validation)
+aws:
+access-key: YOUR_AWS_ACCESS_KEY
+secret-key: YOUR_AWS_SECRET_KEY
 
-Data & Storage
 
-JPA (Hibernate): ORM 표준
+스프링 부트 베이스 프로젝트
 
-QueryDSL 5.0: Type-Safe 동적 쿼리 처리
+이 프로젝트는 확장 가능한 웹 애플리케이션의 빠른 개발을 위해 설계된 Spring Boot 3.2 기반의 스타터 템플릿입니다. 인증(소셜 로그인), 파일 저장소(AWS S3), 메시징(이메일, SMS), 그리고 JPA와 QueryDSL을 활용한 데이터베이스 상호작용 등 필수적인 기능들이 통합되어 있습니다.
 
-MySQL / PostgreSQL: 메인 데이터베이스 (Local: MySQL, Prod: PostgreSQL 권장)
+🚀 주요 기능
 
-Redis: 캐싱, Rate Limiting (Bucket4j), 임시 데이터 저장
+인증 및 보안:
 
-AWS S3: 이미지 파일 스토리지
+Spring Security 통합.
 
-Infra & Utils
+소셜 로그인 지원 (Google OAuth2).
 
-Swagger (SpringDoc): API 문서화 (Local 프로필에서만 활성화 권장)
+커스텀 인증 성공 핸들러.
 
-P6Spy: 쿼리 파라미터 로깅
+회원 관리:
 
-OpenFeign: 외부 API 통신 (Google Login 등)
+역할 기반 접근 제어 (USER, ADMIN, SUPER_ADMIN).
 
-CoolSMS: SMS 발송
+전략 패턴(Strategy Pattern)을 적용한 회원 CRUD.
 
-JavaMailSender: 이메일 발송
+프로필 이미지 관리.
 
-🏗 Project Architecture & Patterns
+인프라 및 저장소:
 
-1. 회원 관리 전략 (Strategy Pattern)
+AWS S3: 이미지 업로드 및 관리.
 
-회원(Member)은 USER, ADMIN, SUPER_ADMIN 등 다양한 역할(Role)을 가집니다. 이를 효율적으로 관리하기 위해 전략 패턴을 사용합니다.
+Redis: 세션 저장소 및 캐싱 활용.
 
-MemberStrategyFactory: 런타임에 AccountRole에 맞는 Service 구현체를 주입해줍니다.
+메시징:
 
-Read/Write 분리: 조회(ReadMemberService)와 변경(WriteMemberService) 로직을 인터페이스단에서 분리하여 CQRS 패턴의 기초를 마련했습니다.
+Email: SMTP를 이용한 비동기 이메일 발송.
 
-2. AOP 기반 유효성 검사 (Validation)
+SMS: 인증 번호 발송 서비스 (CoolSMS).
 
-컨트롤러의 코드를 깔끔하게 유지하기 위해 BindingResult 처리를 AOP로 이관했습니다.
+데이터베이스 및 ORM:
 
-동작 원리:
+Spring Data JPA 및 동적 쿼리를 위한 QueryDSL.
 
-컨트롤러 메서드에서 @Valid 객체 뒤에 BindingResult를 파라미터로 선언합니다.
+Auditing 적용 (생성일, 수정일, 생성자, 수정자 자동 관리).
 
-BindingAdvice (AOP) 가 메서드 실행 전 BindingResult의 에러 유무를 감지합니다.
+P6Spy: 개발 편의를 위한 가독성 높은 SQL 로깅.
 
-에러가 존재하면 BindingException을 throw 합니다.
+로깅 및 모니터링:
 
-ExceptionAdvice에서 이를 포착하여 공통 에러 처리를 수행합니다.
+MDC 로깅 (요청별 Trace ID 추적).
 
-⚠️ 주의사항: 컨트롤러 메서드 시그니처에 BindingResult가 없으면 AOP가 동작하지 않고, 스프링 기본 예외가 발생할 수 있습니다.
+AOP 기반의 컨트롤러 요청/응답 로깅.
 
-3. InitBinder & Validator 네이밍 규칙
+사용자 활동 로그 기록 (로그인, 정보 수정 등).
 
-커스텀 Validator를 @InitBinder로 등록하여 사용할 때, 변수명 일치가 필수적입니다.
+뷰 (View):
 
-// Controller 예시
-@InitBinder("memberCreateRequest") // 1. 지정한 이름
-public void initBinder(WebDataBinder dataBinder) {
-dataBinder.addValidators(memberCreateValidator);
-}
+Thymeleaf 및 Tailwind CSS를 이용한 서버 사이드 렌더링.
 
-@PostMapping(...)
-public String create(
-// 2. @ModelAttribute의 이름(또는 파라미터 변수명)이 위와 일치해야 함
-@Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest request,
-BindingResult bindingResult
-) { ... }
+🛠 기술 스택
 
+Java: 21
 
-4. 더티 체킹 (Dirty Checking) 지향
+Framework: Spring Boot 3.2
 
-Builder 패턴 미사용: 객체의 일관성을 위해 무분별한 빌더 사용을 지양합니다.
+Database: MySQL / PostgreSQL
 
-생성자 주입: 필수 필드는 생성 시점에 강제합니다.
+Cache/Session: Redis
 
-Update 메서드: 엔티티 내부에 비즈니스 로직을 담은 수정 메서드(updatePassword, deActive 등)를 정의하고, @Transactional 안에서 조회 후 상태를 변경하여 더티 체킹으로 DB에 반영합니다.
+ORM: JPA (Hibernate), QueryDSL
 
-🚀 Getting Started
+Template Engine: Thymeleaf
 
-1. 사전 요구 사항
+Build Tool: Gradle
 
-Java 21 이상 설치
+⚙️ 설정 방법
 
-Redis 실행 (기본 포트 6379)
+application-dummy.yml 파일의 내용을 복사하여 src/main/resources/application.yml 파일을 생성하거나 덮어씁니다.
 
-MySQL (Local) 실행
+YAML 파일 내의 주요 설정 값(DB 정보, AWS 키, API 키 등)을 본인의 환경에 맞게 수정합니다.
 
-2. 환경 변수 설정 (application.yml)
+# 예시
+datasource:
+url: jdbc:mysql://localhost:3306/your_db
+username: root
+password: your_password
 
-로컬 실행 시 application-local.yml이 활성화됩니다. 아래 설정들이 필요합니다.
-
-# DB 설정
-spring.datasource.username: root
-spring.datasource.password: 0000
-
-# AWS S3 (이미지 업로드)
-aws.access-key: [YOUR_ACCESS_KEY]
-aws.secret-key: [YOUR_SECRET_KEY]
-s3.bucket-local: [BUCKET_NAME]
-
-# Google Social Login
-social.google.clientId: [CLIENT_ID]
-social.google.secretKey: [SECRET_KEY]
-
-# SMS / Mail 등 필요한 키 설정
-
-
-3. 빌드 및 실행
-
-# Build
-./gradlew clean build -x test
-
-# Run
-java -jar build/libs/app.jar
-
-
-
-📝 Coding Conventions
-
-Entity:
-
-@Setter 사용 지양.
-
-기본 생성자는 protected.
-
-변경 로직은 엔티티 내부 메서드로 구현.
-
-DTO:
-
-Java record 사용 권장 (불변성 보장).
-
-Logging:
-
-ControllerLoggingAspect를 통해 요청/응답을 로깅합니다.
-
-TraceID를 발급하여 요청 흐름을 추적합니다.
-
-가독성을 위해 줄바꿈(\n) 스타일을 사용합니다.
-
-Exception:
-
-비즈니스 로직 예외는 GlobalException을 사용하며 ErrorCode를 통해 관리합니다.
-
-ExceptionAdvice가 Accept 헤더에 따라 JSON 또는 HTML 에러 페이지를 자동으로 분기하여 반환합니다.
-
-🔒 Security & Auth
-
-방식: Session Based Authentication (JSESSIONID)
-
-접근 제어:
-
-SecurityConfig의 filterChain 및 어노테이션(@PreAuthorize) 기반 제어.
-
-MemberGuard 빈을 활용하여 리소스 소유자 확인 등 복잡한 권한 로직 수행.
-
-Current User:
-
-컨트롤러에서 @CurrentAccount CurrentAccountDTO account 파라미터를 통해 현재 로그인된 사용자 정보를 손쉽게 획득 가능.
-
-© 2025 Sample Base Project.
+aws:
+access-key: 발급받은_AWS_ACCESS_KEY
+secret-key: 발급받은_AWS_SECRET_KEY
