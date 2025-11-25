@@ -2,76 +2,83 @@
 <html lang="ko"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      xmlns:th="http://www.thymeleaf.org"> <!-- [수정] Thymeleaf Security 네임스페이스 수정 -->
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title layout:title-document="샘플 타임리프 프로젝트">샘플 타임리프 프로젝트</title>
+    <title layout:title-document="샘플 프로젝트">샘플 프로젝트</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <!-- [수정] Tailwind CSS CDN 링크 수정 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 커스텀 스타일 */
-        /* Noto Sans KR 폰트는 별도 임포트가 필요하지만, 여기서는 기본 폰트로 대체 */
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif; /* 폰트 예시 변경 */
         }
     </style>
     <th:block layout:fragment="css"></th:block>
 </head>
-<body class="bg-gray-100 min-h-screen">
-<nav class="bg-white shadow-lg">
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+<!-- 네비게이션 바 -->
+<nav class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
+            <!-- 로고 -->
             <div class="flex items-center">
-                <a class="text-xl font-bold text-gray-900" th:href="@{/}">샘플 베이스</a>
+                <a class="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors" th:href="@{/}">
+                    Base Project
+                </a>
             </div>
-            <div class="flex items-center">
-                <a class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                   th:href="@{/member/user/list}">유저 목록</a>
+
+            <!-- 메뉴 (불필요한 유저 목록 제거) -->
+            <div class="flex items-center space-x-4">
                 <!-- 로그인된 경우 -->
-                <div sec:authorize="isAuthenticated()">
-                    <!-- [수정] sec:authentication의 principal.nickName은 PrincipalDetails의 getNickName()을 호출함 -->
-                    <a class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                       sec:authentication="principal.nickName"
+                <div class="flex items-center space-x-2" sec:authorize="isAuthenticated()">
+                    <span class="text-sm text-gray-500 mr-2">
+                        <span class="font-semibold text-gray-700" sec:authentication="principal.nickName">User</span>님
+                    </span>
+                    <a class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                        th:href="@{/account/profile}">내 프로필</a>
-                    <a class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md text-sm font-medium ml-4"
+                    <a class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
                        th:href="@{/logout}">로그아웃</a>
                 </div>
+
                 <!-- 로그아웃된 경우 -->
                 <div sec:authorize="!isAuthenticated()">
-                    <a class="text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium ml-4"
+                    <a class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
                        th:href="@{/account/login}">로그인</a>
                 </div>
             </div>
         </div>
     </div>
 </nav>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- 메인 컨텐츠 영역 -->
-    <main class="bg-white p-6 rounded-lg shadow-xl" layout:fragment="content">
-        <p>기본 컨텐츠</p>
+
+<!-- 메인 컨텐츠 -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+    <main class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 min-h-[500px]" layout:fragment="content">
+        <!-- 컨텐츠가 들어갈 자리 -->
     </main>
 </div>
-<footer class="mt-12 py-4 text-center text-gray-500 border-t">
-    <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> Sample Base Project</p>
+
+<!-- 푸터 -->
+<footer class="bg-white border-t border-gray-200 mt-auto">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-sm text-gray-500">
+            &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> Sample Base Project. All rights reserved.
+        </p>
+    </div>
 </footer>
+
 <th:block layout:fragment="script"></th:block>
 <script th:inline="javascript">
     /* Flash Attribute 메시지 처리 */
     const message = [[${message}]];
     const logoutMessage = [[${logoutMessage}]];
 
-    // [개선 권고] alert() 대신 커스텀 모달 UI 사용을 권장합니다.
     if (message) {
-        // alert(message);
-        console.log("Flash Message: " + message);
-        // 여기에 커스텀 모달 표시 로직 구현
+        console.log("System Message: " + message);
     }
     if (logoutMessage) {
-        // alert(logoutMessage);
         console.log("Logout Message: " + logoutMessage);
-        // 여기에 커스텀 모달 표시 로직 구현
     }
 </script>
 </body>
