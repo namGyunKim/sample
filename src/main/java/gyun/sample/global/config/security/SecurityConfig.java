@@ -30,21 +30,21 @@ public class SecurityConfig {
 
     private static final String[] WHITE_LIST = {
             // 정적 자원 (Thymeleaf/웹 환경)
-            "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico",
+            "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico", "/sw.js", // sw.js 허용 추가
             // Swagger/API Docs 관련 경로
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/enums",
 
             // 공개 뷰 경로
-            "/", "/account/login", "/error",
-            // [변경] "/member/user/create" 제거 (일반 회원가입 비활성화)
+            "/", "/account/login", "/member/user/create", "/error",
 
-            // 공개 API 경로
+            // 공개 API 경로 (일부 RestController는 남겨둠)
             "/api/health",
             "/api/sms/**",
-            "/social/**", // 소셜 로그인
-            "/login" // Spring Security 로그인 프로세스
+            "/social/**", // 소셜 로그인 (콜백 엔드포인트는 세션 발급)
+            "/login" // Spring Security가 처리하는 POST 로그인 경로
     };
 
+    // PrincipalDetailsService 대신 UserDetailsService 인터페이스 사용
     private final UserDetailsService userDetailsService;
 
 
@@ -56,9 +56,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * DaoAuthenticationProvider 설정
-     */
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -70,7 +68,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 비활성화
+                // CSRF 비활성화 (Rest API 호환성을 위해 유지. 폼 로그인을 사용하므로 활성화가 권장되지만, 현재 베이스는 비활성)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authenticationProvider(authenticationProvider())
@@ -80,11 +78,11 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 필요한 경우에만 세션 생성
                 )
 
-                // 폼 로그인 설정 (관리자용으로 남겨두거나 내부 처리용, UI에서는 숨김)
+                // 폼 로그인 설정
                 .formLogin(form -> form
                         .loginPage("/account/login")        // 사용자 정의 로그인 페이지 (GET)
-                        .loginProcessingUrl("/login")       // 로그인 처리 POST 요청 경로
-                        .usernameParameter("username")
+                        .loginProcessingUrl("/login")       // 로그인 처리 POST 요청 경로 (templates/account/login.html의 action과 일치)
+                        .usernameParameter("username")      // Spring Security 기본값 유지 (loginId + role을 조합하여 사용해야 함)
                         .passwordParameter("password")
                         .defaultSuccessUrl("/", true)       // 로그인 성공 시 리다이렉트 경로
                         .failureUrl("/account/login?error")  // 로그인 실패 시 리다이렉트 경로
@@ -107,17 +105,22 @@ public class SecurityConfig {
                 )
         ;
 
+        // 참고: 폼 로그인 시 `role` 파라미터를 처리하기 위해 Custom Authentication Filter를 추가하는 것이 정석이나,
+        // 현재는 `PrincipalDetailsService`가 `username`만으로도 `Member`를 찾도록 되어 있어,
+        // `PrincipalDetailsService`를 수정하여 `username` + `role`을 파싱하도록 합니다. (다음 파일에서 수정)
+
         return http.build();
     }
 
-    // CORS 설정
+    // CORS 설정 (Rest API 호환성을 위해 유지)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // application.yml의 CORS 설정 (app.cors.allowed-origins)을 활용하도록 변경 권장
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of());
+        configuration.setExposedHeaders(List.of()); // JWT 미사용으로 Authorization 노출 제거
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
