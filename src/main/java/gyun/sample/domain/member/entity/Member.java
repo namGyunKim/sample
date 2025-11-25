@@ -11,6 +11,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Comment;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class Member extends BaseTimeEntity {
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
     @Comment("유저 활성")
+    @Setter
     private GlobalActiveEnums active;
     @Enumerated(EnumType.STRING)
     @Comment("유저 권한")
@@ -50,7 +52,7 @@ public class Member extends BaseTimeEntity {
 
     @Column(columnDefinition = "text")
     @Comment("소셜 토큰")
-    private String socialToken;
+    private String socialToken; // 소셜 연동 해제 시 null 가능
     @Comment("소셜 키")
     private String socialKey;
 
@@ -96,8 +98,9 @@ public class Member extends BaseTimeEntity {
         this.active = GlobalActiveEnums.INACTIVE;
     }
 
-    public void updateAccessToken(String accessToken) {
-        this.socialToken = accessToken;
+    // Access Token 업데이트 (소셜 연동 해제 시 null 전달 가능)
+    public void updateAccessToken(String socialToken) {
+        this.socialToken = socialToken;
     }
 
     public void addImage(MemberImage memberImage) {

@@ -1,11 +1,11 @@
 package gyun.sample.domain.social.google.service;
 
 import feign.FeignException;
+import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.repository.MemberRepository;
-import gyun.sample.domain.member.service.write.WriteUserService;
 import gyun.sample.domain.social.google.payload.response.GoogleTokenResponse;
 import gyun.sample.domain.social.google.payload.response.GoogleUserInfoResponse;
 import gyun.sample.domain.social.service.SocialLoginService;
@@ -20,6 +20,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.Optional;
+
 @Slf4j
 @Service
 @Transactional
@@ -27,8 +35,8 @@ public class GoogleSocialService implements SocialLoginService {
 
     private final GoogleApiClient googleApiClient;
     private final MemberRepository memberRepository;
-    private final WriteUserService writeUserService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final HttpClient httpClient;
 
     @Value("${social.google.baseUrl}")
     private String baseUrl;
@@ -45,11 +53,15 @@ public class GoogleSocialService implements SocialLoginService {
     @Value("${social.google.scope}")
     private String scope;
 
-    public GoogleSocialService(GoogleApiClient googleApiClient, MemberRepository memberRepository, WriteUserService writeUserService, JwtTokenProvider jwtTokenProvider) {
+    // [수정] WriteUserService 제거
+    public GoogleSocialService(GoogleApiClient googleApiClient, MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
         this.googleApiClient = googleApiClient;
         this.memberRepository = memberRepository;
-        this.writeUserService = writeUserService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .build();
     }
 
     @Override
@@ -66,7 +78,7 @@ public class GoogleSocialService implements SocialLoginService {
                     .queryParam("client_id", clientId)
                     .queryParam("redirect_uri", redirectUri)
                     .queryParam("response_type", "code")
-                    .queryParam("scope", scope.replace(",", "%20")) // 스코프는 공백으로 구분
+                    .queryParam("scope", scope.replace(",", "%20"))
                     .toUriString();
         } catch (Exception e) {
             log.error("Google Redirect URL 생성 중 오류 발생: {}", e.getMessage(), e);
@@ -84,6 +96,55 @@ public class GoogleSocialService implements SocialLoginService {
 
         // 3. 회원가입 및 로그인 처리
         return registerOrLoginMember(userInfo, tokenResponse.accessToken());
+    }
+
+    /**
+     * Google과의 연결을 끊고, Access Token을 무효화합니다. (탈퇴 시 사용)
+     *
+     * @param member Google 소셜 회원
+     */
+    public void unlink(Member member) {
+        if (member.getMemberType() != MemberType.GOOGLE) {
+            log.warn("Google 회원이 아님: {}", member.getLoginId());
+            return;
+        }
+
+        String accessToken = member.getSocialToken();
+        if (accessToken == null || accessToken.isBlank()) {
+            log.warn("Google Access Token이 없음. 연동 해제 불필요: {}", member.getLoginId());
+            return;
+        }
+
+        try {
+            // Google 토큰 취소 API URL: https://oauth2.googleapis.com/revoke?token={token}
+            String revokeUrl = UriComponentsBuilder.fromUriString("https://oauth2.googleapis.com")
+                    .path("/revoke")
+                    .queryParam("token", accessToken)
+                    .toUriString();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(revokeUrl))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .timeout(Duration.ofSeconds(5))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                log.error("Google 토큰 취소 실패 (HTTP {}): {}", response.statusCode(), response.body());
+                throw new SocialException(ErrorCode.GOOGLE_API_UNLINK_ERROR, "Google 토큰 취소 실패 (HTTP " + response.statusCode() + ") - " + response.body());
+            }
+
+            member.updateAccessToken(null);
+            log.info("Google 토큰 취소 성공: {}", member.getLoginId());
+
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            log.error("Google 토큰 취소 중 오류 발생: {}", e.getMessage(), e);
+            throw new SocialException(ErrorCode.GOOGLE_API_UNLINK_ERROR, e);
+        }
     }
 
     /**
@@ -109,8 +170,6 @@ public class GoogleSocialService implements SocialLoginService {
      */
     private GoogleUserInfoResponse getUserInfo(String accessToken) {
         try {
-            // Google의 User Info API는 GET 요청도 지원하지만, Feign Client는 Post 요청으로 구현했습니다.
-            // GoogleApiClient.java의 주석을 확인하세요.
             return googleApiClient.getUserInfo(accessToken);
         } catch (FeignException e) {
             log.error("Google User Info 요청 실패: {}", e.getMessage(), e);
@@ -120,42 +179,57 @@ public class GoogleSocialService implements SocialLoginService {
 
     /**
      * 소셜 키(ID)를 기반으로 회원가입 또는 로그인 처리
+     * 1. ACTIVE 회원 찾기 -> 로그인 및 토큰 업데이트
+     * 2. INACTIVE 회원 찾기 -> ACTIVE로 전환 및 로그인
+     * 3. 신규 회원 -> 회원가입
      */
     private AccountLoginResponse registerOrLoginMember(GoogleUserInfoResponse userInfo, String accessToken) {
-        // Google의 고유 ID를 Social Key로 사용
         String socialKey = userInfo.id();
+        MemberType memberType = MemberType.GOOGLE;
+        AccountRole role = memberType.getDefaultRole();
 
-        return memberRepository.findBySocialKeyAndRoleAndActiveAndMemberType(
-                socialKey,
-                MemberType.GOOGLE.getDefaultRole(),
-                GlobalActiveEnums.ACTIVE,
-                MemberType.GOOGLE
-        ).map(member -> {
-            // 1. 이미 존재하는 회원: 토큰 업데이트 및 로그인 처리
-            log.info("Google 로그인 성공 (기존 회원): {}", member.getLoginId());
-            member.updateAccessToken(accessToken); // 소셜 토큰 업데이트 (선택 사항)
+        // 1. ACTIVE 회원 찾기 (일반 로그인)
+        Optional<Member> activeMember = memberRepository.findBySocialKeyAndRoleAndActiveAndMemberType(
+                socialKey, role, GlobalActiveEnums.ACTIVE, memberType
+        );
+
+        if (activeMember.isPresent()) {
+            Member member = activeMember.get();
+            log.info("Google 로그인 성공 (기존 ACTIVE 회원): {}", member.getLoginId());
+            member.updateAccessToken(accessToken);
             String jwtAccessToken = jwtTokenProvider.createAccessToken(member);
             String jwtRefreshToken = jwtTokenProvider.createRefreshToken(member);
             return new AccountLoginResponse(jwtAccessToken, jwtRefreshToken);
-        }).orElseGet(() -> {
-            // 2. 신규 회원: 회원가입 및 로그인 처리
-            log.info("Google 회원가입 시작: SocialKey={}", socialKey);
-            // 닉네임은 Google name (null 방지를 위해 email도 고려)
-            String nickName = userInfo.name() != null && !userInfo.name().isBlank() ? userInfo.name() : userInfo.email().split("@")[0];
-            String loginId = MemberType.GOOGLE.name().toLowerCase() + "_" + socialKey;
+        }
 
-            // 소셜 회원은 비밀번호 없이 생성
-            Member newMember = new Member(loginId, nickName, MemberType.GOOGLE, socialKey);
-            newMember.updateAccessToken(accessToken);
+        // 2. INACTIVE 회원 찾기 (탈퇴 후 재가입)
+        Optional<Member> inactiveMember = memberRepository.findBySocialKeyAndRoleAndActiveAndMemberType(
+                socialKey, role, GlobalActiveEnums.INACTIVE, memberType
+        );
 
-            // WriteUserService의 소셜 회원가입 로직이 있다면 사용 (현재는 일반 회원가입 로직만 있음)
-            // 임시로 직접 save 후 JWT 생성
-            Member savedMember = memberRepository.save(newMember);
-
-            // JWT 생성
-            String jwtAccessToken = jwtTokenProvider.createAccessToken(savedMember);
-            String jwtRefreshToken = jwtTokenProvider.createRefreshToken(savedMember);
+        if (inactiveMember.isPresent()) {
+            Member member = inactiveMember.get();
+            log.info("Google 재가입 성공 (기존 INACTIVE 회원, ACTIVE로 전환): {}", member.getLoginId());
+            member.setActive(GlobalActiveEnums.ACTIVE); // ACTIVE로 전환
+            member.updateAccessToken(accessToken); // 새 토큰 업데이트
+            // Refresh Token도 재발급 (이전 토큰은 무효화되었을 가능성이 높음)
+            String jwtAccessToken = jwtTokenProvider.createAccessToken(member);
+            String jwtRefreshToken = jwtTokenProvider.createRefreshToken(member);
             return new AccountLoginResponse(jwtAccessToken, jwtRefreshToken);
-        });
+        }
+
+        // 3. 신규 회원: 회원가입 및 로그인 처리
+        log.info("Google 신규 회원가입 시작: SocialKey={}", socialKey);
+        String nickName = userInfo.name() != null && !userInfo.name().isBlank() ? userInfo.name() : userInfo.email().split("@")[0];
+        String loginId = memberType.name().toLowerCase() + "_" + socialKey;
+
+        Member newMember = new Member(loginId, nickName, memberType, socialKey);
+        newMember.updateAccessToken(accessToken);
+
+        Member savedMember = memberRepository.save(newMember);
+
+        String jwtAccessToken = jwtTokenProvider.createAccessToken(savedMember);
+        String jwtRefreshToken = jwtTokenProvider.createRefreshToken(savedMember);
+        return new AccountLoginResponse(jwtAccessToken, jwtRefreshToken);
     }
 }
