@@ -16,26 +16,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * 전역 예외 처리 (JSON API 및 Thymeleaf 뷰 공통 처리)
- * - RestController에는 JSON 응답을, Controller에는 HTML 뷰 응답을 반환하도록 설정
+ * - Accept 헤더를 감지하여 JSON 또는 HTML로 응답을 분기합니다.
  */
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -46,200 +40,91 @@ public class ExceptionAdvice {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     // =================================================================================
-    // Internal Helper Methods for Logging and Response Generation (JSON/HTML)
-    // =================================================================================
-
-    // Event - Log
-    private void sendLogEvent(Exception exception, ErrorCode errorCode, String errorDetailMessage, CurrentAccountDTO account, HttpServletRequest httpServletRequest) {
-        applicationEventPublisher.publishEvent(ExceptionEvent.createExceptionEvent(exception, errorCode, errorDetailMessage, account, httpServletRequest));
-    }
-
-    private ResponseEntity<RestApiResponse<ErrorResult>> createFailRestResponse(ErrorResult errorResult, HttpStatus status) {
-        return ResponseEntity
-                .status(status)
-                .body(RestApiResponse.fail(errorResult));
-    }
-
-    private ModelAndView createFailModelAndView(ErrorCode errorCode, HttpStatus status, HttpServletRequest request) {
-        ModelAndView mav = new ModelAndView("error/error"); // 공통 에러 페이지 뷰 이름
-        mav.setStatus(status);
-        mav.addObject("code", errorCode.getCode());
-        mav.addObject("message", errorCode.getErrorMessage());
-        mav.addObject("timestamp", System.currentTimeMillis());
-        mav.addObject("path", request.getRequestURI());
-        return mav;
-    }
-
-
-    // =================================================================================
     // Custom Exception Handlers
     // =================================================================================
 
-    /**
-     * 비즈니스 로직 전역 예외 처리 (GlobalException)
-     */
-    @ExceptionHandler(value = GlobalException.class)
+    @ExceptionHandler(GlobalException.class)
     public Object handleGlobalException(GlobalException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        sendLogEvent(e, e.getErrorCode(), e.getErrorDetailMessage(), account, request);
-        return handleExceptionInternal(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, account, request);
+        return processException(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, e.getErrorDetailMessage(), account, request);
     }
 
-    /**
-     * 바인딩 예외 처리 (BindingAdvice에서 던진 예외)
-     */
-    @ExceptionHandler(value = BindingException.class)
+    @ExceptionHandler(BindingException.class)
     public Object handleBindingException(BindingException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        sendLogEvent(e, e.getErrorCode(), e.getErrorDetailMessage(), account, request);
-        // HTML 요청인 경우 이전 페이지로 리다이렉트하거나 폼을 다시 보여주는 것이 좋지만,
-        // 여기서는 임시로 GlobalException과 동일하게 처리합니다.
-        return handleExceptionInternal(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, account, request);
+        // 바인딩 에러는 상세 메시지에 필드별 에러 내용을 포함
+        return processException(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, e.getErrorDetailMessage(), account, request);
     }
 
-    /**
-     * JWT 인터셉터 예외 처리 (세션 기반에서는 발생하지 않음, JSON API 호환성을 위해 유지)
-     */
-    @ExceptionHandler(value = JWTInterceptorException.class)
-    public Object handleJWTInterceptorException(JWTInterceptorException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        sendLogEvent(e, e.getErrorCode(), e.getErrorDetailMessage(), account, request);
-        return handleExceptionInternal(e, e.getErrorCode(), HttpStatus.UNAUTHORIZED, account, request);
-    }
-
-    /**
-     * 소셜 로그인 관련 예외 처리
-     */
-    @ExceptionHandler(value = SocialException.class)
+    @ExceptionHandler(SocialException.class)
     public Object handleSocialException(SocialException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        sendLogEvent(e, e.getErrorCode(), e.getErrorDetailMessage(), account, request);
-        return handleExceptionInternal(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, account, request);
+        return processException(e, e.getErrorCode(), HttpStatus.BAD_REQUEST, e.getErrorDetailMessage(), account, request);
+    }
+
+    @ExceptionHandler(JWTInterceptorException.class)
+    public Object handleJWTException(JWTInterceptorException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
+        return processException(e, e.getErrorCode(), HttpStatus.UNAUTHORIZED, e.getErrorDetailMessage(), account, request);
     }
 
     // =================================================================================
-    // Standard Spring Exception Handlers
+    // Standard Exception Handlers
     // =================================================================================
 
-    /**
-     * 정적 자원(Static Resource) 없음 예외 처리 (Spring Boot 3.2+)
-     * - /sw.js, /favicon.ico 등 존재하지 않는 정적 리소스 요청 시 발생하는 WARN 로그 방지
-     * - sendLogEvent를 호출하지 않음
-     */
-    @ExceptionHandler(NoResourceFoundException.class)
-    public Object handleNoResourceFoundException(NoResourceFoundException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        // 로그 이벤트 발행 생략 (콘솔 로그 안 뜸)
-
-        String acceptHeader = request.getHeader("Accept");
-        if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE)) {
-            ErrorResult errorResult = ErrorCode.PAGE_NOT_EXIST.getErrorResponse();
-            return createFailRestResponse(errorResult, HttpStatus.NOT_FOUND);
-        } else {
-            // HTML 응답이 필요한 경우 404 에러 페이지 반환
-            return createFailModelAndView(ErrorCode.PAGE_NOT_EXIST, HttpStatus.NOT_FOUND, request);
-        }
-    }
-
-    /**
-     * @Valid 유효성 검사 실패 시 (@RequestBody)
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Object handleMethodArgumentNotValidException(MethodArgumentNotValidException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.INPUT_VALUE_INVALID, HttpStatus.BAD_REQUEST, account, request);
-    }
-
-    /**
-     * DB 데이터 접근 에러 (SQL 예외 등)
-     */
-    @ExceptionHandler(DataAccessException.class)
-    public Object handleDataAccessException(DataAccessException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.DATA_ACCESS_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, account, request);
-    }
-
-    /**
-     * 권한 없음 (Security)
-     */
     @ExceptionHandler(AccessDeniedException.class)
     public Object handleAccessDeniedException(AccessDeniedException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.ACCESS_DENIED, HttpStatus.FORBIDDEN, account, request);
+        return processException(e, ErrorCode.ACCESS_DENIED, HttpStatus.FORBIDDEN, e.getMessage(), account, request);
     }
 
-    /**
-     * 파일 업로드 용량 초과
-     */
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public Object handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED, HttpStatus.PAYLOAD_TOO_LARGE, account, request);
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Object handleNoResourceFoundException(NoResourceFoundException e, HttpServletRequest request) {
+        // 정적 자원 404는 로그 이벤트 발행 제외 (노이즈 감소)
+        return createResponse(ErrorCode.PAGE_NOT_EXIST, HttpStatus.NOT_FOUND, request);
     }
 
-    /**
-     * 잘못된 요청 핸들러 (404)
-     */
     @ExceptionHandler(NoHandlerFoundException.class)
     public Object handleNoHandlerFoundException(NoHandlerFoundException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.PAGE_NOT_EXIST, HttpStatus.NOT_FOUND, account, request);
+        return processException(e, ErrorCode.PAGE_NOT_EXIST, HttpStatus.NOT_FOUND, e.getMessage(), account, request);
     }
 
-    /**
-     * 지원하지 않는 HTTP Method 요청
-     */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public Object handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.METHOD_NOT_SUPPORTED, HttpStatus.METHOD_NOT_ALLOWED, account, request);
+    public Object handleMethodNotSupported(HttpRequestMethodNotSupportedException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
+        return processException(e, ErrorCode.METHOD_NOT_SUPPORTED, HttpStatus.METHOD_NOT_ALLOWED, e.getMessage(), account, request);
     }
-
-    /**
-     * 잘못된 인자값 전달
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public Object handleIllegalArgumentException(IllegalArgumentException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.ARGUMENT_INVALID, HttpStatus.BAD_REQUEST, account, request);
-    }
-
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public Object handleHttpMessageNotReadableException(HttpMessageNotReadableException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.JSON_PROCESS_FAIL, HttpStatus.BAD_REQUEST, account, request);
-    }
-
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public Object handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.INVALID_PARAMETER, HttpStatus.BAD_REQUEST, account, request);
-    }
-
-
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public Object handleMissingServletRequestParameterException(MissingServletRequestParameterException e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        return handleExceptionInternal(e, ErrorCode.INVALID_PARAMETER, HttpStatus.BAD_REQUEST, account, request);
-    }
-
-
-    // =================================================================================
-    // Fallback Handler
-    // =================================================================================
 
     @ExceptionHandler(Exception.class)
     public Object handleException(Exception e, @CurrentAccount CurrentAccountDTO account, HttpServletRequest request) {
-        // 예상치 못한 예외는 500으로 처리
-        return handleExceptionInternal(e, ErrorCode.FAILED, HttpStatus.INTERNAL_SERVER_ERROR, account, request);
+        log.error("Unexpected Error: ", e);
+        return processException(e, ErrorCode.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), account, request);
     }
 
+    // =================================================================================
+    // Internal Logic
+    // =================================================================================
 
-    /**
-     * 공통 예외 처리 내부 로직 (JSON/HTML 분기)
-     * - Accept 헤더를 기반으로 JSON 또는 HTML 응답을 생성합니다.
-     */
-    private Object handleExceptionInternal(Exception e, ErrorCode errorCode, HttpStatus status, CurrentAccountDTO account, HttpServletRequest request) {
-        // 예외 로그 이벤트 발생 (GlobalException으로 래핑)
-        GlobalException globalException = new GlobalException(errorCode, e);
-        sendLogEvent(globalException, errorCode, e.getMessage(), account, request);
+    private Object processException(Exception e, ErrorCode errorCode, HttpStatus status, String detailMessage, CurrentAccountDTO account, HttpServletRequest request) {
+        // 1. 로그 이벤트 발행
+        applicationEventPublisher.publishEvent(
+                ExceptionEvent.createExceptionEvent(e, errorCode, detailMessage, account, request)
+        );
 
-        // Accept 헤더 확인 (JSON API 호출인지, HTML 뷰 요청인지)
+        // 2. 응답 생성 (JSON vs View)
+        return createResponse(errorCode, status, request);
+    }
+
+    private Object createResponse(ErrorCode errorCode, HttpStatus status, HttpServletRequest request) {
         String acceptHeader = request.getHeader("Accept");
-        if (acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE)) {
-            // JSON 응답 (기존 RestControllerAdvice의 로직)
-            ErrorResult errorResult = errorCode.getErrorResponse();
-            return createFailRestResponse(errorResult, status);
+        boolean isJsonRequest = acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE);
+
+        if (isJsonRequest) {
+            return ResponseEntity
+                    .status(status)
+                    .body(RestApiResponse.fail(errorCode.getErrorResponse()));
         } else {
-            // HTML/View 응답
-            return createFailModelAndView(errorCode, status, request);
+            ModelAndView mav = new ModelAndView("error/error");
+            mav.setStatus(status);
+            mav.addObject("code", errorCode.getCode());
+            mav.addObject("message", errorCode.getErrorMessage());
+            mav.addObject("status", status.value());
+            mav.addObject("path", request.getRequestURI());
+            return mav;
         }
     }
 }

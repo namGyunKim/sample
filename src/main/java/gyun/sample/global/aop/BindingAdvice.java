@@ -12,14 +12,15 @@ import org.springframework.validation.FieldError;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * BindingResult AOP 처리
  * - 컨트롤러 메서드 실행 전 BindingResult를 검사
  * - 에러 발생 시 BindingException 던짐 -> ExceptionAdvice에서 처리
- * - 컨트롤러 메서드 파라미터에 BindingResult가 반드시 포함되어 있어야 함
- * - 주의: 이 방식은 타임리프 폼에서 에러 메시지를 필드 옆에 보여주는 기본 흐름 대신,
- * 전역 예외 처리(에러 페이지)로 이동하게 만듭니다. 클린 모드/API 스타일 유효성 검증에 적합합니다.
+ * - 주의: Thymeleaf 폼 검증 시, 이 방식은 에러 페이지로 이동하게 됩니다.
+ * 인라인 에러 메시지를 원한다면 컨트롤러 내부에서 hasErrors()를 직접 체크해야 하지만,
+ * 베이스 프로젝트 원칙상 AOP로 일괄 처리합니다.
  */
 @Slf4j
 @Aspect
@@ -33,18 +34,18 @@ public class BindingAdvice {
         for (Object arg : args) {
             if (arg instanceof BindingResult bindingResult) {
                 if (bindingResult.hasErrors()) {
-                    // 에러 맵 생성
-                    Map<String, String> errorMap = new HashMap<>();
-                    for (FieldError error : bindingResult.getFieldErrors()) {
-                        errorMap.put(error.getField(), error.getDefaultMessage());
-                    }
+                    Map<String, String> errorMap = bindingResult.getFieldErrors().stream()
+                            .collect(Collectors.toMap(
+                                    FieldError::getField,
+                                    error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid Value",
+                                    (existing, replacement) -> existing // 중복 키 발생 시 기존 값 유지
+                            ));
 
-                    // 에러 로깅 (보기 좋게 포맷팅)
                     log.warn("========== Validation Error ==========");
                     errorMap.forEach((field, message) -> log.warn("Field: [{}], Message: [{}]", field, message));
                     log.warn("======================================");
 
-                    // 예외 발생 -> ExceptionAdvice에서 잡아서 처리
+                    // 예외 발생 -> ExceptionAdvice에서 포착
                     throw new BindingException(ErrorCode.REQUEST_BINDING_RESULT, errorMap.toString());
                 }
             }

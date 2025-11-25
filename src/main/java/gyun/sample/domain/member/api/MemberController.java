@@ -16,7 +16,6 @@ import gyun.sample.domain.member.validator.MemberListValidator;
 import gyun.sample.domain.member.validator.MemberUserUpdateValidator;
 import gyun.sample.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
-@Tag(name = "MemberController", description = "통합 회원(유저/관리자) 뷰/API")
+@Tag(name = "MemberController", description = "회원 관리 (전략 패턴 적용)")
 @Controller
 @RequestMapping(value = "/member")
 @RequiredArgsConstructor
@@ -44,6 +43,7 @@ public class MemberController {
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
+    // Validator 등록: @InitBinder 이름은 @ModelAttribute 이름과 반드시 일치해야 함
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -59,8 +59,7 @@ public class MemberController {
         dataBinder.addValidators(memberUserUpdateValidator);
     }
 
-    // [수정] 회원 생성은 관리자만 가능 (일반 유저는 소셜 로그인으로 자동 가입됨)
-    @Operation(summary = "회원 생성 폼 뷰 (관리자 전용)")
+    @Operation(summary = "회원 생성 폼")
     @GetMapping(value = "/{role}/create")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMemberForm(@PathVariable AccountRole role, Model model) {
@@ -71,24 +70,23 @@ public class MemberController {
         return "member/create";
     }
 
-    // [수정] 회원 생성 처리 (관리자 전용)
-    @Operation(summary = "회원 생성 처리 (관리자 전용)")
+    @Operation(summary = "회원 생성 처리")
     @PostMapping(value = "/{role}/create")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMember(
-            @Parameter(description = "Account Role", example = "USER") @PathVariable AccountRole role,
+            @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
-            BindingResult bindingResult, // AOP 감지용
+            BindingResult bindingResult, // AOP 감지 및 처리
             RedirectAttributes redirectAttributes) {
 
         WriteMemberService service = memberStrategyFactory.getWriteService(role);
         service.createMember(memberCreateRequest);
 
-        redirectAttributes.addFlashAttribute("message", "회원 생성이 완료되었습니다.");
+        redirectAttributes.addFlashAttribute("message", "회원이 성공적으로 생성되었습니다.");
         return "redirect:/member/" + role.name().toLowerCase() + "/list";
     }
 
-    @Operation(summary = "회원 목록 조회 뷰")
+    @Operation(summary = "회원 목록 조회")
     @GetMapping(value = "/{role}/list")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String getMemberList(
@@ -108,14 +106,12 @@ public class MemberController {
         return "member/list";
     }
 
-    @Operation(summary = "회원 상세 조회 뷰")
+    @Operation(summary = "회원 상세 조회")
     @GetMapping(value = "/{role}/detail/{id}")
-    // 관리자이거나, 본인인 경우에만 접근 가능 (MemberGuard 활용)
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or (#role.name() == 'USER' and @memberGuard.checkAccess(#id, principal))")
     public String getMemberDetail(
             @PathVariable AccountRole role,
             @PathVariable Long id,
-            @AuthenticationPrincipal PrincipalDetails principal,
             Model model) {
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
@@ -135,16 +131,12 @@ public class MemberController {
             @AuthenticationPrincipal PrincipalDetails principal,
             Model model) {
 
-        // 현재 로그인한 사용자의 정보를 가져옴
         ReadMemberService service = memberStrategyFactory.getReadService(role);
         Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
 
-        // 수정 폼에 보여줄 객체 세팅
         if (!model.containsAttribute("memberUpdateRequest")) {
             model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(member.getNickName(), null));
         }
-
-        // 화면 표시용 현재 정보
         model.addAttribute("currentMember", new DetailMemberResponse(member));
         model.addAttribute("role", role);
 
@@ -153,7 +145,7 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 수정 처리")
     @PostMapping(value = "/{role}/update")
-    @PreAuthorize("isAuthenticated()") // 로그인 사용자만
+    @PreAuthorize("isAuthenticated()")
     public String updateMember(
             @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
@@ -168,7 +160,7 @@ public class MemberController {
         return "redirect:/account/profile";
     }
 
-    @Operation(summary = "회원 탈퇴/비활성화 처리")
+    @Operation(summary = "회원 탈퇴/비활성화")
     @PostMapping(value = "/{role}/inactive")
     @PreAuthorize("isAuthenticated()")
     public String inactiveMember(

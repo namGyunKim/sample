@@ -2,6 +2,7 @@ package gyun.sample.global.config.security;
 
 import gyun.sample.global.security.handler.CustomAuthSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -28,24 +29,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String[] WHITE_LIST = {
-            // 정적 자원 (Thymeleaf/웹 환경)
-            "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico", "/sw.js",
-            // Swagger/API Docs 관련 경로
-            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/enums",
-
-            // 공개 뷰 경로 (회원가입 제거)
-            "/", "/account/login", "/error",
-
-            // 공개 API 경로
-            "/api/health",
-            "/api/sms/**", // SMS는 비밀번호 찾기 등에 쓰일 수 있으므로 유지 (필요 없다면 제거 가능)
-            "/social/**",
-            "/login"
-    };
-
     private final UserDetailsService userDetailsService;
     private final CustomAuthSuccessHandler customAuthSuccessHandler;
+
+    // 공개 URL 목록
+    private static final String[] PUBLIC_URLS = {
+            "/", "/account/login", "/error", "/login",
+            "/api/health", "/api/sms/**", "/social/**",
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
+    };
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -69,12 +61,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
-                // 폼 로그인은 관리자 혹은 테스트용으로 남겨둘 수 있으나,
-                // 메인 흐름은 소셜 로그인입니다. 설정은 유지하되 UI에서 감춥니다.
+                .authorizeHttpRequests(auth -> auth
+                        // 정적 자원(css, js, images, webjars, favicon) 자동 허용
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/sw.js")).permitAll() // Service Worker
+                        .requestMatchers(PUBLIC_URLS).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .formLogin(form -> form
                         .loginPage("/account/login")
                         .loginProcessingUrl("/login")
-                        .usernameParameter("loginId") // loginId로 파라미터 명시
+                        .usernameParameter("loginId") // 로그인 폼의 name 속성과 일치
                         .passwordParameter("password")
                         .successHandler(customAuthSuccessHandler)
                         .failureUrl("/account/login?error")
@@ -86,12 +83,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
-                )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(WHITE_LIST).permitAll()
-                        .anyRequest().authenticated()
-                )
-        ;
+                );
 
         return http.build();
     }
