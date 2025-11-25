@@ -53,8 +53,9 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'org.postgresql:postgresql'
 
-    // Redis (세션용이 아닌 캐싱/RateLimiting 등 보조 용도)
+    // Redis (세션 공유 및 캐싱 용도)
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.session:spring-session-data-redis'
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'

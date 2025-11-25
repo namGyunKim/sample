@@ -14,13 +14,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member extends BaseTimeEntity {
+public class Member extends BaseTimeEntity implements Serializable {
+
+    // 직렬화 버전 UID 추가 (클래스 구조 변경 시 역직렬화 오류 방지)
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -60,8 +67,10 @@ public class Member extends BaseTimeEntity {
     @Column(columnDefinition = "text")
     private String refreshToken;
 
+    // transient: 직렬화(Redis 저장) 시 이 필드는 제외합니다.
+    // 세션에 이미지 리스트까지 저장하면 용량이 커지고, MemberImage가 Serializable이 아니면 에러가 발생하기 때문입니다.
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<MemberImage> memberImages = new ArrayList<>();
+    private final transient List<MemberImage> memberImages = new ArrayList<>();
 
 
     // 통합된 Request로 생성 (주로 관리자가 생성할 때 사용, role이 request에 포함됨)

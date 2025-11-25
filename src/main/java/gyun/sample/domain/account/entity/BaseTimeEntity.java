@@ -11,15 +11,17 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 모든 엔티티의 상위 클래스로, 생성일/수정일/생성자/수정자를 자동으로 관리합니다.
+ * Redis 세션 저장을 위해 Serializable을 구현합니다.
  */
 @Getter
 @MappedSuperclass
 @EntityListeners(value = {AuditingEntityListener.class})
-public abstract class BaseTimeEntity {
+public abstract class BaseTimeEntity implements Serializable {
 
     @CreatedDate
     @Column(updatable = false)
