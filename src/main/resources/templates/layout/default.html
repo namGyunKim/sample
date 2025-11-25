@@ -9,62 +9,136 @@
     <title layout:title-document="샘플 프로젝트">샘플 프로젝트</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Pretendard', 'Noto Sans KR', sans-serif; /* 폰트 예시 변경 */
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
         }
     </style>
     <th:block layout:fragment="css"></th:block>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-<!-- 네비게이션 바 -->
-<nav class="bg-white shadow-sm border-b border-gray-200">
+<!-- 상단 네비게이션 바 -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <!-- 로고 -->
-            <div class="flex items-center">
-                <a class="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors" th:href="@{/}">
-                    Base Project
-                </a>
-            </div>
 
-            <!-- 메뉴 (불필요한 유저 목록 제거) -->
-            <div class="flex items-center space-x-4">
-                <!-- 로그인된 경우 -->
-                <div class="flex items-center space-x-2" sec:authorize="isAuthenticated()">
-                    <span class="text-sm text-gray-500 mr-2">
-                        <span class="font-semibold text-gray-700" sec:authentication="principal.nickName">User</span>님
-                    </span>
-                    <a class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                       th:href="@{/account/profile}">내 프로필</a>
-                    <a class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
-                       th:href="@{/logout}">로그아웃</a>
+            <!-- 좌측: 로고 및 대카테고리 -->
+            <div class="flex">
+                <!-- 로고 -->
+                <div class="flex-shrink-0 flex items-center mr-8">
+                    <a class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-2" th:href="@{/}">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>BASE</span>
+                    </a>
                 </div>
 
-                <!-- 로그아웃된 경우 -->
-                <div sec:authorize="!isAuthenticated()">
-                    <a class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
-                       th:href="@{/account/login}">로그인</a>
+                <!-- 대카테고리 메뉴 -->
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+
+                    <!-- 대카테고리 1: 커뮤니티 (예시) -->
+                    <div class="relative dropdown flex items-center h-full">
+                        <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out h-full">
+                            커뮤니티
+                            <i class="fa-solid fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="dropdown-menu absolute left-0 top-16 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 hidden animate-fade-in-down">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">자유게시판</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">질문답변</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">공지사항</a>
+                        </div>
+                    </div>
+
+                    <!-- 대카테고리 2: 회원 관리 (관리자용) -->
+                    <div class="relative dropdown flex items-center h-full" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out h-full">
+                            회원 관리
+                            <i class="fa-solid fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="dropdown-menu absolute left-0 top-16 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 hidden">
+                            <a th:href="@{/member/user/list}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">유저 목록</a>
+                            <a th:href="@{/member/admin/list}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">관리자 목록</a>
+                        </div>
+                    </div>
+
+                    <!-- 대카테고리 3: 서비스 소개 -->
+                    <div class="relative dropdown flex items-center h-full">
+                        <a href="#" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out h-full">
+                            서비스 소개
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 우측: 로그인/마이페이지 -->
+            <div class="flex items-center">
+                <!-- 로그인 상태 -->
+                <div class="flex items-center space-x-4" sec:authorize="isAuthenticated()">
+                    <div class="relative dropdown group">
+                        <button class="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none">
+                            <span class="bg-blue-100 text-blue-600 rounded-full h-8 w-8 flex items-center justify-center">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <span sec:authentication="principal.nickName">User</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                        </button>
+                        <!-- 마이페이지 드롭다운 -->
+                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 hidden z-50 group-hover:block">
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm text-gray-500">환영합니다!</p>
+                                <p class="text-sm font-bold text-gray-900 truncate" sec:authentication="principal.username"></p>
+                            </div>
+                            <a th:href="@{/account/profile}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fa-regular fa-id-card mr-2"></i>내 프로필
+                            </a>
+                            <a th:href="@{/member/user/update}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fa-solid fa-user-gear mr-2"></i>정보 수정
+                            </a>
+                            <div class="border-t border-gray-100"></div>
+                            <a th:href="@{/logout}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>로그아웃
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 비로그인 상태: 회원가입 버튼 제거 -->
+                <div class="flex items-center space-x-3" sec:authorize="!isAuthenticated()">
+                    <a class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors"
+                       th:href="@{/account/login}">
+                        로그인
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-</nav>
+</header>
 
 <!-- 메인 컨텐츠 -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
-    <main class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 min-h-[500px]" layout:fragment="content">
-        <!-- 컨텐츠가 들어갈 자리 -->
+    <main class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 min-h-[600px]" layout:fragment="content">
+        <!-- 페이지별 컨텐츠가 여기에 삽입됨 -->
     </main>
 </div>
 
 <!-- 푸터 -->
 <footer class="bg-white border-t border-gray-200 mt-auto">
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-sm text-gray-500">
-            &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> Sample Base Project. All rights reserved.
-        </p>
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-500">
+                <p>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> Sample Project. All rights reserved.</p>
+                <p class="mt-1">Terms of Service | Privacy Policy</p>
+            </div>
+            <div class="flex space-x-4 text-gray-400">
+                <a href="#" class="hover:text-gray-500"><i class="fa-brands fa-github text-xl"></i></a>
+                <a href="#" class="hover:text-gray-500"><i class="fa-brands fa-instagram text-xl"></i></a>
+            </div>
+        </div>
     </div>
 </footer>
 
@@ -75,10 +149,10 @@
     const logoutMessage = [[${logoutMessage}]];
 
     if (message) {
-        console.log("System Message: " + message);
+        alert(message);
     }
     if (logoutMessage) {
-        console.log("Logout Message: " + logoutMessage);
+        console.log("Logout: " + logoutMessage);
     }
 </script>
 </body>

@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true) // @PreAuthorize 활성화
@@ -31,22 +30,22 @@ public class SecurityConfig {
 
     private static final String[] WHITE_LIST = {
             // 정적 자원 (Thymeleaf/웹 환경)
-            "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico",
+            "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico", "/sw.js",
             // Swagger/API Docs 관련 경로
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/enums",
 
-            // 공개 뷰 경로
-            "/", "/account/login", "/member/user/create", "/error",
+            // 공개 뷰 경로 (회원가입 제거)
+            "/", "/account/login", "/error",
 
             // 공개 API 경로
             "/api/health",
-            "/api/sms/**",
+            "/api/sms/**", // SMS는 비밀번호 찾기 등에 쓰일 수 있으므로 유지 (필요 없다면 제거 가능)
             "/social/**",
             "/login"
     };
 
     private final UserDetailsService userDetailsService;
-    private final CustomAuthSuccessHandler customAuthSuccessHandler; // [추가] 커스텀 성공 핸들러 주입
+    private final CustomAuthSuccessHandler customAuthSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,12 +69,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
+                // 폼 로그인은 관리자 혹은 테스트용으로 남겨둘 수 있으나,
+                // 메인 흐름은 소셜 로그인입니다. 설정은 유지하되 UI에서 감춥니다.
                 .formLogin(form -> form
                         .loginPage("/account/login")
                         .loginProcessingUrl("/login")
-                        .usernameParameter("username")
+                        .usernameParameter("loginId") // loginId로 파라미터 명시
                         .passwordParameter("password")
-                        .successHandler(customAuthSuccessHandler) // [수정] defaultSuccessUrl 대신 핸들러 등록
+                        .successHandler(customAuthSuccessHandler)
                         .failureUrl("/account/login?error")
                         .permitAll()
                 )

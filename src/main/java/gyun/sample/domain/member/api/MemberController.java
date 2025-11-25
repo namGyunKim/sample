@@ -1,10 +1,12 @@
 package gyun.sample.domain.member.api;
 
 import gyun.sample.domain.account.enums.AccountRole;
+import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberListRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
+import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import gyun.sample.domain.member.payload.response.MemberListResponse;
 import gyun.sample.domain.member.service.MemberStrategyFactory;
 import gyun.sample.domain.member.service.read.ReadMemberService;
@@ -57,9 +59,10 @@ public class MemberController {
         dataBinder.addValidators(memberUserUpdateValidator);
     }
 
-    @Operation(summary = "회원 생성 폼 뷰")
+    // [수정] 회원 생성은 관리자만 가능 (일반 유저는 소셜 로그인으로 자동 가입됨)
+    @Operation(summary = "회원 생성 폼 뷰 (관리자 전용)")
     @GetMapping(value = "/{role}/create")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role.name() == 'USER'")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMemberForm(@PathVariable AccountRole role, Model model) {
         if (!model.containsAttribute("memberCreateRequest")) {
             model.addAttribute("memberCreateRequest", new MemberCreateRequest(null, null, null, role, null));
@@ -68,10 +71,10 @@ public class MemberController {
         return "member/create";
     }
 
-    @Operation(summary = "회원 생성 처리")
+    // [수정] 회원 생성 처리 (관리자 전용)
+    @Operation(summary = "회원 생성 처리 (관리자 전용)")
     @PostMapping(value = "/{role}/create")
-    // [수정] 위와 동일하게 안전한 방식으로 변경
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or #role.name() == 'USER'")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMember(
             @Parameter(description = "Account Role", example = "USER") @PathVariable AccountRole role,
             @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
@@ -107,6 +110,7 @@ public class MemberController {
 
     @Operation(summary = "회원 상세 조회 뷰")
     @GetMapping(value = "/{role}/detail/{id}")
+    // 관리자이거나, 본인인 경우에만 접근 가능 (MemberGuard 활용)
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or (#role.name() == 'USER' and @memberGuard.checkAccess(#id, principal))")
     public String getMemberDetail(
             @PathVariable AccountRole role,
@@ -115,12 +119,36 @@ public class MemberController {
             Model model) {
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
-        // 상세 조회 로직... (기존 코드에 없어서 템플릿 경로만 유추하여 추가함)
-        // DetailMemberResponse response = service.getDetail(id);
-        // model.addAttribute("member", response);
+        DetailMemberResponse response = service.getDetail(id);
 
-        // 임시로 list로 리다이렉트 (구현 시 위 주석 해제)
+        model.addAttribute("member", response);
+        model.addAttribute("role", role);
+
         return "member/detail";
+    }
+
+    @Operation(summary = "회원 정보 수정 폼")
+    @GetMapping(value = "/{role}/update")
+    @PreAuthorize("isAuthenticated()")
+    public String updateMemberForm(
+            @PathVariable AccountRole role,
+            @AuthenticationPrincipal PrincipalDetails principal,
+            Model model) {
+
+        // 현재 로그인한 사용자의 정보를 가져옴
+        ReadMemberService service = memberStrategyFactory.getReadService(role);
+        Member member = service.getByLoginIdAndRole(principal.getUsername(), role);
+
+        // 수정 폼에 보여줄 객체 세팅
+        if (!model.containsAttribute("memberUpdateRequest")) {
+            model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(member.getNickName(), null));
+        }
+
+        // 화면 표시용 현재 정보
+        model.addAttribute("currentMember", new DetailMemberResponse(member));
+        model.addAttribute("role", role);
+
+        return "member/update";
     }
 
     @Operation(summary = "회원 정보 수정 처리")
@@ -137,7 +165,6 @@ public class MemberController {
         service.updateMember(memberUpdateRequest, principal.getUsername());
 
         redirectAttributes.addFlashAttribute("message", "정보가 수정되었습니다.");
-        // 수정 후 프로필 혹은 상세 페이지로 이동
         return "redirect:/account/profile";
     }
 

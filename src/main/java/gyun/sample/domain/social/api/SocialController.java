@@ -12,6 +12,7 @@ import gyun.sample.global.utils.UtilService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -19,6 +20,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +37,10 @@ public class SocialController {
 
     private final SocialServiceFactory socialServiceFactory;
     private final GoogleSocialService googleSocialService;
-    private final ApplicationEventPublisher eventPublisher; // [추가] 이벤트 발행기
+    private final ApplicationEventPublisher eventPublisher;
+
+    // [추가] Spring Security 6에서는 수동으로 만든 SecurityContext를 세션에 저장하기 위해 Repository가 필요합니다.
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     @Operation(summary = "구글 로그인 리다이렉트 URL 요청", description = "구글 로그인 페이지로 이동합니다.")
     @GetMapping("/google/login")
@@ -45,7 +51,7 @@ public class SocialController {
 
     @Operation(summary = "구글 로그인 콜백", description = "Google 리다이렉션으로 호출되며, 성공 시 세션을 발급하고 메인 페이지로 리다이렉트합니다.")
     @GetMapping("/google/redirect")
-    public String googleRedirect(@RequestParam String code, HttpServletRequest request) {
+    public String googleRedirect(@RequestParam String code, HttpServletRequest request, HttpServletResponse response) {
 
         try {
             Member member = googleSocialService.getMemberBySocialCode(code);
@@ -57,15 +63,15 @@ public class SocialController {
                     principalDetails.getAuthorities()
             );
 
+            // 1. SecurityContext 생성 및 Authentication 설정
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authentication);
             SecurityContextHolder.setContext(securityContext);
 
+            // 2. [중요] SecurityContext를 세션에 명시적으로 저장 (Spring Security 6 필수)
+            securityContextRepository.saveContext(securityContext, request, response);
+
             // [추가] 소셜 로그인 로그 이벤트 발행
-            // (GoogleSocialService 내부에서 신규/기존 여부를 판단하지만, 여기서는 통합 로그인 성공 로그를 남김)
-            // 신규 가입 로그는 GoogleSocialService 내부에서 별도로 발행하거나, 여기서 판단 로직을 추가할 수 있음.
-            // 현재 구조상 서비스 레이어에서 회원가입 여부를 판단하고 있으므로, 서비스 내에서 가입 로그를 찍는 것이 좋으나
-            // 편의상 여기서는 '소셜 로그인 성공'으로 통일합니다.
             eventPublisher.publishEvent(MemberActivityEvent.of(
                     member.getLoginId(),
                     member.getId(),
