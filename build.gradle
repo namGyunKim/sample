@@ -30,6 +30,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    // JWT/Redis 의존성 제거에 따라 불필요한 설정 제거
 }
 
 repositories {
@@ -39,7 +40,7 @@ repositories {
 // BOM 관리
 dependencyManagement {
     imports {
-        // Spring Cloud BOM
+        // Spring Cloud BOM (OpenFeign 사용을 위해 유지)
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
         // AWS SDK BOM
         mavenBom "software.amazon.awssdk:bom:2.20.26"
@@ -49,6 +50,9 @@ dependencyManagement {
 dependencies {
     // Web & Core
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Thymeleaf Starter 추가
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect' // 레이아웃 다이얼렉트
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-aop' // AOP 필수
@@ -58,11 +62,12 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 
-    // Redis
+    // Redis (JWT 미사용이지만, 다른 용도로 사용될 가능성을 고려해 일단 유지. 만약 블랙리스트 외 용도가 없다면 삭제 권장)
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // Thymeleaf Security 통합
     testImplementation 'org.springframework.security:spring-security-test'
 
     // Lombok & DevTools
@@ -86,12 +91,12 @@ dependencies {
     // Crypto
     implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
 
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    // JWT 관련 의존성 제거 (세션 기반으로 전환)
+    // implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    // runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    // runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // XML/JSON/Etc
+    // XML/JSON/Etc (Social/Feign 관련)
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
     runtimeOnly 'com.sun.xml.bind:jaxb-impl:4.0.0'
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
@@ -106,6 +111,10 @@ dependencies {
     // Image Processing
     implementation 'com.twelvemonkeys.imageio:imageio-core:3.10.1'
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
+
+    // JAXB API (일부 라이브러리에서 여전히 필요할 수 있어 유지)
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
+    runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
 
 }
 

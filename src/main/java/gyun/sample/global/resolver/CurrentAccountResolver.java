@@ -5,6 +5,7 @@ import gyun.sample.global.annotaion.CurrentAccount;
 import gyun.sample.global.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -28,15 +29,18 @@ public class CurrentAccountResolver implements HandlerMethodArgumentResolver {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // 인증 정보가 없거나, 익명 사용자일 경우 (Guest 처리)
-        if (authentication == null || authentication.getPrincipal().equals("anonymousUser")) {
+        // 1. 인증 정보가 없거나, 익명 사용자일 경우 (Guest 처리)
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
             return CurrentAccountDTO.generatedGuest();
         }
 
-        // JwtAuthenticationFilter에서 저장한 PrincipalDetails 꺼내기
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        // 2. PrincipalDetails 객체가 아닌 경우 (다른 인증 메커니즘 사용 시)
+        if (!(authentication.getPrincipal() instanceof PrincipalDetails principalDetails)) {
+            // Spring Security가 인증했지만 우리가 정의하지 않은 Principal인 경우
+            return CurrentAccountDTO.generatedGuest();
+        }
 
-        // PrincipalDetails -> CurrentAccountDTO 변환
+        // 3. PrincipalDetails -> CurrentAccountDTO 변환
         return new CurrentAccountDTO(
                 principalDetails.getId(),
                 principalDetails.getUsername(), // loginId

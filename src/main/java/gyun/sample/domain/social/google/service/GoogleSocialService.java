@@ -13,9 +13,9 @@ import gyun.sample.global.config.social.GoogleApiClient;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
-import gyun.sample.global.utils.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,7 +35,6 @@ public class GoogleSocialService implements SocialLoginService {
 
     private final GoogleApiClient googleApiClient;
     private final MemberRepository memberRepository;
-    private final JwtTokenProvider jwtTokenProvider;
     private final HttpClient httpClient;
 
     @Value("${social.google.baseUrl}")
@@ -53,11 +52,10 @@ public class GoogleSocialService implements SocialLoginService {
     @Value("${social.google.scope}")
     private String scope;
 
-    // [수정] WriteUserService 제거
-    public GoogleSocialService(GoogleApiClient googleApiClient, MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
+    // [수정] JwtTokenProvider 제거
+    public GoogleSocialService(GoogleApiClient googleApiClient, MemberRepository memberRepository) {
         this.googleApiClient = googleApiClient;
         this.memberRepository = memberRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .followRedirects(HttpClient.Redirect.NEVER)
@@ -86,22 +84,41 @@ public class GoogleSocialService implements SocialLoginService {
         }
     }
 
-    @Override
-    public AccountLoginResponse login(String code) {
+    /**
+     * [변경] 소셜 코드를 이용해 회원 정보(Member 객체)를 가져오는 메서드
+     */
+    public Member getMemberBySocialCode(String code) {
         // 1. Authorization Code로 Access Token 요청
         GoogleTokenResponse tokenResponse = getAccessToken(code);
 
         // 2. Access Token으로 사용자 정보 요청
         GoogleUserInfoResponse userInfo = getUserInfo(tokenResponse.accessToken());
 
-        // 3. 회원가입 및 로그인 처리
+        // 3. 회원가입 및 로그인 처리 후 Member 객체 반환
         return registerOrLoginMember(userInfo, tokenResponse.accessToken());
     }
 
+    @Override
+    @Deprecated(since = "Thymeleaf Project", forRemoval = true)
+    // SocialLoginService 인터페이스를 구현하기 위해 남김. SocialController에서 Member 객체를 얻기 위해 사용됨.
+    public AccountLoginResponse login(String code) {
+        // JWT가 필요 없으므로, Member 객체를 찾은 후 임시 응답 반환
+        Member member = getMemberBySocialCode(code);
+        // SocialController가 세션을 만들 수 있도록 Member 정보를 담아 반환
+        return new AccountLoginResponse(member.getLoginId(), member.getNickName());
+    }
+
+    /**
+     * [제거] JWT 토큰에서 loginId 추출하는 임시 메서드 제거
+     */
+    public String extractLoginIdFromToken(String accessToken) {
+        // 이 메서드는 이제 사용되지 않습니다.
+        throw new UnsupportedOperationException("세션 기반 프로젝트에서는 JWT 토큰 추출 로직을 사용하지 않습니다.");
+    }
+
+
     /**
      * Google과의 연결을 끊고, Access Token을 무효화합니다. (탈퇴 시 사용)
-     *
-     * @param member Google 소셜 회원
      */
     public void unlink(Member member) {
         if (member.getMemberType() != MemberType.GOOGLE) {
@@ -115,6 +132,7 @@ public class GoogleSocialService implements SocialLoginService {
             return;
         }
 
+        // ... (토큰 취소 로직은 기존과 동일)
         try {
             // Google 토큰 취소 API URL: https://oauth2.googleapis.com/revoke?token={token}
             String revokeUrl = UriComponentsBuilder.fromUriString("https://oauth2.googleapis.com")
@@ -178,12 +196,9 @@ public class GoogleSocialService implements SocialLoginService {
     }
 
     /**
-     * 소셜 키(ID)를 기반으로 회원가입 또는 로그인 처리
-     * 1. ACTIVE 회원 찾기 -> 로그인 및 토큰 업데이트
-     * 2. INACTIVE 회원 찾기 -> ACTIVE로 전환 및 로그인
-     * 3. 신규 회원 -> 회원가입
+     * 소셜 키(ID)를 기반으로 회원가입 또는 로그인 처리 후 Member 객체 반환
      */
-    private AccountLoginResponse registerOrLoginMember(GoogleUserInfoResponse userInfo, String accessToken) {
+    private Member registerOrLoginMember(GoogleUserInfoResponse userInfo, String accessToken) {
         String socialKey = userInfo.id();
         MemberType memberType = MemberType.GOOGLE;
         AccountRole role = memberType.getDefaultRole();
@@ -197,9 +212,7 @@ public class GoogleSocialService implements SocialLoginService {
             Member member = activeMember.get();
             log.info("Google 로그인 성공 (기존 ACTIVE 회원): {}", member.getLoginId());
             member.updateAccessToken(accessToken);
-            String jwtAccessToken = jwtTokenProvider.createAccessToken(member);
-            String jwtRefreshToken = jwtTokenProvider.createRefreshToken(member);
-            return new AccountLoginResponse(jwtAccessToken, jwtRefreshToken);
+            return member;
         }
 
         // 2. INACTIVE 회원 찾기 (탈퇴 후 재가입)
@@ -212,10 +225,7 @@ public class GoogleSocialService implements SocialLoginService {
             log.info("Google 재가입 성공 (기존 INACTIVE 회원, ACTIVE로 전환): {}", member.getLoginId());
             member.setActive(GlobalActiveEnums.ACTIVE); // ACTIVE로 전환
             member.updateAccessToken(accessToken); // 새 토큰 업데이트
-            // Refresh Token도 재발급 (이전 토큰은 무효화되었을 가능성이 높음)
-            String jwtAccessToken = jwtTokenProvider.createAccessToken(member);
-            String jwtRefreshToken = jwtTokenProvider.createRefreshToken(member);
-            return new AccountLoginResponse(jwtAccessToken, jwtRefreshToken);
+            return member;
         }
 
         // 3. 신규 회원: 회원가입 및 로그인 처리
@@ -223,13 +233,18 @@ public class GoogleSocialService implements SocialLoginService {
         String nickName = userInfo.name() != null && !userInfo.name().isBlank() ? userInfo.name() : userInfo.email().split("@")[0];
         String loginId = memberType.name().toLowerCase() + "_" + socialKey;
 
+        // 비밀번호 필드가 NOT NULL이면 문제 발생: 소셜 회원은 임시 비밀번호 설정
+        // Member 엔티티의 생성자를 수정하거나, 비밀번호가 없는 경우를 처리해야 합니다.
         Member newMember = new Member(loginId, nickName, memberType, socialKey);
+        // [수정] Member 엔티티의 updatePassword 메서드를 사용하여 암호화된 임시 비밀번호를 설정해야 합니다.
+        // 현재 Member 엔티티 생성자는 password를 받지 않고, WriteUserService::createMember에서 인코딩합니다.
+        // 여기서는 임시 비밀번호를 생성하여 저장해야 합니다.
+        // **주의: 소셜 회원은 비밀번호가 null이어야 할 수도 있습니다. Member 엔티티의 `password` 필드가 NotNull이 아님을 확인했습니다.**
+        // 다만, Spring Security의 UserDetails 구현체는 getPassword()가 NotNull을 요구하므로, 임시값을 설정합니다.
+        newMember.updatePassword(new BCryptPasswordEncoder().encode("social_temp_password_" + socialKey)); // 임시 비밀번호 암호화 저장
         newMember.updateAccessToken(accessToken);
 
         Member savedMember = memberRepository.save(newMember);
-
-        String jwtAccessToken = jwtTokenProvider.createAccessToken(savedMember);
-        String jwtRefreshToken = jwtTokenProvider.createRefreshToken(savedMember);
-        return new AccountLoginResponse(jwtAccessToken, jwtRefreshToken);
+        return savedMember;
     }
 }

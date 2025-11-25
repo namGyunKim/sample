@@ -1,7 +1,6 @@
 package gyun.sample.global.aop;
 
-import gyun.sample.domain.account.payload.response.TokenResponse;
-import gyun.sample.global.utils.JwtTokenProvider;
+import gyun.sample.global.security.PrincipalDetails;
 import gyun.sample.global.utils.UtilService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +9,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -24,7 +25,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ControllerLoggingAspect {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    // [제거] JWT Token Provider 제거
+    // private final JwtTokenProvider jwtTokenProvider;
+
 
     @Pointcut("execution(* gyun.sample.domain..*Controller.*(..))")
     private void controllerMethods() {
@@ -41,7 +44,8 @@ public class ControllerLoggingAspect {
         String ip = UtilService.getClientIp(request);
         String method = request.getMethod();
         String uri = request.getRequestURI();
-        String loginId = getLoginId(request);
+        // [수정] JWT 대신 Spring Security Context에서 loginId 가져오기
+        String loginId = getLoginIdFromSecurityContext();
 
         log.info("[REQ] [{}] IP:{} | User:{} | {} {}", requestId, ip, loginId, method, uri);
 
@@ -59,17 +63,25 @@ public class ControllerLoggingAspect {
         return result;
     }
 
-    private String getLoginId(HttpServletRequest request) {
-        try {
-            String authorization = request.getHeader("Authorization");
-            if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
-                String bearer = authorization.split(" ")[1];
-                TokenResponse token = jwtTokenProvider.getTokenResponse(bearer);
-                return token.loginId() != null ? token.loginId() : "Guest";
-            }
-        } catch (Exception e) {
-            // 토큰 파싱 에러는 무시 (Guest 처리)
+    /**
+     * Spring Security Context에서 현재 로그인된 사용자의 loginId를 가져옵니다.
+     */
+    private String getLoginIdFromSecurityContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken || !authentication.isAuthenticated()) {
+            return "GUEST";
         }
-        return "Guest";
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof PrincipalDetails principalDetails) {
+            return principalDetails.getUsername(); // loginId 반환
+        } else if (principal instanceof String principalString) {
+            // 익명 사용자일 경우 "anonymousUser" 등이 반환될 수 있음
+            return principalString.equals("anonymousUser") ? "GUEST" : principalString;
+        }
+
+        return "UNKNOWN";
     }
 }

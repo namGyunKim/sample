@@ -1,7 +1,6 @@
 package gyun.sample.domain.health.api;
 
 
-import gyun.sample.global.api.RestApiController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/api")
 public class HealthRestController {
 
-    private final RestApiController restApiController;
 
     @Operation(summary = "서버 살아있나 확인")
     @GetMapping(value = "/health")

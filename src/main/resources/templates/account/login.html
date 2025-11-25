@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>로그인</title>
+</head>
+<body>
+<div class="max-w-md mx-auto" layout:fragment="content">
+    <h1 class="text-3xl font-bold mb-6 text-center">로그인</h1>
+
+    <form class="space-y-4" method="post" th:action="@{/login}">
+        <!-- 로그인 에러 메시지 -->
+        <!-- Spring Security 기본 에러 메시지: `/account/login?error` 일 때 Model에 `errorMessage`를 추가함 (AccountController::loginForm 참조) -->
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert"
+             th:if="${errorMessage}">
+            <p th:text="${errorMessage}">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+        </div>
+
+        <!-- 로그아웃 메시지 -->
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert"
+             th:if="${logoutMessage}">
+            <p th:text="${logoutMessage}">로그아웃되었습니다.</p>
+        </div>
+
+        <!-- [수정] Spring Security는 필드 이름으로 'username'을 기대합니다. -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="username">로그인 아이디</label>
+            <input class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" id="username" name="username" required
+                   type="text">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="password">비밀번호</label>
+            <input class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" id="password" name="password" required
+                   type="password">
+        </div>
+
+        <!-- [주의] role 필드는 Spring Security가 기본적으로 사용하지 않으므로, 커스텀 인증 필터가 필요하지만,
+             현재는 Spring Security의 기본 인증만 사용하고, 역할은 PrincipalDetails에 저장됩니다.
+             이 필드는 유효성 검사(LoginAccountValidator) 목적으로만 존재하거나, 향후 커스텀 필터에서 사용될 수 있습니다. -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700" for="role">권한 (Role)</label>
+            <select class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" id="role" name="role"
+                    required>
+                <option value="USER">USER (사용자)</option>
+                <option value="ADMIN">ADMIN (관리자)</option>
+                <option value="SUPER_ADMIN">SUPER_ADMIN (최고 관리자)</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">로그인 시도할 권한을 선택해주세요.</p>
+        </div>
+
+        <button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                type="submit">
+            로그인
+        </button>
+    </form>
+
+    <div class="mt-6 text-center space-y-3">
+        <p class="text-sm">소셜 로그인</p>
+        <!-- [수정] 소셜 로그인 리다이렉트 URL 수정 (AccountController에서 /account/login으로 변경되었으므로) -->
+        <a class="inline-flex items-center justify-center w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+           th:href="@{/social/google/login}">
+            <img alt="Google Logo"
+                 class="w-5 h-5 mr-2" th:src="@{https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/512px-Google_%22G%22_logo.svg.png}">
+            Google로 로그인
+        </a>
+    </div>
+
+    <div class="mt-4 text-center">
+        <p class="text-sm text-gray-600">계정이 없으신가요? <a class="font-medium text-blue-600 hover:text-blue-500"
+                                                       th:href="@{/member/user/create}">회원가입</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>
