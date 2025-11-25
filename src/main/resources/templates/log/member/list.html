@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>회원 활동 로그</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- 페이지 헤더 -->
+    <div class="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">회원 활동 로그</h1>
+            <p class="mt-1 text-sm text-gray-500">시스템 내 회원의 주요 활동 이력을 확인합니다.</p>
+        </div>
+
+        <!-- 검색 폼 -->
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <form method="get" th:action="@{/log/member}" class="flex gap-2">
+                <div class="relative rounded-md shadow-sm">
+                    <input type="text" name="searchWord" th:value="${searchWord}"
+                           placeholder="회원 ID 검색"
+                           class="block w-full rounded-md border-gray-300 pr-10 focus:border-primary focus:ring-primary sm:text-sm"
+                           style="min-width: 200px;">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                    </div>
+                </div>
+                <button type="submit" class="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition">
+                    검색
+                </button>
+                <!-- 검색어가 있을 때만 초기화 버튼 표시 -->
+                <a th:if="${not #strings.isEmpty(searchWord)}" th:href="@{/log/member}"
+                   class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition"
+                   title="검색 초기화">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <!-- 로그 테이블 -->
+    <div class="bg-white shadow-sm ring-1 ring-black ring-opacity-5 sm:rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ID</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">발생 일시</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">유형</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">대상 계정</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">수행자</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">IP 주소</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">상세 내용</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                <tr th:each="log : ${logPage.content}" class="hover:bg-gray-50 transition">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6" th:text="${log.id}">1</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" th:text="${log.createdAt}">2024-01-01 12:00</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                              th:classappend="${log.logType.name() == 'LOGIN' ? 'bg-blue-100 text-blue-800' :
+                                               (log.logType.name() == 'INACTIVE' ? 'bg-red-100 text-red-800' :
+                                               (log.logType.name() == 'JOIN' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'))}"
+                              th:text="${log.logType.description}">로그인</span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900" th:text="${log.loginId}">user1</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" th:text="${log.executorId}">admin</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" th:text="${log.clientIp}">127.0.0.1</td>
+                    <td class="px-3 py-4 text-sm text-gray-500 break-all" th:text="${log.details}">상세 내용</td>
+                </tr>
+                <!-- 데이터 없을 때 -->
+                <tr th:if="${logPage.empty}">
+                    <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fa-solid fa-clock-rotate-left text-4xl text-gray-300 mb-3"></i>
+                            <p>로그 기록이 없습니다.</p>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6" th:if="${!logPage.empty}">
+            <div class="flex flex-1 justify-between sm:hidden">
+                <!-- 모바일용 이전/다음 버튼 (검색어 유지) -->
+                <a th:if="${logPage.hasPrevious()}"
+                   th:href="@{/log/member(page=${logPage.number}, searchWord=${searchWord})}"
+                   class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">이전</a>
+                <a th:if="${logPage.hasNext()}"
+                   th:href="@{/log/member(page=${logPage.number + 2}, searchWord=${searchWord})}"
+                   class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">다음</a>
+            </div>
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-center">
+                <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                        <!-- 데스크탑용 이전 버튼 (검색어 유지) -->
+                        <a th:if="${logPage.hasPrevious()}"
+                           th:href="@{/log/member(page=${logPage.number}, searchWord=${searchWord})}"
+                           class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Previous</span>
+                            <i class="fa-solid fa-chevron-left h-5 w-5"></i>
+                        </a>
+
+                        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0 bg-blue-50"
+                              th:text="${logPage.number + 1} + ' / ' + ${logPage.totalPages}">
+                            1 / 10
+                        </span>
+
+                        <!-- 데스크탑용 다음 버튼 (검색어 유지) -->
+                        <a th:if="${logPage.hasNext()}"
+                           th:href="@{/log/member(page=${logPage.number + 2}, searchWord=${searchWord})}"
+                           class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Next</span>
+                            <i class="fa-solid fa-chevron-right h-5 w-5"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
