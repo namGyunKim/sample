@@ -68,12 +68,6 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // Querydsl
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
     // AWS S3
     implementation 'software.amazon.awssdk:s3'
 
@@ -101,14 +95,8 @@ dependencies {
     // JAXB API
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
     runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
-
-    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-task cleanGeneratedDir(type: Delete) {
-    delete file('build/generated')
 }
