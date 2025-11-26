@@ -66,7 +66,8 @@ public enum ImageType {
     // Member (S3MemberService에서 필요)
     public static void validateMemberUploadType(ImageType type) {
         if (type == null || !MEMBER_UPLOAD_ALLOWED_TYPES.contains(type)) {
-            throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE, "회원 업로드에 허용되지 않는 이미지 타입입니다: " + type);
+            // [수정] ErrorCode.INVALID_INPUT_VALUE -> ErrorCode.INPUT_VALUE_INVALID로 변경
+            throw new GlobalException(ErrorCode.INPUT_VALUE_INVALID, "회원 업로드에 허용되지 않는 이미지 타입입니다: " + type);
         }
     }
 

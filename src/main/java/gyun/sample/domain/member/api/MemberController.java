@@ -56,7 +56,8 @@ public class MemberController {
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     // === InitBinders ===
-    // @InitBinder의 value는 컨트롤러 메서드의 @ModelAttribute 이름과 일치해야 함
+    // [중요] @InitBinder의 value는 컨트롤러 메서드의 @ModelAttribute 이름과 반드시 일치해야 함
+
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -78,7 +79,7 @@ public class MemberController {
     @GetMapping(value = "/{role}/create")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMemberForm(@PathVariable AccountRole role, Model model) {
-        // ModelAttribute 이름과 InitBinder 이름 일치
+        // ModelAttribute 이름과 InitBinder 이름 일치 (memberCreateRequest)
         if (!model.containsAttribute("memberCreateRequest")) {
             model.addAttribute("memberCreateRequest", new MemberCreateRequest(null, null, null, role, null));
         }
@@ -91,11 +92,12 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMember(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest, // 이름 명시
+            @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest, // 이름 명시 필수
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
 
+        // 유효성 검증 실패 시 다시 폼으로 이동 (BindingResult는 Model에 자동으로 담김)
         if (bindingResult.hasErrors()) {
             model.addAttribute("role", role);
             return "member/create";
@@ -113,22 +115,22 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String getMemberList(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest,
-            BindingResult bindingResult, // AOP(BindingAdvice)가 처리하도록 두거나, Controller에서 처리
+            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest, // 이름 명시 필수
+            BindingResult bindingResult,
             Model model) {
 
-        // BindingAdvice AOP가 RestController용이므로, 여기(Controller)서는 직접 처리하거나
-        // GlobalException으로 던져서 ExceptionAdvice가 View를 반환하도록 유도 가능.
-        // 여기서는 View 반환을 위해 직접 에러 체크 후 페이지 리턴
+        // 목록 조회에서 에러가 있어도(페이지 번호 오류 등) 기본 화면은 보여줘야 함
         if (bindingResult.hasErrors()) {
-            return "member/list"; // 에러 메시지 포함하여 리턴
+            return "member/list";
         }
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
+        // DTO 변환하여 서비스 계층으로 전달
         Page<MemberListResponse> memberPage = service.getList(new MemberListRequestDTO(memberListRequest));
 
         model.addAttribute("role", role);
         model.addAttribute("memberPage", memberPage);
+        // 검색 조건 유지를 위해 request 객체 다시 전달 (ModelAttribute가 이미 하지만 명시적 확인)
         model.addAttribute("request", memberListRequest);
 
         return "member/list";
@@ -165,6 +167,7 @@ public class MemberController {
 
         checkPermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
 
+        // ModelAttribute 초기화
         if (!model.containsAttribute("memberUpdateRequest")) {
             model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(targetMember.getProfile().nickName()));
         }
@@ -203,14 +206,17 @@ public class MemberController {
         }
 
         WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
+        // 더티 체킹을 위해 트랜잭션 안에서 동작하는 서비스 호출
         writeService.updateMember(memberUpdateRequest, targetMember.getProfile().loginId());
 
+        // 본인 정보 수정 시 세션 정보 갱신
         if (principal.getId().equals(id)) {
             refreshSession(request, response, principal.getUsername(), role);
         }
 
         redirectAttributes.addFlashAttribute("message", "정보가 성공적으로 수정되었습니다.");
 
+        // 이동 경로 분기
         return principal.getId().equals(id) ? "redirect:/account/profile" :
                 "redirect:/member/" + role.name().toLowerCase() + "/detail/" + id;
     }
@@ -240,11 +246,11 @@ public class MemberController {
         }
     }
 
-    // 권한 체크 로직
+    // 권한 체크 헬퍼
     private void checkPermission(PrincipalDetails principal, AccountRole targetRole, Long targetId) {
-        if (principal.getId().equals(targetId)) return;
-        if (principal.getRole() == AccountRole.SUPER_ADMIN) return;
-        if (principal.getRole() == AccountRole.ADMIN && targetRole == AccountRole.USER) return;
+        if (principal.getId().equals(targetId)) return; // 본인
+        if (principal.getRole() == AccountRole.SUPER_ADMIN) return; // 최고관리자
+        if (principal.getRole() == AccountRole.ADMIN && targetRole == AccountRole.USER) return; // 관리자가 유저 관리
 
         throw new AccessDeniedException("해당 작업에 대한 권한이 없습니다.");
     }

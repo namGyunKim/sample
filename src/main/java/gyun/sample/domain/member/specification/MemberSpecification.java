@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * QueryDSL 대신 JPA Criteria API를 사용하여 동적 쿼리를 생성합니다.
- * 복잡한 검색 조건을 타입 세이프하게 처리하기 위함입니다.
+ * JPA Specification을 이용한 동적 쿼리 생성
  */
 public class MemberSpecification {
 

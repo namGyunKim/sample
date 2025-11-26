@@ -32,6 +32,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CustomAuthSuccessHandler customAuthSuccessHandler;
 
+    // 인증 없이 접근 가능한 경로
     private static final String[] PUBLIC_URLS = {
             "/", "/account/login", "/error", "/login",
             "/api/health", "/api/sms/**", "/social/**",
@@ -69,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
+                // 관리자용 폼 로그인 설정 (일반 유저는 구글 로그인 유도)
                 .formLogin(form -> form
                         .loginPage("/account/login") // 커스텀 로그인 페이지 경로
                         .loginProcessingUrl("/login") // Security가 가로챌 로그인 처리 URL

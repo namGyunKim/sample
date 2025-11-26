@@ -303,7 +303,7 @@ public abstract class AbstractS3Service implements S3Service {
             }
             return new S3UrlParts(bucket, key);
         } catch (Exception e) {
-            throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE, "Invalid S3 URL");
+            throw new GlobalException(ErrorCode.INPUT_VALUE_INVALID, "Invalid S3 URL");
         }
     }
 
