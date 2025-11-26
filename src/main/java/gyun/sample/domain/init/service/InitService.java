@@ -47,11 +47,11 @@ public class InitService {
         }
     }
 
-    //    유저가 없을경우 유저 10개 생성
+    //    유저가 없을경우 유저 200개 생성
     @Transactional
     public void createMemberByRoleUser() {
         if (!memberStrategyFactory.getReadService(AccountRole.USER).existsByRole(AccountRole.USER)) {
-            for (int i = 1; i <= 10; i++) {
+            for (int i = 1; i <= 200; i++) {
                 // USER 생성 시 Role은 USER로 지정 (MemberCreateRequest.fromUser 같은 팩토리 메서드 사용 가능하나 직접 생성)
                 MemberCreateRequest request = new MemberCreateRequest("user" + i, "유저이름" + i, "1234", AccountRole.USER, MemberType.GENERAL);
                 memberStrategyFactory.getWriteService(AccountRole.USER).createMember(request);

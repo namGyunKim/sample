@@ -5,6 +5,7 @@ import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.payload.dto.MemberListRequestDTO;
 import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberListRequest;
+import gyun.sample.domain.member.payload.request.MemberRoleUpdateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.payload.response.DetailMemberResponse;
 import gyun.sample.domain.member.payload.response.MemberListResponse;
@@ -38,6 +39,10 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Slf4j
 @Tag(name = "MemberController", description = "회원 관리 (전략 패턴 적용)")
 @Controller
@@ -56,8 +61,6 @@ public class MemberController {
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     // === InitBinders ===
-    // [중요] @InitBinder의 value는 컨트롤러 메서드의 @ModelAttribute 이름과 반드시 일치해야 함
-
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -79,7 +82,6 @@ public class MemberController {
     @GetMapping(value = "/{role}/create")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMemberForm(@PathVariable AccountRole role, Model model) {
-        // ModelAttribute 이름과 InitBinder 이름 일치 (memberCreateRequest)
         if (!model.containsAttribute("memberCreateRequest")) {
             model.addAttribute("memberCreateRequest", new MemberCreateRequest(null, null, null, role, null));
         }
@@ -92,12 +94,11 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMember(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest, // 이름 명시 필수
+            @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
 
-        // 유효성 검증 실패 시 다시 폼으로 이동 (BindingResult는 Model에 자동으로 담김)
         if (bindingResult.hasErrors()) {
             model.addAttribute("role", role);
             return "member/create";
@@ -115,22 +116,19 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String getMemberList(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest, // 이름 명시 필수
+            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest,
             BindingResult bindingResult,
             Model model) {
 
-        // 목록 조회에서 에러가 있어도(페이지 번호 오류 등) 기본 화면은 보여줘야 함
         if (bindingResult.hasErrors()) {
             return "member/list";
         }
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
-        // DTO 변환하여 서비스 계층으로 전달
         Page<MemberListResponse> memberPage = service.getList(new MemberListRequestDTO(memberListRequest));
 
         model.addAttribute("role", role);
         model.addAttribute("memberPage", memberPage);
-        // 검색 조건 유지를 위해 request 객체 다시 전달 (ModelAttribute가 이미 하지만 명시적 확인)
         model.addAttribute("request", memberListRequest);
 
         return "member/list";
@@ -167,7 +165,6 @@ public class MemberController {
 
         checkPermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
 
-        // ModelAttribute 초기화
         if (!model.containsAttribute("memberUpdateRequest")) {
             model.addAttribute("memberUpdateRequest", new MemberUpdateRequest(targetMember.getProfile().nickName()));
         }
@@ -185,7 +182,7 @@ public class MemberController {
     public String updateMember(
             @PathVariable AccountRole role,
             @PathVariable Long id,
-            @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest, // 이름 명시
+            @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
             BindingResult bindingResult,
             @AuthenticationPrincipal PrincipalDetails principal,
             RedirectAttributes redirectAttributes,
@@ -206,17 +203,14 @@ public class MemberController {
         }
 
         WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
-        // 더티 체킹을 위해 트랜잭션 안에서 동작하는 서비스 호출
         writeService.updateMember(memberUpdateRequest, targetMember.getProfile().loginId());
 
-        // 본인 정보 수정 시 세션 정보 갱신
         if (principal.getId().equals(id)) {
             refreshSession(request, response, principal.getUsername(), role);
         }
 
         redirectAttributes.addFlashAttribute("message", "정보가 성공적으로 수정되었습니다.");
 
-        // 이동 경로 분기
         return principal.getId().equals(id) ? "redirect:/account/profile" :
                 "redirect:/member/" + role.name().toLowerCase() + "/detail/" + id;
     }
@@ -246,7 +240,92 @@ public class MemberController {
         }
     }
 
-    // 권한 체크 헬퍼
+    // [수정] 회원 등급 변경 폼 (최고 관리자 전용)
+    @Operation(summary = "회원 등급 변경 폼")
+    @GetMapping(value = "/{role}/role-update/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')") // 최고 관리자만 접근 가능
+    public String updateMemberRoleForm(
+            @PathVariable AccountRole role,
+            @PathVariable Long id,
+            @AuthenticationPrincipal PrincipalDetails principal,
+            Model model) {
+
+        ReadMemberService service = memberStrategyFactory.getReadService(role);
+        DetailMemberResponse targetMember = service.getDetail(id);
+
+        // 권한 변경 유효성 검사 (본인 변경 불가 등)
+        validateRoleChangePermission(principal, targetMember.getProfile().id());
+
+        if (!model.containsAttribute("memberRoleUpdateRequest")) {
+            model.addAttribute("memberRoleUpdateRequest", new MemberRoleUpdateRequest(targetMember.getProfile().role()));
+        }
+
+        // 변경 가능한 모든 권한 목록 (GUEST 제외)
+        List<AccountRole> assignableRoles = Arrays.stream(AccountRole.values())
+                .filter(r -> r != AccountRole.GUEST)
+                .toList();
+
+        model.addAttribute("targetMember", targetMember);
+        model.addAttribute("assignableRoles", assignableRoles);
+        model.addAttribute("role", role); // 현재 조회 중인 경로 상의 role (뒤로가기 용)
+        model.addAttribute("targetId", id);
+
+        return "member/role_update";
+    }
+
+    // [수정] 회원 등급 변경 처리 (최고 관리자 전용)
+    @Operation(summary = "회원 등급 변경 처리")
+    @PostMapping(value = "/{role}/role-update/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public String updateMemberRole(
+            @PathVariable AccountRole role, // 현재 보고 있는 리스트의 Role (ex: USER)
+            @PathVariable Long id,
+            @Valid @ModelAttribute("memberRoleUpdateRequest") MemberRoleUpdateRequest request,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal PrincipalDetails principal,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        ReadMemberService readService = memberStrategyFactory.getReadService(role);
+        DetailMemberResponse targetMember = readService.getDetail(id);
+
+        validateRoleChangePermission(principal, targetMember.getProfile().id());
+
+        if (bindingResult.hasErrors()) {
+            List<AccountRole> assignableRoles = Arrays.stream(AccountRole.values())
+                    .filter(r -> r != AccountRole.GUEST)
+                    .toList();
+            model.addAttribute("targetMember", targetMember);
+            model.addAttribute("assignableRoles", assignableRoles);
+            model.addAttribute("role", role);
+            model.addAttribute("targetId", id);
+            return "member/role_update";
+        }
+
+        WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
+        writeService.updateMemberRole(targetMember.getProfile().loginId(), request.role());
+
+        redirectAttributes.addFlashAttribute("message", "회원 등급이 변경되었습니다.");
+
+        // [중요] 등급이 변경되면 기존 경로(/member/user/...)로 리다이렉트 시
+        // ReadService가 해당 회원을 찾지 못할 수 있음 (Specification 필터링 때문).
+        // 따라서 변경된 등급에 맞는 상세 페이지로 리다이렉트해야 함.
+        String newRolePath = request.role().name().toLowerCase();
+
+        return "redirect:/member/" + newRolePath + "/detail/" + id;
+    }
+
+    // [수정] 권한 변경 유효성 검사: 최고 관리자만 가능하며, 본인의 권한은 변경할 수 없음
+    private void validateRoleChangePermission(PrincipalDetails principal, Long targetId) {
+        if (principal.getRole() != AccountRole.SUPER_ADMIN) {
+            throw new AccessDeniedException("최고 관리자만 회원 등급을 변경할 수 있습니다.");
+        }
+        if (principal.getId().equals(targetId)) {
+            throw new AccessDeniedException("자신의 등급은 변경할 수 없습니다.");
+        }
+    }
+
+    // 권한 체크 헬퍼 (정보 수정, 탈퇴 등)
     private void checkPermission(PrincipalDetails principal, AccountRole targetRole, Long targetId) {
         if (principal.getId().equals(targetId)) return; // 본인
         if (principal.getRole() == AccountRole.SUPER_ADMIN) return; // 최고관리자

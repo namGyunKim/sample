@@ -2,6 +2,8 @@ package gyun.sample.domain.member.service.write;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.aws.enums.ImageType;
+import gyun.sample.domain.log.enums.LogType;
+import gyun.sample.domain.log.event.MemberActivityEvent;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.entity.MemberImage;
 import gyun.sample.domain.member.payload.request.MemberCreateRequest;
@@ -13,8 +15,14 @@ import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
+import gyun.sample.global.security.PrincipalDetails;
+import gyun.sample.global.utils.UtilService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +38,8 @@ public class WriteAdminService extends AbstractWriteMemberService {
     private final MemberRepository memberRepository;
     private final ReadAdminService readAdminService;
     private final S3ServiceAdapter s3ServiceAdapter; // S3 서비스 어댑터 주입
+    private final ApplicationEventPublisher eventPublisher;
+    private final HttpServletRequest httpServletRequest;
 
     @Override
     public List<AccountRole> getSupportedRoles() {
@@ -87,5 +97,30 @@ public class WriteAdminService extends AbstractWriteMemberService {
         }
 
         return new GlobalInactiveResponse(member.getId());
+    }
+
+    @Override
+    public void updateMemberRole(String loginId, AccountRole newRole) {
+        List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
+        Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
+        AccountRole oldRole = member.getRole();
+        member.changeRole(newRole);
+
+        publishLog(member.getLoginId(), member.getId(), LogType.UPDATE, "관리자 권한 변경: " + oldRole + " -> " + newRole);
+    }
+
+    private void publishLog(String targetId, Long memberId, LogType type, String details) {
+        String executorId = getExecutorId(targetId);
+        eventPublisher.publishEvent(MemberActivityEvent.of(
+                targetId, memberId, executorId, type, details, UtilService.getClientIp(httpServletRequest)
+        ));
+    }
+
+    private String getExecutorId(String defaultId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof PrincipalDetails principal) {
+            return principal.getUsername();
+        }
+        return defaultId;
     }
 }

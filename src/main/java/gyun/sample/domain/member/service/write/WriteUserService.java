@@ -116,6 +116,14 @@ public class WriteUserService extends AbstractWriteMemberService {
         return new GlobalInactiveResponse(member.getId());
     }
 
+    @Override
+    public void updateMemberRole(String loginId, AccountRole newRole) {
+        Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
+        AccountRole oldRole = member.getRole();
+        member.changeRole(newRole);
+        publishLog(member.getLoginId(), member.getId(), LogType.UPDATE, "권한 변경: " + oldRole + " -> " + newRole);
+    }
+
     // 로그 발행 헬퍼 메서드
     private void publishLog(String targetId, Long memberId, LogType type, String details) {
         String executorId = getExecutorId(targetId);

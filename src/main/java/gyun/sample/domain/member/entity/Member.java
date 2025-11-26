@@ -123,4 +123,8 @@ public class Member extends BaseTimeEntity implements Serializable {
     public void setActive(GlobalActiveEnums active) {
         this.active = active;
     }
+
+    public void changeRole(AccountRole newRole) {
+        this.role = newRole;
+    }
 }
