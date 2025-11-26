@@ -60,22 +60,18 @@ public class WriteAdminService extends AbstractWriteMemberService {
 
     /**
      * 관리자/최고 관리자 회원 탈퇴 (비활성화) 로직
-     * 1. 회원의 active 상태를 INACTIVE로 변경 (Dirty Checking)
-     * 2. Refresh Token 무효화
-     * 3. S3에 저장된 프로필 이미지 삭제
+     * 1. 회원의 active 상태를 INACTIVE로 변경 및 개인정보 마스킹 (withdraw)
+     * 2. S3에 저장된 프로필 이미지 삭제
      */
     @Override
     public GlobalInactiveResponse deActiveMember(String loginId) {
         List<AccountRole> roles = Arrays.asList(AccountRole.ADMIN, AccountRole.SUPER_ADMIN);
         Member member = readAdminService.getByLoginIdAndRoles(loginId, roles);
 
-        // 1. 상태 변경
-        member.deActive();
+        // 1. 상태 변경 (Soft Delete 로직 적용 - deActive() 대신 withdraw() 사용)
+        member.withdraw();
 
-        // 2. Refresh Token 무효화
-        member.invalidateRefreshToken();
-
-        // 3. S3 프로필 이미지 삭제
+        // 2. S3 프로필 이미지 삭제
         if (!member.getMemberImages().isEmpty()) {
             List<String> fileNames = member.getMemberImages().stream()
                     .filter(mi -> mi.getUploadDirect() == UploadDirect.MEMBER_PROFILE)

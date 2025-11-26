@@ -1,6 +1,5 @@
 package gyun.sample.domain.member.entity;
 
-
 import gyun.sample.domain.account.entity.BaseTimeEntity;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.member.enums.MemberType;
@@ -16,6 +15,8 @@ import org.hibernate.annotations.Comment;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,6 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseTimeEntity implements Serializable {
 
-    // 직렬화 버전 UID 추가 (클래스 구조 변경 시 역직렬화 오류 방지)
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -33,22 +33,22 @@ public class Member extends BaseTimeEntity implements Serializable {
     @Column(name = "member_id")
     @Comment("유저 아이디")
     private long id;
-    @Column(unique = true, updatable = false)
+
+    @Column(unique = true) // 변경 가능하도록 updatable = false 제거 (탈퇴 시 변경 위해)
     @Comment("유저 로그인 아이디")
     private String loginId;
+
     @Column(unique = true)
     @Comment("유저 닉네임")
     private String nickName;
+
     @Comment("유저 비밀번호")
     private String password;
-    @Comment("유저 국가코드")
-    private String countryCode;
-    @Comment("유저 전화번호")
-    private String phoneNumber;
+
     @Enumerated(EnumType.STRING)
-    @Comment("유저 활성")
-    @Setter
+    @Comment("유저 활성 상태")
     private GlobalActiveEnums active;
+
     @Enumerated(EnumType.STRING)
     @Comment("유저 권한")
     private AccountRole role;
@@ -59,7 +59,8 @@ public class Member extends BaseTimeEntity implements Serializable {
 
     @Column(columnDefinition = "text")
     @Comment("소셜 토큰")
-    private String socialToken; // 소셜 연동 해제 시 null 가능
+    private String socialToken;
+
     @Comment("소셜 키")
     private String socialKey;
 
@@ -67,24 +68,20 @@ public class Member extends BaseTimeEntity implements Serializable {
     @Column(columnDefinition = "text")
     private String refreshToken;
 
-    // transient: 직렬화(Redis 저장) 시 이 필드는 제외합니다.
-    // 세션에 이미지 리스트까지 저장하면 용량이 커지고, MemberImage가 Serializable이 아니면 에러가 발생하기 때문입니다.
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private final transient List<MemberImage> memberImages = new ArrayList<>();
 
-
-    // 통합된 Request로 생성 (주로 관리자가 생성할 때 사용, role이 request에 포함됨)
+    // 생성자: 관리자 생성용
     public Member(MemberCreateRequest request) {
         this.loginId = request.loginId();
         this.nickName = request.nickName();
         this.password = request.password();
-        // Request에 Role이 없으면 기본 USER (Validator에서 관리자는 필수 체크함)
         this.role = request.role() != null ? request.role() : AccountRole.USER;
         this.active = GlobalActiveEnums.ACTIVE;
         this.memberType = request.memberType();
     }
 
-    // 소셜 회원가입 및 WriteUserService에서 사용
+    // 생성자: 소셜 로그인용
     public Member(String loginId, String nickName, MemberType memberType, String socialKey) {
         this.loginId = loginId;
         this.nickName = nickName;
@@ -98,29 +95,32 @@ public class Member extends BaseTimeEntity implements Serializable {
         this.password = password;
     }
 
-    // Dirty Checking을 위한 Update 메서드
-    public void update(MemberUpdateRequest memberUpdateRequest) {
-        this.nickName = memberUpdateRequest.nickName();
+    // 더티 체킹을 위한 회원 정보 수정
+    public void update(MemberUpdateRequest request) {
+        this.nickName = request.nickName();
     }
 
-    public void deActive() {
+    // 회원 탈퇴 처리 (Soft Delete + Unique Key 회피)
+    public void withdraw() {
+        String nowStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         this.active = GlobalActiveEnums.INACTIVE;
+        this.loginId = this.loginId + "_LEAVE_" + nowStr;
+        this.nickName = this.nickName + "_LEAVE_" + nowStr;
+        this.socialToken = null;
+        this.refreshToken = null;
+        // socialKey는 유지하되, 재가입 시 중복 체크 로직에서 Active 상태인 것만 조회하도록 쿼리 조정 필요
     }
 
-    // Access Token 업데이트 (소셜 연동 해제 시 null 전달 가능)
     public void updateAccessToken(String socialToken) {
         this.socialToken = socialToken;
     }
 
-    public void addImage(MemberImage memberImage) {
-        this.memberImages.add(memberImage);
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
     public void invalidateRefreshToken() {
         this.refreshToken = null;
+    }
+
+    // Active 상태 변경 Setter (필요 시 사용)
+    public void setActive(GlobalActiveEnums active) {
+        this.active = active;
     }
 }

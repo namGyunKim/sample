@@ -16,29 +16,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 회원 관련 동적 쿼리 생성 Specification
- * QueryDSL 대신 JPA Criteria API 사용
+ * JPA Criteria API를 래핑한 Specification
+ * QueryDSL 없이 동적 쿼리 생성
  */
 public class MemberSpecification {
 
-    /**
-     * 검색 조건(DTO)과 역할 목록(Roles)을 받아 Specification 생성
-     */
     public static Specification<Member> searchMember(MemberListRequestDTO request, List<AccountRole> roles) {
         return (Root<Member> root, CriteriaQuery<?> query, CriteriaBuilder builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // 1. Role 필터링 (IN 절)
+            // 1. Role 필터링
             if (roles != null && !roles.isEmpty()) {
                 predicates.add(root.get("role").in(roles));
             }
 
-            // 2. 활성 상태 필터링 (ALL이 아니면 해당 상태만 조회)
+            // 2. Active 상태 필터링
             if (request.active() != null && request.active() != GlobalActiveEnums.ALL) {
                 predicates.add(builder.equal(root.get("active"), request.active()));
             }
 
-            // 3. 검색어 필터링
+            // 3. 검색어(SearchWord) 필터링
             if (StringUtils.hasText(request.searchWord())) {
                 String keyword = "%" + request.searchWord() + "%";
                 GlobalFilterEnums filter = request.filter() != null ? request.filter() : GlobalFilterEnums.ALL;
@@ -46,6 +43,7 @@ public class MemberSpecification {
                 Predicate searchPredicate = switch (filter) {
                     case LOGIN_ID -> builder.like(root.get("loginId"), keyword);
                     case NICK_NAME -> builder.like(root.get("nickName"), keyword);
+                    // ALL인 경우 LoginId 또는 NickName에서 검색
                     default -> builder.or(
                             builder.like(root.get("loginId"), keyword),
                             builder.like(root.get("nickName"), keyword)
@@ -54,6 +52,7 @@ public class MemberSpecification {
                 predicates.add(searchPredicate);
             }
 
+            // WHERE 절 생성
             return builder.and(predicates.toArray(new Predicate[0]));
         };
     }

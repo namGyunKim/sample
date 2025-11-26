@@ -113,21 +113,19 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String getMemberList(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest, // 이름 명시
-            BindingResult bindingResult,
+            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest,
+            BindingResult bindingResult, // AOP(BindingAdvice)가 처리하도록 두거나, Controller에서 처리
             Model model) {
 
+        // BindingAdvice AOP가 RestController용이므로, 여기(Controller)서는 직접 처리하거나
+        // GlobalException으로 던져서 ExceptionAdvice가 View를 반환하도록 유도 가능.
+        // 여기서는 View 반환을 위해 직접 에러 체크 후 페이지 리턴
         if (bindingResult.hasErrors()) {
-            model.addAttribute("role", role);
-            model.addAttribute("request", memberListRequest);
-            model.addAttribute("memberPage", Page.empty());
-            return "member/list";
+            return "member/list"; // 에러 메시지 포함하여 리턴
         }
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
-        // DTO 변환
-        var listRequestDTO = new MemberListRequestDTO(memberListRequest);
-        Page<MemberListResponse> memberPage = service.getList(listRequestDTO);
+        Page<MemberListResponse> memberPage = service.getList(new MemberListRequestDTO(memberListRequest));
 
         model.addAttribute("role", role);
         model.addAttribute("memberPage", memberPage);
