@@ -58,19 +58,21 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authenticationProvider(authenticationProvider())
+                // 세션 정책: 필요 시 생성 (기본값)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // 정적 리소스 허용 (css, js, images 등)
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/sw.js")).permitAll()
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/account/login")
-                        .loginProcessingUrl("/login")
-                        .usernameParameter("loginId") // HTML input name과 일치해야 함
+                        .loginPage("/account/login") // 커스텀 로그인 페이지 경로
+                        .loginProcessingUrl("/login") // Security가 가로챌 로그인 처리 URL
+                        .usernameParameter("loginId") // HTML form의 input name
                         .passwordParameter("password")
                         .successHandler(customAuthSuccessHandler)
                         .failureUrl("/account/login?error")

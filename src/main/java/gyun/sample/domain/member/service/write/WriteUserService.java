@@ -30,6 +30,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 쓰기 전용 서비스 (CQRS - Write)
+ * 데이터 변경(Create, Update, Delete)을 담당하며 기본적으로 @Transactional이 적용됨.
+ */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -50,22 +54,33 @@ public class WriteUserService extends AbstractWriteMemberService {
 
     @Override
     public GlobalCreateResponse createMember(MemberCreateRequest request) {
-        // 일반 회원 가입 (소셜이 아닌 경우)
+        // 1. 엔티티 생성 (빌더 미사용, 생성자 사용)
         Member createdMember = new Member(request);
+
+        // 2. 저장
         Member member = memberRepository.save(createdMember);
+
+        // 3. 비밀번호 암호화 후 업데이트 (Setter 대신 명시적 메서드 사용)
         member.updatePassword(passwordEncoder.encode(request.password()));
 
+        // 4. 로그 이벤트 발행
         publishLog(member.getLoginId(), member.getId(), LogType.JOIN, "일반 회원 가입");
+
         return new GlobalCreateResponse(member.getId());
     }
 
     @Override
     public GlobalUpdateResponse updateMember(MemberUpdateRequest memberUpdateRequest, String loginId) {
-        // 더티 체킹을 이용한 업데이트
+        // 1. 조회 (영속성 컨텍스트 로드)
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
+
+        // 2. 변경 감지(Dirty Checking)를 통한 업데이트
+        // 엔티티 내의 update 비즈니스 메서드 호출
         member.update(memberUpdateRequest);
 
+        // 3. 로그 발행
         publishLog(member.getLoginId(), member.getId(), LogType.UPDATE, "회원 정보 수정");
+
         return new GlobalUpdateResponse(member.getId());
     }
 
@@ -73,24 +88,26 @@ public class WriteUserService extends AbstractWriteMemberService {
     public GlobalInactiveResponse deActiveMember(String loginId) {
         Member member = readUserService.getByLoginIdAndRole(loginId, AccountRole.USER);
 
-        // 1. 구글 연동 해제 (토큰 revoke)
+        // 1. 구글 연동 해제 (소셜 회원인 경우)
         if (member.getMemberType() == MemberType.GOOGLE) {
             googleSocialService.unlink(member);
         }
 
-        // 2. 회원 탈퇴 처리 (Soft Delete: ID/닉네임 변경 + Active 상태 변경)
+        // 2. 회원 탈퇴 처리 (Soft Delete: Active -> INACTIVE, 개인정보 마스킹)
         member.withdraw();
 
-        // 3. 프로필 이미지 삭제 (S3 및 DB)
+        // 3. 프로필 이미지 삭제 (S3 실제 파일 삭제 및 DB 연관 관계 정리)
         if (!member.getMemberImages().isEmpty()) {
             List<String> fileNames = member.getMemberImages().stream()
                     .filter(mi -> mi.getUploadDirect() == UploadDirect.MEMBER_PROFILE)
                     .map(MemberImage::getFileName)
                     .toList();
 
+            // S3에서 파일 삭제
             s3ServiceAdapter.getService(UploadDirect.MEMBER_PROFILE)
                     .deleteImages(fileNames, ImageType.MEMBER_PROFILE, member.getId());
 
+            // 고아 객체 제거(Orphan Removal)를 위해 컬렉션 비우기
             member.getMemberImages().clear();
         }
 
@@ -99,6 +116,7 @@ public class WriteUserService extends AbstractWriteMemberService {
         return new GlobalInactiveResponse(member.getId());
     }
 
+    // 로그 발행 헬퍼 메서드
     private void publishLog(String targetId, Long memberId, LogType type, String details) {
         String executorId = getExecutorId(targetId);
         eventPublisher.publishEvent(MemberActivityEvent.of(
@@ -106,6 +124,7 @@ public class WriteUserService extends AbstractWriteMemberService {
         ));
     }
 
+    // 현재 로그인한 사용자 ID 가져오기 (없으면 본인)
     private String getExecutorId(String defaultId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof PrincipalDetails principal) {

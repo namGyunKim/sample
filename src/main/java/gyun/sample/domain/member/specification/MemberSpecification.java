@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JPA Criteria API를 래핑한 Specification
- * QueryDSL 없이 동적 쿼리 생성
+ * QueryDSL 대신 JPA Criteria API를 사용하여 동적 쿼리를 생성합니다.
+ * 복잡한 검색 조건을 타입 세이프하게 처리하기 위함입니다.
  */
 public class MemberSpecification {
 
@@ -25,17 +25,18 @@ public class MemberSpecification {
         return (Root<Member> root, CriteriaQuery<?> query, CriteriaBuilder builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // 1. Role 필터링
+            // 1. 권한(Role) 필터링 (IN 절)
             if (roles != null && !roles.isEmpty()) {
                 predicates.add(root.get("role").in(roles));
             }
 
-            // 2. Active 상태 필터링
+            // 2. 활성화 상태(Active) 필터링
+            // ALL이 아닌 경우에만 WHERE 조건 추가
             if (request.active() != null && request.active() != GlobalActiveEnums.ALL) {
                 predicates.add(builder.equal(root.get("active"), request.active()));
             }
 
-            // 3. 검색어(SearchWord) 필터링
+            // 3. 검색어(SearchWord) 및 필터(Filter) 처리
             if (StringUtils.hasText(request.searchWord())) {
                 String keyword = "%" + request.searchWord() + "%";
                 GlobalFilterEnums filter = request.filter() != null ? request.filter() : GlobalFilterEnums.ALL;
@@ -43,7 +44,7 @@ public class MemberSpecification {
                 Predicate searchPredicate = switch (filter) {
                     case LOGIN_ID -> builder.like(root.get("loginId"), keyword);
                     case NICK_NAME -> builder.like(root.get("nickName"), keyword);
-                    // ALL인 경우 LoginId 또는 NickName에서 검색
+                    // ALL인 경우: 로그인 ID 또는 닉네임 중 하나라도 매칭되면 검색 (OR 조건)
                     default -> builder.or(
                             builder.like(root.get("loginId"), keyword),
                             builder.like(root.get("nickName"), keyword)
@@ -52,7 +53,7 @@ public class MemberSpecification {
                 predicates.add(searchPredicate);
             }
 
-            // WHERE 절 생성
+            // 모든 조건을 AND로 결합하여 반환
             return builder.and(predicates.toArray(new Predicate[0]));
         };
     }
