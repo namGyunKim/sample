@@ -6,33 +6,53 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* NProgress 커스텀 (파란색 로딩바) */
+#nprogress .bar {
+    background: #3B82F6 !important; /* Tailwind blue-500 */
+    height: 3px !important;
+}
+
+#nprogress .peg {
+    box-shadow: 0 0 10px #3B82F6, 0 0 5px #3B82F6 !important;
+}
+
 /* 부드러운 페이드인 애니메이션 */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* 테이블 호버 효과 */
+.animate-fade-in-down {
+    animation: fadeInDown 0.4s ease-out forwards;
+}
+
+/* 테이블 호버 효과 고도화 */
 .table-row-hover:hover td {
-    background-color: #f9fafb;
+    background-color: #F8FAFC; /* slate-50 */
     transition: background-color 0.2s;
 }
 
-/* 스크롤바 커스텀 (선택 사항) */
+/* 스크롤바 커스텀 */
 ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: #CBD5E1; /* slate-300 */
     border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+    background: #94A3B8; /* slate-400 */
 }

@@ -7,94 +7,145 @@
     <title>회원 목록</title>
 </head>
 <body>
-<div layout:fragment="content">
-    <!-- 페이지 헤더 -->
+<div layout:fragment="content" class="animate-fade-in">
+
+    <!-- 상단 헤더 & 액션 버튼 -->
     <div class="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">회원 목록</h1>
-            <p class="mt-1 text-sm text-gray-500">등록된 모든 회원의 정보를 관리합니다.</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">회원 관리</h1>
+            <p class="mt-2 text-sm text-gray-500">
+                총 <span class="font-semibold text-primary" th:text="${memberPage.totalElements}">0</span>명의 회원이 등록되어 있습니다.
+            </p>
         </div>
-        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div class="mt-4 sm:mt-0 sm:flex-none">
             <a th:href="@{/member/{role}/create(role=${role})}"
-               class="inline-flex items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto transition">
+               class="inline-flex items-center justify-center rounded-lg border border-transparent bg-gray-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all transform hover:-translate-y-0.5">
                 <i class="fa-solid fa-plus mr-2"></i>회원 등록
             </a>
         </div>
     </div>
 
-    <!-- 검색 필터 -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-        <form method="get" th:action="@{/member/{role}/list(role=${role})}" th:object="${request}" class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+    <!-- 검색 필터 (카드 형태) -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+        <!-- hx-boost가 body에 있으므로, form 제출 시 자동으로 SPA 방식으로 처리됨 -->
+        <form method="get" th:action="@{/member/{role}/list(role=${role})}" th:object="${request}" class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-12 items-end">
+
+            <!-- 필터링 옵션 -->
             <div class="sm:col-span-2">
-                <label for="filter" class="block text-sm font-medium text-gray-700">검색 기준</label>
-                <select id="filter" th:field="*{filter}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-2">
-                    <option value="ALL">전체</option>
-                    <option value="LOGIN_ID">아이디</option>
-                    <option value="NICK_NAME">닉네임</option>
-                </select>
+                <label for="filter" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">검색 기준</label>
+                <div class="relative">
+                    <select id="filter" th:field="*{filter}" class="appearance-none block w-full rounded-lg border-gray-200 bg-gray-50 py-2.5 pl-3 pr-10 text-sm focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary transition-colors cursor-pointer">
+                        <option value="ALL">전체</option>
+                        <option value="LOGIN_ID">아이디</option>
+                        <option value="NICK_NAME">닉네임</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sm:col-span-4">
+                <label for="searchWord" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">검색어</label>
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                    </div>
+                    <input type="text" id="searchWord" th:field="*{searchWord}" placeholder="검색어를 입력하세요"
+                           class="block w-full rounded-lg border-gray-200 bg-gray-50 py-2.5 pl-10 text-sm focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary transition-colors">
+                </div>
             </div>
 
             <div class="sm:col-span-2">
-                <label for="searchWord" class="block text-sm font-medium text-gray-700">검색어</label>
-                <input type="text" id="searchWord" th:field="*{searchWord}" placeholder="검색어를 입력하세요" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-2">
+                <label for="active" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">계정 상태</label>
+                <div class="relative">
+                    <select id="active" th:field="*{active}" class="appearance-none block w-full rounded-lg border-gray-200 bg-gray-50 py-2.5 pl-3 pr-10 text-sm focus:border-primary focus:bg-white focus:ring-1 focus:ring-primary transition-colors cursor-pointer">
+                        <option value="ALL">전체</option>
+                        <option value="ACTIVE">활성</option>
+                        <option value="INACTIVE">비활성</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
             </div>
 
-            <div class="sm:col-span-1">
-                <label for="active" class="block text-sm font-medium text-gray-700">상태</label>
-                <select id="active" th:field="*{active}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm py-2">
-                    <option value="ALL">전체</option>
-                    <option value="ACTIVE">활성</option>
-                    <option value="INACTIVE">비활성</option>
-                </select>
-            </div>
+            <!-- 정렬 및 사이즈 (Hidden for simplicity UI, but included in logic) -->
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" th:field="*{size}">
+            <input type="hidden" th:field="*{order}">
 
-            <div class="sm:col-span-1 flex items-end">
-                <button type="submit" class="w-full bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-900 transition">
-                    <i class="fa-solid fa-magnifying-glass mr-2"></i>검색
+            <div class="sm:col-span-2 sm:col-start-11">
+                <button type="submit" class="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all shadow-sm">
+                    조회하기
                 </button>
             </div>
-
-            <!-- 히든 필드 -->
-            <input type="hidden" name="page" value="1">
-            <input type="hidden" name="size" th:value="*{size}">
-            <input type="hidden" th:field="*{order}">
         </form>
     </div>
 
-    <!-- 테이블 리스트 -->
-    <div class="bg-white shadow-sm ring-1 ring-black ring-opacity-5 sm:rounded-lg overflow-hidden">
+    <!-- 데이터 테이블 -->
+    <div class="bg-white shadow-sm ring-1 ring-gray-200 sm:rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-300">
-                <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50/50">
                 <tr>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ID</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">로그인 ID</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">닉네임</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">권한</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">가입 유형</th>
-                    <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">관리</th>
+                    <th scope="col" class="py-4 pl-6 pr-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+                    <th scope="col" class="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">로그인 정보</th>
+                    <th scope="col" class="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">닉네임</th>
+                    <th scope="col" class="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">권한</th>
+                    <th scope="col" class="px-3 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">유형</th>
+                    <th scope="col" class="px-3 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider pr-6">관리</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                <tr th:each="member : ${memberPage.content}" class="table-row-hover cursor-pointer transition"
-                    th:onclick="|location.href='@{/member/{role}/detail/{id}(role=${role}, id=${member.profile.id})}'|">
-                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6" th:text="${member.profile.id}">1</td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" th:text="${member.profile.loginId}">user1</td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium" th:text="${member.profile.nickName}">홍길동</td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10" th:text="${member.profile.role}">USER</span>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                <tr th:each="member : ${memberPage.content}" class="group hover:bg-blue-50/30 transition-colors duration-150">
+                    <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-gray-500" th:text="${member.profile.id}">1</td>
+
+                    <td class="whitespace-nowrap px-3 py-4">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 mr-3 text-xs">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="text-sm font-medium text-gray-900" th:text="${member.profile.loginId}">user1</div>
+                        </div>
                     </td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500" th:text="${member.profile.memberType}">GENERAL</td>
-                    <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
-                        <a th:href="@{/member/{role}/detail/{id}(role=${role}, id=${member.profile.id})}" class="text-primary hover:text-blue-900 font-medium">상세보기 <span class="sr-only">, <span th:text="${member.profile.nickName}">User</span></span></a>
+
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-600" th:text="${member.profile.nickName}">홍길동</td>
+
+                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                              th:classappend="${member.profile.role.name() == 'ADMIN' ? 'bg-purple-100 text-purple-800' : (member.profile.role.name() == 'SUPER_ADMIN' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800')}">
+                            <span class="w-1.5 h-1.5 rounded-full mr-1.5"
+                                  th:classappend="${member.profile.role.name() == 'ADMIN' ? 'bg-purple-400' : (member.profile.role.name() == 'SUPER_ADMIN' ? 'bg-red-400' : 'bg-blue-400')}"></span>
+                            <span th:text="${member.profile.role.value}">USER</span>
+                        </span>
+                    </td>
+
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span class="inline-flex items-center gap-1" th:if="${member.profile.memberType.name() == 'GOOGLE'}">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-4 h-4" alt="Google">
+                            <span>Google</span>
+                        </span>
+                        <span th:if="${member.profile.memberType.name() != 'GOOGLE'}" th:text="${member.profile.memberType.value}">일반</span>
+                    </td>
+
+                    <td class="whitespace-nowrap px-3 py-4 text-right pr-6 text-sm font-medium">
+                        <a th:href="@{/member/{role}/detail/{id}(role=${role}, id=${member.profile.id})}"
+                           class="text-gray-400 hover:text-primary transition-colors group-hover:text-primary">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
                     </td>
                 </tr>
-                <!-- 데이터 없을 때 -->
+
+                <!-- 데이터 없음 -->
                 <tr th:if="${memberPage.empty}">
-                    <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colspan="6" class="px-6 py-16 text-center text-sm text-gray-500 bg-gray-50/30">
                         <div class="flex flex-col items-center justify-center">
-                            <i class="fa-regular fa-folder-open text-4xl text-gray-300 mb-3"></i>
-                            <p>검색 결과가 없습니다.</p>
+                            <div class="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xl"></i>
+                            </div>
+                            <p class="text-gray-900 font-medium">검색 결과가 없습니다.</p>
+                            <p class="text-gray-500 mt-1 text-xs">검색 조건을 변경하여 다시 시도해주세요.</p>
                         </div>
                     </td>
                 </tr>
@@ -102,31 +153,51 @@
             </table>
         </div>
 
-        <!-- 페이지네이션 -->
+        <!-- 페이지네이션 (Tailwind UI 스타일) -->
         <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6" th:if="${!memberPage.empty}">
+            <!-- 모바일용 -->
             <div class="flex flex-1 justify-between sm:hidden">
-                <a th:if="${memberPage.hasPrevious()}" th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">이전</a>
-                <a th:if="${memberPage.hasNext()}" th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number + 2}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">다음</a>
+                <a th:if="${memberPage.hasPrevious()}"
+                   th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}"
+                   class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">이전</a>
+                <a th:if="${memberPage.hasNext()}"
+                   th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number + 2}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}"
+                   class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">다음</a>
             </div>
-            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-center">
+
+            <!-- 데스크탑용 -->
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Showing
+                        <span class="font-medium" th:text="${memberPage.number * memberPage.size + 1}">1</span>
+                        to
+                        <span class="font-medium" th:text="${(memberPage.number + 1) * memberPage.size > memberPage.totalElements ? memberPage.totalElements : (memberPage.number + 1) * memberPage.size}">10</span>
+                        of
+                        <span class="font-medium" th:text="${memberPage.totalElements}">97</span>
+                        results
+                    </p>
+                </div>
                 <div>
                     <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                        <!-- 이전 버튼 -->
-                        <a th:if="${memberPage.hasPrevious()}" th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                        <!-- 이전 페이지 -->
+                        <a th:classappend="${!memberPage.hasPrevious()} ? 'pointer-events-none opacity-50' : ''"
+                           th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}"
+                           class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                             <span class="sr-only">Previous</span>
-                            <i class="fa-solid fa-chevron-left h-5 w-5"></i>
+                            <i class="fa-solid fa-chevron-left h-4 w-4"></i>
                         </a>
 
-                        <!-- 현재 페이지 표시 (단순화) -->
-                        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0 bg-blue-50"
-                              th:text="${memberPage.number + 1} + ' / ' + ${memberPage.totalPages}">
-                            1 / 10
-                        </span>
+                        <!-- 페이지 번호 (간소화: 현재 페이지만 표시하거나 로직 추가 가능) -->
+                        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-primary ring-1 ring-inset ring-gray-300 bg-blue-50 focus:z-20 focus:outline-offset-0"
+                              th:text="${memberPage.number + 1}">1</span>
 
-                        <!-- 다음 버튼 -->
-                        <a th:if="${memberPage.hasNext()}" th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number + 2}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                        <!-- 다음 페이지 -->
+                        <a th:classappend="${!memberPage.hasNext()} ? 'pointer-events-none opacity-50' : ''"
+                           th:href="@{/member/{role}/list(role=${role}, page=${memberPage.number + 2}, size=${memberPage.size}, searchWord=${request.searchWord}, filter=${request.filter}, active=${request.active}, order=${request.order})}"
+                           class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                             <span class="sr-only">Next</span>
-                            <i class="fa-solid fa-chevron-right h-5 w-5"></i>
+                            <i class="fa-solid fa-chevron-right h-4 w-4"></i>
                         </a>
                     </nav>
                 </div>

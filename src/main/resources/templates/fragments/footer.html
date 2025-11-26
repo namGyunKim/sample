@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<footer th:fragment="footer" class="bg-white">
+<footer th:fragment="footer" class="bg-white border-t border-gray-100 mt-auto">
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div class="md:flex md:items-center md:justify-between">
             <div class="flex justify-center space-x-6 md:order-2">
-                <a href="#" class="text-gray-400 hover:text-gray-500">
+                <!-- 외부 링크이므로 hx-boost="false" 추가 -->
+                <a href="https://github.com/namGyunKim/sample/tree/thyme-leaf" target="_blank" hx-boost="false" class="text-gray-400 hover:text-gray-500 transition-colors">
                     <span class="sr-only">GitHub</span>
                     <i class="fa-brands fa-github text-xl"></i>
                 </a>
