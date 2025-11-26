@@ -3,7 +3,6 @@ package gyun.sample.domain.account.api;
 import gyun.sample.domain.account.payload.dto.CurrentAccountDTO;
 import gyun.sample.domain.account.payload.response.LoginMemberResponse;
 import gyun.sample.domain.account.service.WriteAccountService;
-import gyun.sample.domain.account.validator.LoginAccountValidator;
 import gyun.sample.global.annotaion.CurrentAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -26,12 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AccountController {
 
     private final WriteAccountService writeAccountService;
-    private final LoginAccountValidator loginAccountValidator;
-
-    @InitBinder("accountLoginRequest")
-    public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(loginAccountValidator);
-    }
 
     /**
      * 로그인 페이지
@@ -45,7 +36,8 @@ public class AccountController {
                             Model model) {
 
         if (error != null) {
-            model.addAttribute("errorMessage", "아이디 또는 비밀번호가 일치하지 않습니다.");
+            // Spring Security에서 로그인 실패 시 redirect 되는 파라미터 처리
+            model.addAttribute("errorMessage", "아이디 또는 비밀번호가 일치하지 않거나, 비활성화된 계정입니다.");
         }
         if (logout != null) {
             model.addAttribute("logoutMessage", "성공적으로 로그아웃되었습니다.");
