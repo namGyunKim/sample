@@ -1,172 +1,125 @@
-Spring Boot Base Project
+GEMINI - 프로젝트 베이스 가이드라인
 
-This project is a robust Spring Boot 3.2 starter template designed for rapid development of scalable web applications. It integrates essential features such as authentication (Social Login), file storage (AWS S3), messaging (Email, SMS), and database interactions using JPA and QueryDSL.
+이 문서는 Spring Boot 3.2.5 & Java 21 기반의 타임리프 프로젝트를 위한 개발 가이드라인 및 요구사항 명세서입니다.
 
-🚀 Key Features
+1. 프로젝트 환경 (Environment)
 
-Authentication & Security:
+Build Tool: Gradle
 
-Spring Security integration.
+Language: Java 21
 
-Social Login support (Google OAuth2).
+Framework: Spring Boot 3.2.5
 
-Custom authentication success handlers.
+Database: MySQL / PostgreSQL
 
-Member Management:
+Template Engine: Thymeleaf
 
-Role-based access control (USER, ADMIN, SUPER_ADMIN).
+2. 주요 기술 스택 (Tech Stack)
 
-Member CRUD with Strategy Pattern.
+Web & UI:
 
-Profile image management.
+spring-boot-starter-web, spring-boot-starter-validation
 
-Infrastructure & Storage:
+thymeleaf-layout-dialect (레이아웃 모듈화: 헤더, 푸터 등)
 
-AWS S3: Image upload and management.
+thymeleaf-extras-springsecurity6 (로그인 상태 및 권한별 UI 제어)
 
-Redis: Session storage and caching.
+Persistence:
 
-Messaging:
+spring-boot-starter-data-jpa
 
-Email: Async email sending via SMTP.
+Specification: 복잡한 동적 쿼리는 QueryDSL 대신 JPA Specification(Criteria API 래핑) 사용
 
-SMS: Verification code sending service (CoolSMS).
+Security & Auth:
 
-Database & ORM:
+spring-boot-starter-security
 
-Spring Data JPA & QueryDSL for dynamic queries.
+Google Social Login: 회원 가입 및 로그인은 구글 소셜 로그인으로 단일화
 
-Auditing (CreatedAt, ModifiedAt, CreatedBy, ModifiedBy).
+Cache & Session:
 
-P6Spy: Pretty SQL logging for development.
+spring-boot-starter-data-redis
+
+spring-session-data-redis (세션 클러스터링)
 
 Logging & Monitoring:
 
-MDC Logging (Trace ID tracking).
+p6spy-spring-boot-starter (SQL 로깅, 줄바꿈 스타일 적용)
 
-AOP-based controller logging.
+spring-boot-starter-actuator
 
-Activity logging (Login, Update, etc.).
+External Integration:
 
-View:
+spring-cloud-starter-openfeign (HTTP Client)
 
-Server-side rendering with Thymeleaf & Tailwind CSS.
+software.amazon.awssdk:s3 (파일 업로드)
 
-🛠 Tech Stack
+spring-boot-starter-mail (이메일 발송)
 
-Java: 21
+Docs: springdoc-openapi-starter-webmvc-ui (Swagger)
 
-Framework: Spring Boot 3.2
+Utils: bucket4j-core (Rate Limiting), twelvemonkeys (이미지 처리)
 
-Database: MySQL / PostgreSQL
+3. 아키텍처 및 패키지 구조 (Architecture)
 
-Cache/Session: Redis
+Service Layer 분리:
 
-ORM: JPA (Hibernate), QueryDSL
+CQRS 지향: read 패키지와 write 패키지로 서비스를 명확히 분리
 
-Template Engine: Thymeleaf
+예: MemberReadService.java, MemberWriteService.java
 
-Build Tool: Gradle
+Request Handling:
 
-⚙️ Configuration
+Controller에서 요청을 받을 때는 반드시 별도의 Request DTO 생성하여 사용
 
-Copy the application-dummy.yml file to src/main/resources/application.yml.
+Response Handling:
 
-Fill in the required environment variables or direct values in the YAML file.
+BindingResult는 컨트롤러 코드 내에서 직접 처리하지 않고, AOP를 통해 일괄 감지 및 예외 처리
 
-# Example
-datasource:
-url: jdbc:mysql://localhost:3306/your_db
-username: root
-password: your_password
+4. 코딩 컨벤션 (Coding Convention)
 
-aws:
-access-key: YOUR_AWS_ACCESS_KEY
-secret-key: YOUR_AWS_SECRET_KEY
+Entity Style:
 
+No Builder: 빌더 패턴(@Builder)을 사용하지 않음
 
-스프링 부트 베이스 프로젝트
+Dirty Checking: 데이터 수정 시 set 메서드 등을 통한 변경 감지(Dirty Checking) 활용
 
-이 프로젝트는 확장 가능한 웹 애플리케이션의 빠른 개발을 위해 설계된 Spring Boot 3.2 기반의 스타터 템플릿입니다. 인증(소셜 로그인), 파일 저장소(AWS S3), 메시징(이메일, SMS), 그리고 JPA와 QueryDSL을 활용한 데이터베이스 상호작용 등 필수적인 기능들이 통합되어 있습니다.
+Validation:
 
-🚀 주요 기능
+@InitBinder 사용 시, Validator의 이름과 컨트롤러의 @ModelAttribute 변수명이 일치해야 함을 준수
 
-인증 및 보안:
+Clean Code:
 
-Spring Security 통합.
+불필요한 코드를 줄이고 가독성을 높이는 클린 모드 지향
 
-소셜 로그인 지원 (Google OAuth2).
+주석 및 답변은 한글로 작성
 
-커스텀 인증 성공 핸들러.
+Testing:
 
-회원 관리:
+테스트 코드(JUnit 등)는 작성하지 않음
 
-역할 기반 접근 제어 (USER, ADMIN, SUPER_ADMIN).
+5. UI/UX 가이드 (Thymeleaf)
 
-전략 패턴(Strategy Pattern)을 적용한 회원 CRUD.
+Layout Reuse (Essential):
 
-프로필 이미지 관리.
+모든 화면은 공통 레이아웃(layout/default.html)을 상속받아 구현해야 합니다.
 
-인프라 및 저장소:
+개별 HTML 파일의 <html> 태그에 layout:decorate="~{layout/default}"를 반드시 명시합니다.
 
-AWS S3: 이미지 업로드 및 관리.
+실제 콘텐츠는 <div layout:fragment="content"> 내부에 작성하여, 헤더/푸터/공통 스타일이 자동으로 적용되도록 합니다.
 
-Redis: 세션 저장소 및 캐싱 활용.
+Layout Dialect: 공통 요소(Header, Footer, Sidebar)는 Layout으로 모듈화하여 중복 제거
 
-메시징:
+Fragments: 댓글 목록, 리스트 아이템 등 반복되는 UI는 th:replace를 사용하여 Fragment로 분리 및 재사용
 
-Email: SMTP를 이용한 비동기 이메일 발송.
+Security Integration: sec:authorize="isAuthenticated()" 등을 활용하여 로그인 여부 및 권한에 따른 버튼 노출/숨김 처리
 
-SMS: 인증 번호 발송 서비스 (CoolSMS).
+6. 기타 요구사항
 
-데이터베이스 및 ORM:
+모든 코드는 전체 코드(Full Code) 형태로 제공
 
-Spring Data JPA 및 동적 쿼리를 위한 QueryDSL.
+코드 제공 시 파일 경로와 파일명을 명시하여 수정 위치 혼동 방지
 
-Auditing 적용 (생성일, 수정일, 생성자, 수정자 자동 관리).
+Google Search API 등의 외부 도구는 상황에 맞게 활용
 
-P6Spy: 개발 편의를 위한 가독성 높은 SQL 로깅.
-
-로깅 및 모니터링:
-
-MDC 로깅 (요청별 Trace ID 추적).
-
-AOP 기반의 컨트롤러 요청/응답 로깅.
-
-사용자 활동 로그 기록 (로그인, 정보 수정 등).
-
-뷰 (View):
-
-Thymeleaf 및 Tailwind CSS를 이용한 서버 사이드 렌더링.
-
-🛠 기술 스택
-
-Java: 21
-
-Framework: Spring Boot 3.2
-
-Database: MySQL / PostgreSQL
-
-Cache/Session: Redis
-
-ORM: JPA (Hibernate), QueryDSL
-
-Template Engine: Thymeleaf
-
-Build Tool: Gradle
-
-⚙️ 설정 방법
-
-application-dummy.yml 파일의 내용을 복사하여 src/main/resources/application.yml 파일을 생성하거나 덮어씁니다.
-
-YAML 파일 내의 주요 설정 값(DB 정보, AWS 키, API 키 등)을 본인의 환경에 맞게 수정합니다.
-
-# 예시
-datasource:
-url: jdbc:mysql://localhost:3306/your_db
-username: root
-password: your_password
-
-aws:
-access-key: 발급받은_AWS_ACCESS_KEY
-secret-key: 발급받은_AWS_SECRET_KEY
+Generated by GEMINI
