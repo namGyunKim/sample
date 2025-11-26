@@ -26,8 +26,7 @@ public class AccountController {
 
     /**
      * 로그인 페이지
-     * 실제 로그인 처리는 Spring Security (POST /login)가 담당하므로
-     * 여기서는 뷰만 반환합니다.
+     * 실제 인증은 Spring Security (POST /login)가 처리합니다.
      */
     @Operation(summary = "로그인 페이지")
     @GetMapping(value = "/login")
@@ -36,7 +35,6 @@ public class AccountController {
                             Model model) {
 
         if (error != null) {
-            // Spring Security에서 로그인 실패 시 redirect 되는 파라미터 처리
             model.addAttribute("errorMessage", "아이디 또는 비밀번호가 일치하지 않거나, 비활성화된 계정입니다.");
         }
         if (logout != null) {
