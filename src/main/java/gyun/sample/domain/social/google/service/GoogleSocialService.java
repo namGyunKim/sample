@@ -138,8 +138,15 @@ public class GoogleSocialService implements SocialLoginService {
 
         // 2. 신규 회원 가입 (탈퇴 후 재가입 포함)
         String loginId = "google_" + socialKey;
-        // 닉네임 중복 방지를 위한 처리 필요 시 추가 로직 구현
-        String nickName = userInfo.name();
+
+        // 닉네임 중복 체크 및 처리 로직 추가
+        String originalNickName = userInfo.name();
+        String nickName = originalNickName;
+
+        // 닉네임이 이미 존재하면 랜덤 숫자를 붙여서 유니크하게 만듦
+        while (memberRepository.existsByNickName(nickName)) {
+            nickName = originalNickName + "_" + (int)(Math.random() * 10000);
+        }
 
         Member newMember = new Member(loginId, nickName, MemberType.GOOGLE, socialKey);
         newMember.updatePassword(new BCryptPasswordEncoder().encode("SOCIAL_" + socialKey));
