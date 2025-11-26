@@ -64,7 +64,9 @@
 * **Dirty Checking:** 데이터 수정 시 명시적인 `save()` 호출보다는, 트랜잭션 내에서 `set` 메서드(또는 의미 있는 비즈니스 메서드)를 통한 변경 감지(Dirty Checking)를 활용합니다.
 
 ### Validation
-* `@InitBinder` 사용 시, `Validator`의 이름과 컨트롤러의 `@ModelAttribute` 변수명이 일치해야 함을 준수합니다.
+* Validator 분리: 검증 로직은 가능한 경우 어노테이션(@NotNull 등)에 의존하기보다, org.springframework.validation.Validator 인터페이스를 구현한 별도의 Validator 클래스로 분리하여 작성합니다.
+* @InitBinder 활용: 작성한 Validator는 컨트롤러 내 @InitBinder 메서드를 통해 WebDataBinder에 등록하여 적용합니다.
+* Naming Convention: @InitBinder("targetName") 사용 시, 등록하는 Validator의 대상 이름과 컨트롤러 메서드 파라미터의 @ModelAttribute("targetName") 변수명이 반드시 일치해야 합니다.
 
 ### Clean Code
 * 불필요한 코드를 줄이고 가독성을 높이는 클린 코드를 지향합니다.
