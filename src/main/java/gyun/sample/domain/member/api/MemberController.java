@@ -14,6 +14,7 @@ import gyun.sample.domain.member.service.read.ReadMemberService;
 import gyun.sample.domain.member.service.write.WriteMemberService;
 import gyun.sample.domain.member.validator.MemberCreateValidator;
 import gyun.sample.domain.member.validator.MemberListValidator;
+import gyun.sample.domain.member.validator.MemberRoleUpdateValidator;
 import gyun.sample.domain.member.validator.MemberUserUpdateValidator;
 import gyun.sample.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +40,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,6 +56,7 @@ public class MemberController {
     private final MemberCreateValidator memberCreateValidator;
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
+    private final MemberRoleUpdateValidator memberRoleUpdateValidator; // [추가]
 
     // Security Context Repository
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
@@ -74,6 +75,12 @@ public class MemberController {
     @InitBinder("memberUpdateRequest")
     public void initBinderUpdate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberUserUpdateValidator);
+    }
+
+    // [추가] 등급 변경 요청에 대한 Validator 바인딩
+    @InitBinder("memberRoleUpdateRequest")
+    public void initBinderRoleUpdate(WebDataBinder dataBinder) {
+        dataBinder.addValidators(memberRoleUpdateValidator);
     }
 
     // === Views & Actions ===
@@ -247,14 +254,14 @@ public class MemberController {
     public String updateMemberRoleForm(
             @PathVariable AccountRole role,
             @PathVariable Long id,
-            @AuthenticationPrincipal PrincipalDetails principal,
             Model model) {
+        // [수정] 수동 검증 로직(validateRoleChangePermission) 제거
+        // GET 요청은 데이터를 바인딩하지 않으므로 Validator가 자동 실행되지 않지만,
+        // @PreAuthorize와 View 레벨(본인 버튼 숨김)에서의 제어로 충분합니다.
+        // 실제 악의적인 요청(POST)은 Validator가 차단합니다.
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
         DetailMemberResponse targetMember = service.getDetail(id);
-
-        // 권한 변경 유효성 검사 (본인 변경 불가 등)
-        validateRoleChangePermission(principal, targetMember.getProfile().id());
 
         if (!model.containsAttribute("memberRoleUpdateRequest")) {
             model.addAttribute("memberRoleUpdateRequest", new MemberRoleUpdateRequest(targetMember.getProfile().role()));
@@ -280,18 +287,19 @@ public class MemberController {
     public String updateMemberRole(
             @PathVariable AccountRole role, // 현재 보고 있는 리스트의 Role (ex: USER)
             @PathVariable Long id,
+            // [수정] InitBinder에 등록된 이름과 일치하는 @ModelAttribute 사용
+            // 유효성 검사는 MemberRoleUpdateValidator에서 수행됨
             @Valid @ModelAttribute("memberRoleUpdateRequest") MemberRoleUpdateRequest request,
             BindingResult bindingResult,
-            @AuthenticationPrincipal PrincipalDetails principal,
             RedirectAttributes redirectAttributes,
             Model model) {
 
+        // ReadService로 타겟 회원을 조회 (화면 렌더링용 데이터 복구)
         ReadMemberService readService = memberStrategyFactory.getReadService(role);
         DetailMemberResponse targetMember = readService.getDetail(id);
 
-        validateRoleChangePermission(principal, targetMember.getProfile().id());
-
         if (bindingResult.hasErrors()) {
+            // 에러 발생 시 다시 폼으로 이동
             List<AccountRole> assignableRoles = Arrays.stream(AccountRole.values())
                     .filter(r -> r != AccountRole.GUEST)
                     .toList();
@@ -307,22 +315,8 @@ public class MemberController {
 
         redirectAttributes.addFlashAttribute("message", "회원 등급이 변경되었습니다.");
 
-        // [중요] 등급이 변경되면 기존 경로(/member/user/...)로 리다이렉트 시
-        // ReadService가 해당 회원을 찾지 못할 수 있음 (Specification 필터링 때문).
-        // 따라서 변경된 등급에 맞는 상세 페이지로 리다이렉트해야 함.
         String newRolePath = request.role().name().toLowerCase();
-
         return "redirect:/member/" + newRolePath + "/detail/" + id;
-    }
-
-    // [수정] 권한 변경 유효성 검사: 최고 관리자만 가능하며, 본인의 권한은 변경할 수 없음
-    private void validateRoleChangePermission(PrincipalDetails principal, Long targetId) {
-        if (principal.getRole() != AccountRole.SUPER_ADMIN) {
-            throw new AccessDeniedException("최고 관리자만 회원 등급을 변경할 수 있습니다.");
-        }
-        if (principal.getId().equals(targetId)) {
-            throw new AccessDeniedException("자신의 등급은 변경할 수 없습니다.");
-        }
     }
 
     // 권한 체크 헬퍼 (정보 수정, 탈퇴 등)
