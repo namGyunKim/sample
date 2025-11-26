@@ -2,7 +2,7 @@ package gyun.sample.domain.member.entity;
 
 
 import gyun.sample.domain.account.entity.BaseTimeEntity;
-import gyun.sample.domain.s3.enums.UploadDirect;
+import gyun.sample.domain.aws.enums.UploadDirect;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

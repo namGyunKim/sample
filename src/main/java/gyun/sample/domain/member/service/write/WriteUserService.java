@@ -2,6 +2,8 @@ package gyun.sample.domain.member.service.write;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.aws.enums.ImageType;
+import gyun.sample.domain.aws.enums.UploadDirect;
+import gyun.sample.domain.aws.service.implement.S3MemberService;
 import gyun.sample.domain.log.enums.LogType;
 import gyun.sample.domain.log.event.MemberActivityEvent;
 import gyun.sample.domain.member.entity.Member;
@@ -11,8 +13,6 @@ import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadUserService;
-import gyun.sample.domain.s3.adapter.S3ServiceAdapter;
-import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.domain.social.google.service.GoogleSocialService;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
@@ -33,6 +33,7 @@ import java.util.List;
 /**
  * 유저(USER) 전용 쓰기 서비스
  * 상속(extends) 대신 조합(Injection)을 사용하여 ReadService를 활용합니다.
+ * [변경] S3ServiceAdapter 제거 -> S3MemberService 직접 주입 사용
  */
 @Service
 @Transactional
@@ -42,7 +43,10 @@ public class WriteUserService extends AbstractWriteMemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final ReadUserService readUserService;
-    private final S3ServiceAdapter s3ServiceAdapter;
+
+    // [수정] 어댑터 대신 구체적인 S3 서비스 주입
+    private final S3MemberService s3MemberService;
+
     private final GoogleSocialService googleSocialService;
     private final ApplicationEventPublisher eventPublisher;
     private final HttpServletRequest httpServletRequest;
@@ -95,15 +99,15 @@ public class WriteUserService extends AbstractWriteMemberService {
         // 2. 회원 탈퇴 처리 (Soft Delete)
         member.withdraw();
 
-        // 3. 프로필 이미지 정리
+        // 3. 프로필 이미지 정리 (S3MemberService 직접 사용)
         if (!member.getMemberImages().isEmpty()) {
             List<String> fileNames = member.getMemberImages().stream()
                     .filter(mi -> mi.getUploadDirect() == UploadDirect.MEMBER_PROFILE)
                     .map(MemberImage::getFileName)
                     .toList();
 
-            s3ServiceAdapter.getService(UploadDirect.MEMBER_PROFILE)
-                    .deleteImages(fileNames, ImageType.MEMBER_PROFILE, member.getId());
+            // [수정] 어댑터 호출 제거 -> s3MemberService 직접 호출
+            s3MemberService.deleteImages(fileNames, ImageType.MEMBER_PROFILE, member.getId());
 
             member.getMemberImages().clear();
         }

@@ -2,6 +2,8 @@ package gyun.sample.domain.member.service.write;
 
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.aws.enums.ImageType;
+import gyun.sample.domain.aws.enums.UploadDirect;
+import gyun.sample.domain.aws.service.implement.S3MemberService;
 import gyun.sample.domain.log.enums.LogType;
 import gyun.sample.domain.log.event.MemberActivityEvent;
 import gyun.sample.domain.member.entity.Member;
@@ -10,8 +12,6 @@ import gyun.sample.domain.member.payload.request.MemberCreateRequest;
 import gyun.sample.domain.member.payload.request.MemberUpdateRequest;
 import gyun.sample.domain.member.repository.MemberRepository;
 import gyun.sample.domain.member.service.read.ReadAdminService;
-import gyun.sample.domain.s3.adapter.S3ServiceAdapter;
-import gyun.sample.domain.s3.enums.UploadDirect;
 import gyun.sample.global.payload.response.GlobalCreateResponse;
 import gyun.sample.global.payload.response.GlobalInactiveResponse;
 import gyun.sample.global.payload.response.GlobalUpdateResponse;
@@ -37,7 +37,10 @@ public class WriteAdminService extends AbstractWriteMemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final ReadAdminService readAdminService;
-    private final S3ServiceAdapter s3ServiceAdapter; // S3 서비스 어댑터 주입
+
+    // [수정] S3ServiceAdapter 대신 S3MemberService 주입
+    private final S3MemberService s3MemberService;
+
     private final ApplicationEventPublisher eventPublisher;
     private final HttpServletRequest httpServletRequest;
 
@@ -88,9 +91,8 @@ public class WriteAdminService extends AbstractWriteMemberService {
                     .map(MemberImage::getFileName)
                     .toList();
 
-            // S3 삭제
-            s3ServiceAdapter.getService(UploadDirect.MEMBER_PROFILE)
-                    .deleteImages(fileNames, ImageType.MEMBER_PROFILE, member.getId());
+            // [수정] 어댑터 호출 제거 -> s3MemberService 직접 호출
+            s3MemberService.deleteImages(fileNames, ImageType.MEMBER_PROFILE, member.getId());
 
             // DB에서 MemberImage 레코드 삭제 (Cascade 설정에 의해 Entity의 리스트를 clear하면 자동으로 orphan removal)
             member.getMemberImages().clear();

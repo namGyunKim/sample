@@ -1,4 +1,4 @@
-package gyun.sample.domain.s3.enums;
+package gyun.sample.domain.aws.enums;
 
 import lombok.Getter;
 

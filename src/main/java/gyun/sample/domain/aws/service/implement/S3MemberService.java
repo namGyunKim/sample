@@ -1,4 +1,4 @@
-package gyun.sample.domain.s3.service;
+package gyun.sample.domain.aws.service.implement;
 
 import gyun.sample.domain.aws.enums.ImageType;
 import gyun.sample.domain.aws.service.common.AbstractS3Service;
