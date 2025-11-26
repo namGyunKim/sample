@@ -52,11 +52,11 @@ public class MemberController {
     private final MemberListValidator memberListValidator;
     private final MemberUserUpdateValidator memberUserUpdateValidator;
 
-    // Security Context Repository (for manual session update)
+    // Security Context Repository
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     // === InitBinders ===
-    // 요청 객체 이름과 일치해야 Validator가 동작함
+    // @InitBinder의 value는 컨트롤러 메서드의 @ModelAttribute 이름과 일치해야 함
     @InitBinder("memberCreateRequest")
     public void initBinderCreate(WebDataBinder dataBinder) {
         dataBinder.addValidators(memberCreateValidator);
@@ -78,6 +78,7 @@ public class MemberController {
     @GetMapping(value = "/{role}/create")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMemberForm(@PathVariable AccountRole role, Model model) {
+        // ModelAttribute 이름과 InitBinder 이름 일치
         if (!model.containsAttribute("memberCreateRequest")) {
             model.addAttribute("memberCreateRequest", new MemberCreateRequest(null, null, null, role, null));
         }
@@ -90,7 +91,7 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String createMember(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest,
+            @Valid @ModelAttribute("memberCreateRequest") MemberCreateRequest memberCreateRequest, // 이름 명시
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model) {
@@ -112,7 +113,7 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public String getMemberList(
             @PathVariable AccountRole role,
-            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest,
+            @Valid @ModelAttribute("memberListRequest") MemberListRequest memberListRequest, // 이름 명시
             BindingResult bindingResult,
             Model model) {
 
@@ -124,6 +125,7 @@ public class MemberController {
         }
 
         ReadMemberService service = memberStrategyFactory.getReadService(role);
+        // DTO 변환
         var listRequestDTO = new MemberListRequestDTO(memberListRequest);
         Page<MemberListResponse> memberPage = service.getList(listRequestDTO);
 
@@ -137,7 +139,6 @@ public class MemberController {
     @Operation(summary = "회원 상세 조회")
     @GetMapping(value = "/{role}/detail/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or (#role.name() == 'USER' and @memberGuard.checkCreateRole(#role))")
-    // 참고: memberGuard 로직은 상황에 맞게 조정 필요. 보통 상세 조회는 본인 여부 체크가 필요함.
     public String getMemberDetail(
             @PathVariable AccountRole role,
             @PathVariable Long id,
@@ -161,11 +162,9 @@ public class MemberController {
             @AuthenticationPrincipal PrincipalDetails principal,
             Model model) {
 
-        // 1. 수정 대상 정보 조회
         ReadMemberService service = memberStrategyFactory.getReadService(role);
         DetailMemberResponse targetMember = service.getDetail(id);
 
-        // 2. 권한 체크 (본인 또는 관리자)
         checkPermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
 
         if (!model.containsAttribute("memberUpdateRequest")) {
@@ -185,7 +184,7 @@ public class MemberController {
     public String updateMember(
             @PathVariable AccountRole role,
             @PathVariable Long id,
-            @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest,
+            @Valid @ModelAttribute("memberUpdateRequest") MemberUpdateRequest memberUpdateRequest, // 이름 명시
             BindingResult bindingResult,
             @AuthenticationPrincipal PrincipalDetails principal,
             RedirectAttributes redirectAttributes,
@@ -196,10 +195,8 @@ public class MemberController {
         ReadMemberService readService = memberStrategyFactory.getReadService(role);
         DetailMemberResponse targetMember = readService.getDetail(id);
 
-        // 1. 권한 체크
         checkPermission(principal, targetMember.getProfile().role(), targetMember.getProfile().id());
 
-        // 2. 유효성 검사 실패 시 폼으로 복귀
         if (bindingResult.hasErrors()) {
             model.addAttribute("currentMember", targetMember);
             model.addAttribute("role", role);
@@ -207,18 +204,15 @@ public class MemberController {
             return "member/update";
         }
 
-        // 3. 수정 실행
         WriteMemberService writeService = memberStrategyFactory.getWriteService(role);
         writeService.updateMember(memberUpdateRequest, targetMember.getProfile().loginId());
 
-        // 4. 본인 정보 수정 시 세션 갱신 (닉네임 변경 등 반영)
         if (principal.getId().equals(id)) {
             refreshSession(request, response, principal.getUsername(), role);
         }
 
         redirectAttributes.addFlashAttribute("message", "정보가 성공적으로 수정되었습니다.");
 
-        // 관리자가 타인을 수정한 경우 -> 상세 페이지, 본인이 수정한 경우 -> 프로필 페이지
         return principal.getId().equals(id) ? "redirect:/account/profile" :
                 "redirect:/member/" + role.name().toLowerCase() + "/detail/" + id;
     }
@@ -248,16 +242,16 @@ public class MemberController {
         }
     }
 
-    // === Helper Methods ===
-
+    // 권한 체크 로직
     private void checkPermission(PrincipalDetails principal, AccountRole targetRole, Long targetId) {
-        if (principal.getId().equals(targetId)) return; // 본인
-        if (principal.getRole() == AccountRole.SUPER_ADMIN) return; // 슈퍼 관리자
-        if (principal.getRole() == AccountRole.ADMIN && targetRole == AccountRole.USER) return; // 관리자가 유저 관리
+        if (principal.getId().equals(targetId)) return;
+        if (principal.getRole() == AccountRole.SUPER_ADMIN) return;
+        if (principal.getRole() == AccountRole.ADMIN && targetRole == AccountRole.USER) return;
 
         throw new AccessDeniedException("해당 작업에 대한 권한이 없습니다.");
     }
 
+    // 세션 갱신 로직
     private void refreshSession(HttpServletRequest request, HttpServletResponse response, String loginId, AccountRole role) {
         ReadMemberService readService = memberStrategyFactory.getReadService(role);
         Member updatedMember = readService.getByLoginIdAndRole(loginId, role);

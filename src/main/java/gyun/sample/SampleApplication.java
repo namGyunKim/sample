@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableFeignClients
 @EnableAsync
 // @EnableJpaAuditing -> JpaAuditConfig로 이동하여 관리 (설정 분리)
-//todo: MemberRepository의 getMemberList 에서 MemberSpecification.getMemberListSpec 를 사용중인데 이걸 서비스로 이동하고 회원 목록 볼때 정렬기준 추가 디폴트는 생성일 역순
 public class SampleApplication {
 
     public static void main(String[] args) {
