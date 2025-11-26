@@ -40,60 +40,86 @@ dependencyManagement {
 }
 
 dependencies {
+    // =================================================================================
     // Web & Core
+    // =================================================================================
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
-    // JPA & DB
+    // Thymeleaf (View Template Engine)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect' // 레이아웃 기능 지원
+
+    // =================================================================================
+    // JPA & Database
+    // =================================================================================
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Database Drivers (Runtime Only)
     runtimeOnly 'org.postgresql:postgresql'
 
     // Redis (Session & Cache)
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
 
-    // Security
+    // =================================================================================
+    // Security & Auth
+    // =================================================================================
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // 타임리프 시큐리티 확장
     testImplementation 'org.springframework.security:spring-security-test'
 
-    // Lombok & DevTools
+    // Crypto (Bouncy Castle - 암호화 유틸)
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
+
+    // =================================================================================
+    // Tools & Utils
+    // =================================================================================
+    // Lombok
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // Configuration Processor (yml 자동완성 지원)
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // DevTools (Live Reload 등)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Swagger (API Documentation)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    // Logging (P6Spy - 쿼리 로그 파라미터 바인딩 확인)
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
+    // Rate Limiting (Bucket4j)
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
+
+    // Mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // =================================================================================
+    // External Services & File Processing
+    // =================================================================================
     // AWS S3
     implementation 'software.amazon.awssdk:s3'
 
-    // Swagger (OpenAPI)
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-
-    // Crypto
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
-
-    // XML/JSON/Feign
-    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
-    runtimeOnly 'com.sun.xml.bind:jaxb-impl:4.0.0'
-    implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
-    implementation "io.github.openfeign:feign-jackson"
-
-    // Logging & Utils
-    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:7.0.0'
-
-    // Image Processing
+    // Image Processing (TwelveMonkeys)
     implementation 'com.twelvemonkeys.imageio:imageio-core:3.10.1'
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.10.1'
 
-    // JAXB API
-    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
+    // =================================================================================
+    // JSON / XML / Feign Client
+    // =================================================================================
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
+    implementation "io.github.openfeign:feign-jackson"
+
+    // JAXB (XML Processing - Java 9+ 호환성)
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    runtimeOnly 'com.sun.xml.bind:jaxb-impl:4.0.0'
     runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
+
 }
 
 tasks.named('test') {
