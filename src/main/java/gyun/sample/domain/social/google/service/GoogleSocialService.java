@@ -3,6 +3,8 @@ package gyun.sample.domain.social.google.service;
 import feign.FeignException;
 import gyun.sample.domain.account.enums.AccountRole;
 import gyun.sample.domain.account.payload.response.AccountLoginResponse;
+import gyun.sample.domain.log.enums.LogType;
+import gyun.sample.domain.log.event.MemberActivityEvent;
 import gyun.sample.domain.member.entity.Member;
 import gyun.sample.domain.member.enums.MemberType;
 import gyun.sample.domain.member.repository.MemberRepository;
@@ -13,8 +15,11 @@ import gyun.sample.global.config.social.GoogleApiClient;
 import gyun.sample.global.enums.GlobalActiveEnums;
 import gyun.sample.global.exception.SocialException;
 import gyun.sample.global.exception.enums.ErrorCode;
+import gyun.sample.global.utils.UtilService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +42,10 @@ public class GoogleSocialService implements SocialLoginService {
     private final MemberRepository memberRepository;
     private final HttpClient httpClient;
 
+    // 로그 발행을 위한 의존성 추가
+    private final ApplicationEventPublisher eventPublisher;
+    private final HttpServletRequest httpServletRequest;
+
     @Value("${social.google.baseUrl}")
     private String baseUrl;
 
@@ -52,10 +61,15 @@ public class GoogleSocialService implements SocialLoginService {
     @Value("${social.google.scope}")
     private String scope;
 
-    // [수정] JwtTokenProvider 제거
-    public GoogleSocialService(GoogleApiClient googleApiClient, MemberRepository memberRepository) {
+    // 생성자 주입 (HttpClient 설정 포함)
+    public GoogleSocialService(GoogleApiClient googleApiClient,
+                               MemberRepository memberRepository,
+                               ApplicationEventPublisher eventPublisher,
+                               HttpServletRequest httpServletRequest) {
         this.googleApiClient = googleApiClient;
         this.memberRepository = memberRepository;
+        this.eventPublisher = eventPublisher;
+        this.httpServletRequest = httpServletRequest;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .followRedirects(HttpClient.Redirect.NEVER)
@@ -85,7 +99,7 @@ public class GoogleSocialService implements SocialLoginService {
     }
 
     /**
-     * [변경] 소셜 코드를 이용해 회원 정보(Member 객체)를 가져오는 메서드
+     * 소셜 코드를 이용해 회원 정보(Member 객체)를 가져오는 메서드
      */
     public Member getMemberBySocialCode(String code) {
         // 1. Authorization Code로 Access Token 요청
@@ -100,22 +114,10 @@ public class GoogleSocialService implements SocialLoginService {
 
     @Override
     @Deprecated(since = "Thymeleaf Project", forRemoval = true)
-    // SocialLoginService 인터페이스를 구현하기 위해 남김. SocialController에서 Member 객체를 얻기 위해 사용됨.
     public AccountLoginResponse login(String code) {
-        // JWT가 필요 없으므로, Member 객체를 찾은 후 임시 응답 반환
         Member member = getMemberBySocialCode(code);
-        // SocialController가 세션을 만들 수 있도록 Member 정보를 담아 반환
         return new AccountLoginResponse(member.getLoginId(), member.getNickName());
     }
-
-    /**
-     * [제거] JWT 토큰에서 loginId 추출하는 임시 메서드 제거
-     */
-    public String extractLoginIdFromToken(String accessToken) {
-        // 이 메서드는 이제 사용되지 않습니다.
-        throw new UnsupportedOperationException("세션 기반 프로젝트에서는 JWT 토큰 추출 로직을 사용하지 않습니다.");
-    }
-
 
     /**
      * Google과의 연결을 끊고, Access Token을 무효화합니다. (탈퇴 시 사용)
@@ -132,9 +134,8 @@ public class GoogleSocialService implements SocialLoginService {
             return;
         }
 
-        // ... (토큰 취소 로직은 기존과 동일)
         try {
-            // Google 토큰 취소 API URL: https://oauth2.googleapis.com/revoke?token={token}
+            // Google 토큰 취소 API URL
             String revokeUrl = UriComponentsBuilder.fromUriString("https://oauth2.googleapis.com")
                     .path("/revoke")
                     .queryParam("token", accessToken)
@@ -165,9 +166,6 @@ public class GoogleSocialService implements SocialLoginService {
         }
     }
 
-    /**
-     * 인증 코드로 Access Token을 요청하는 내부 메서드
-     */
     private GoogleTokenResponse getAccessToken(String code) {
         try {
             return googleApiClient.getToken(
@@ -183,9 +181,6 @@ public class GoogleSocialService implements SocialLoginService {
         }
     }
 
-    /**
-     * Access Token으로 사용자 정보를 요청하는 내부 메서드
-     */
     private GoogleUserInfoResponse getUserInfo(String accessToken) {
         try {
             return googleApiClient.getUserInfo(accessToken);
@@ -233,18 +228,23 @@ public class GoogleSocialService implements SocialLoginService {
         String nickName = userInfo.name() != null && !userInfo.name().isBlank() ? userInfo.name() : userInfo.email().split("@")[0];
         String loginId = memberType.name().toLowerCase() + "_" + socialKey;
 
-        // 비밀번호 필드가 NOT NULL이면 문제 발생: 소셜 회원은 임시 비밀번호 설정
-        // Member 엔티티의 생성자를 수정하거나, 비밀번호가 없는 경우를 처리해야 합니다.
         Member newMember = new Member(loginId, nickName, memberType, socialKey);
-        // [수정] Member 엔티티의 updatePassword 메서드를 사용하여 암호화된 임시 비밀번호를 설정해야 합니다.
-        // 현재 Member 엔티티 생성자는 password를 받지 않고, WriteUserService::createMember에서 인코딩합니다.
-        // 여기서는 임시 비밀번호를 생성하여 저장해야 합니다.
-        // **주의: 소셜 회원은 비밀번호가 null이어야 할 수도 있습니다. Member 엔티티의 `password` 필드가 NotNull이 아님을 확인했습니다.**
-        // 다만, Spring Security의 UserDetails 구현체는 getPassword()가 NotNull을 요구하므로, 임시값을 설정합니다.
-        newMember.updatePassword(new BCryptPasswordEncoder().encode("social_temp_password_" + socialKey)); // 임시 비밀번호 암호화 저장
+        // 소셜 회원은 임시 비밀번호 설정
+        newMember.updatePassword(new BCryptPasswordEncoder().encode("social_temp_password_" + socialKey));
         newMember.updateAccessToken(accessToken);
 
         Member savedMember = memberRepository.save(newMember);
+
+        // [추가] 신규 가입 시 활동 로그 이벤트 발행
+        eventPublisher.publishEvent(MemberActivityEvent.of(
+                savedMember.getLoginId(),
+                savedMember.getId(),
+                savedMember.getLoginId(), // 가입 수행자는 본인
+                LogType.JOIN,
+                "GOOGLE 소셜 회원 가입",
+                UtilService.getClientIp(httpServletRequest)
+        ));
+
         return savedMember;
     }
 }
