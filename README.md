@@ -5,7 +5,7 @@ CQRS 아키텍처, HTMX를 활용한 SPA 경험, 구글 소셜 로그인, 그리
 
 🛠 시작하기 (Getting Started)
 
-1. 사전 요구사항 (Prerequisites)
+사전 요구사항 (Prerequisites)
 
 Java 21 (JDK 21+)
 
@@ -13,18 +13,17 @@ Redis (세션 및 캐시용, 기본 포트: 6379)
 
 PostgreSQL (메인 데이터베이스, 기본 포트: 5432)
 
-2. 환경 설정 (Configuration)
+환경 설정 (Configuration)
 
 프로젝트 실행 전 src/main/resources/application.yml (또는 -local.yml)에서 다음 설정을 본인의 환경에 맞게 수정해야 합니다.
 
 데이터베이스 설정:
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/base_project
-    username: postgres
-    password: your_password
-
+datasource:
+url: jdbc:postgresql://localhost:5432/base_project
+username: postgres
+password: your_password
 
 필수 API 키 설정:
 
@@ -34,16 +33,17 @@ AWS S3: aws.access-key, secret-key, s3.bucket
 
 Mail: spring.mail.username, password (구글 앱 비밀번호)
 
-3. 실행 방법 (Run)
+실행 방법 (Run)
 
-# Windows
+Windows
+
 ./gradlew.bat bootRun
 
-# Mac/Linux
+Mac/Linux
+
 ./gradlew bootRun
 
-
-4. 초기 데이터 및 테스트 계정 (Init Data)
+초기 데이터 및 테스트 계정 (Init Data)
 
 서버 최초 실행 시 InitService가 동작하여 아래의 기본 계정들을 자동으로 생성합니다.
 (비밀번호 공통: 1234)
@@ -74,7 +74,7 @@ user1 ~ user200
 
 📚 개발 가이드라인 (Development Guidelines)
 
-1. 프로젝트 환경 (Environment)
+프로젝트 환경 (Environment)
 
 Build Tool: Gradle
 
@@ -86,7 +86,7 @@ Database: MySQL / PostgreSQL
 
 Template Engine: Thymeleaf
 
-2. 주요 기술 스택 (Tech Stack)
+주요 기술 스택 (Tech Stack)
 
 Web & UI:
 
@@ -106,7 +106,7 @@ Spring Security + Google OAuth2 (소셜 로그인 단일화)
 
 Logging: P6Spy (쿼리 로그)
 
-3. 아키텍처 및 패키지 구조 (Architecture)
+아키텍처 및 패키지 구조 (Architecture)
 
 CQRS 지향:
 
@@ -118,9 +118,13 @@ Request/Response:
 
 Controller는 반드시 Request DTO를 통해 데이터를 받습니다.
 
-BindingResult는 AOP(BindingAdvice)를 통해 일괄 처리합니다.
+Validation & BindingResult:
 
-4. 코딩 컨벤션 (Coding Convention)
+Controller (View): BindingResult를 메서드 파라미터로 받아, 뷰(Thymeleaf)에 전달하여 사용자에게 에러를 표시합니다.
+
+RestController (API): BindingResult를 메서드 파라미터로 선언해야 하며, BindingAdvice (AOP)가 이를 자동으로 감지하여 표준 JSON 에러 응답을 반환합니다.
+
+코딩 컨벤션 (Coding Convention)
 
 Entity: @Builder 지양, 생성자/정적 팩토리 메서드 사용. Setter 대신 비즈니스 메서드로 상태 변경.
 
@@ -128,7 +132,7 @@ Validation: @InitBinder와 Validator 구현체를 연결하여 검증 로직 분
 
 Testing: 프로토타이핑 속도를 위해 단위 테스트보다는 통합 테스트 또는 수동 테스트 위주 진행.
 
-5. UI/UX 가이드
+UI/UX 가이드
 
 HTMX 활용: 페이지 전체 로드 대신 hx-get, hx-target 등을 사용하여 부분 렌더링.
 
