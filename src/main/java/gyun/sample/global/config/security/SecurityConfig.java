@@ -1,5 +1,6 @@
 package gyun.sample.global.config.security;
 
+import gyun.sample.global.security.handler.CustomAuthFailureHandler;
 import gyun.sample.global.security.handler.CustomAuthSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final CustomAuthSuccessHandler customAuthSuccessHandler;
+    private final CustomAuthFailureHandler customAuthFailureHandler; // [추가] 실패 핸들러 주입
 
     // application.yml에 설정된 CORS 허용 목록을 가져옴 (리스트 형태로 자동 주입)
     @Value("${app.cors.allowed-origins}")
@@ -42,7 +44,8 @@ public class SecurityConfig {
             "/", "/account/login", "/error", "/login",
             "/api/health", "/api/sms/**", "/social/**",
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-            "/css/**", "/js/**", "/images/**", "/favicon.ico"
+            "/css/**", "/js/**", "/images/**", "/favicon.ico",
+            "/.well-known/**"
     };
 
     @Bean
@@ -55,6 +58,9 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
+        // [수정] 아이디 찾기 실패 시 UsernameNotFoundException 발생 허용 (로그 상세 기록용)
+        // 보안을 위해 실제 운영 시에는 true로 되돌리는 것을 고려해야 합니다.
+        authProvider.setHideUserNotFoundExceptions(false);
         return authProvider;
     }
 
@@ -82,7 +88,7 @@ public class SecurityConfig {
                         .usernameParameter("loginId") // HTML form의 input name
                         .passwordParameter("password")
                         .successHandler(customAuthSuccessHandler)
-                        .failureUrl("/account/login?error")
+                        .failureHandler(customAuthFailureHandler) // [수정] 실패 핸들러 등록 (로그 저장 및 리다이렉트)
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -100,7 +106,6 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // [수정] 하드코딩 제거 -> yml 설정값(allowedOrigins) 사용
         configuration.setAllowedOrigins(allowedOrigins);
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
