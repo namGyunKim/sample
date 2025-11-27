@@ -19,7 +19,8 @@
             <!-- Form Action에 targetId 포함 -->
             <form class="space-y-6" method="post"
                   th:action="@{/member/{role}/update/{id}(role=${role}, id=${targetId})}"
-                  th:object="${memberUpdateRequest}">
+                  th:object="${memberUpdateRequest}"
+                  hx-boost="false">
 
                 <!-- 글로벌 에러 메시지 -->
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6" th:if="${#fields.hasGlobalErrors()}">
