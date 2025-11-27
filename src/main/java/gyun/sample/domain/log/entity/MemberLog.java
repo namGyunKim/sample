@@ -29,6 +29,7 @@ public class MemberLog extends BaseTimeEntity {
     private String executorId;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)") // Enum CHECK 제약조건 방지
     @Comment("활동 유형")
     private LogType logType;
 

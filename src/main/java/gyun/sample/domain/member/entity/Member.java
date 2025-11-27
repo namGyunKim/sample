@@ -46,14 +46,17 @@ public class Member extends BaseTimeEntity implements Serializable {
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)") // Enum CHECK 제약조건 방지
     @Comment("유저 활성 상태")
     private GlobalActiveEnums active;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)") // Enum CHECK 제약조건 방지
     @Comment("유저 권한")
     private AccountRole role;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)") // Enum CHECK 제약조건 방지
     @Comment("유저 타입")
     private MemberType memberType;
 

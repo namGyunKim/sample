@@ -20,6 +20,7 @@ public class MemberImage extends BaseTimeEntity {
     private long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(255)") // Enum CHECK 제약조건 방지
     @Comment("이미지 경로")
     private UploadDirect uploadDirect;
 
