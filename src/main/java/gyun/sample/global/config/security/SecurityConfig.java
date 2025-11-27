@@ -2,6 +2,7 @@ package gyun.sample.global.config.security;
 
 import gyun.sample.global.security.handler.CustomAuthSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,10 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final CustomAuthSuccessHandler customAuthSuccessHandler;
+
+    // application.yml에 설정된 CORS 허용 목록을 가져옴 (리스트 형태로 자동 주입)
+    @Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     // 인증 없이 접근 가능한 경로
     private static final String[] PUBLIC_URLS = {
@@ -94,7 +99,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
+
+        // [수정] 하드코딩 제거 -> yml 설정값(allowedOrigins) 사용
+        configuration.setAllowedOrigins(allowedOrigins);
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of());
